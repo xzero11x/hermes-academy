@@ -1,0 +1,58 @@
+---
+export interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className = "" } = Astro.props;
+
+// Mapeo de nombres de iconos a clases de Font Awesome (solo iconos utilizados)
+const iconMap = {
+  // Navegación
+  home: "fas fa-home",
+  university: "fas fa-university", 
+  book: "fas fa-book",
+  search: "fas fa-search",
+  filter: "fas fa-filter",
+  
+  // Dashboard
+  user: "fas fa-user",
+  calendar: "fas fa-calendar",
+  clock: "fas fa-clock",
+  star: "fas fa-star",
+  
+  // Acciones básicas
+  check: "fas fa-check",
+  x: "fas fa-times",
+  "arrow-right": "fas fa-arrow-right",
+  "arrow-left": "fas fa-arrow-left",
+  plus: "fas fa-plus",
+  
+  // Comunicación
+  message: "fas fa-comment",
+  notification: "fas fa-bell",
+  
+  // Ubicación y filtros
+  location: "fas fa-map-marker-alt",
+  
+  // Educación
+  graduation: "fas fa-graduation-cap",
+  document: "fas fa-file-text",
+  
+  // Sistema
+  menu: "fas fa-bars",
+  logout: "fas fa-sign-out-alt",
+  settings: "fas fa-cog",
+  info: "fas fa-info-circle"
+};
+
+const iconClass = iconMap[name as keyof typeof iconMap] || "fas fa-question";
+---
+
+<i class={`${iconClass} ${className}`}></i>
+
+<style>
+  i {
+    color: currentColor;
+  }
+</style>

@@ -1,0 +1,453 @@
+---
+import { getUniversityByIdFast } from '../data/optimized.js';
+import { studentData } from '../data/student.js';
+
+// Obtener datos relacionados usando función optimizada
+const university = getUniversityByIdFast(studentData.universityId);
+---
+
+<section class='dashboard-section'>
+  <div class='container'>
+    <!-- Header compacto -->
+    <div class='dashboard-header'>
+      <div class='user-welcome'>
+        <div class='user-avatar'>
+          <i class='fas fa-user'></i>
+        </div>
+        <div class='user-info'>
+          <h1 class='user-name'>¡Hola, {studentData.name}!</h1>
+          <p class='user-university'>{university?.name || 'Universidad'}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid principal -->
+    <div class='dashboard-grid'>
+      <!-- Próximas tutorías -->
+      <div class='dashboard-card tutorials-card'>
+        <div class='card-header'>
+          <h2>Próximas tutorías</h2>
+          <span class='count-badge'>{studentData.upcomingTutorials.length}</span>
+        </div>
+        <div class='tutorials-list'>
+          {
+            studentData.upcomingTutorials.map(tutorial => (
+              <div class='tutorial-item'>
+                <div class='tutorial-info'>
+                  <h3 class='tutorial-course'>{tutorial.courseName}</h3>
+                  <p class='tutorial-tutor'>con {tutorial.tutorName}</p>
+                  <div class='tutorial-schedule'>
+                    <span class='date'>{tutorial.date}</span>
+                    <span class='time'>{tutorial.time}</span>
+                  </div>
+                </div>
+                <div class='tutorial-status'>
+                  <span class={`status ${tutorial.status}`}>
+                    {tutorial.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                  </span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Recomendaciones -->
+      <div class='dashboard-card recommendations-card'>
+        <h2>Recomendaciones</h2>
+        <div class='recommendations-list'>
+          {
+            studentData.recommendations.map(rec => (
+              <div class='recommendation-item'>
+                <h3 class='rec-course'>{rec.courseName}</h3>
+                <p class='rec-tutor'>Tutor: {rec.tutorName}</p>
+                <p class='rec-reason'>{rec.reason}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Accesos rápidos -->
+      <div class='dashboard-card actions-card'>
+        <h2>Accesos rápidos</h2>
+        <div class='actions-grid'>
+          <a href='/courses' class='action-btn'>
+            <i class='fas fa-search'></i>
+            <span>Buscar cursos</span>
+          </a>
+          <a href='/universities' class='action-btn'>
+            <i class='fas fa-university'></i>
+            <span>Universidades</span>
+          </a>
+          <a href='/auth' class='action-btn'>
+            <i class='fas fa-user-cog'></i>
+            <span>Mi perfil</span>
+          </a>
+          <a href='#' class='action-btn'>
+            <i class='fas fa-calendar'></i>
+            <span>Calendario</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Estadísticas simples -->
+      <div class='dashboard-card stats-card'>
+        <h2>Resumen</h2>
+        <div class='stats-grid'>
+          <div class='stat-item'>
+            <span class='stat-number'>{studentData.upcomingTutorials.length}</span>
+            <span class='stat-label'>Tutorías programadas</span>
+          </div>
+          <div class='stat-item'>
+            <span class='stat-number'>{studentData.recommendations.length}</span>
+            <span class='stat-label'>Recomendaciones</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dashboard-section {
+    min-height: calc(100vh - 64px);
+    padding: var(--spacing-md) 0;
+    background: linear-gradient(to bottom, #fafafa, #ffffff);
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    height: calc(100vh - 64px - 2rem);
+  }
+
+  /* Header del Dashboard */
+  .dashboard-header {
+    padding: var(--spacing-md);
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    flex-shrink: 0;
+  }
+
+  .user-welcome {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+
+  .user-name {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .user-university {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* Dashboard Grid */
+  .dashboard-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--spacing-md);
+    min-height: 0;
+  }
+
+  .dashboard-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-color: #e2e8f0;
+  }
+
+  .dashboard-card h2 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+    flex-shrink: 0;
+  }
+
+  /* Tutorías card - ocupa 2 filas */
+  .tutorials-card {
+    grid-row: span 2;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  .count-badge {
+    background: #6366f1;
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+  }
+
+  .tutorials-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .tutorial-item {
+    padding: var(--spacing-sm);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 1px solid #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  .tutorial-course {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .tutorial-tutor {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .tutorial-schedule {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .date,
+  .time {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: white;
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--radius-sm);
+  }
+
+  .tutorial-status {
+    text-align: right;
+  }
+
+  .status {
+    font-size: var(--font-size-xs);
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+
+  .status.confirmed {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status.pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  /* Recomendaciones */
+  .recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .recommendation-item {
+    padding: var(--spacing-sm);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 1px solid #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  .rec-course {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .rec-tutor {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .rec-reason {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0;
+    font-style: italic;
+  }
+
+  /* Acciones rápidas */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+    flex: 1;
+  }
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    font-size: var(--font-size-xs);
+    min-height: 0;
+  }
+
+  .action-btn:hover {
+    background: #eff6ff;
+    border-color: #6366f1;
+    color: #6366f1;
+    transform: translateY(-1px);
+  }
+
+  .action-btn i {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Estadísticas */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    flex: 1;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  .stat-number {
+    display: block;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: #6366f1;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .tutorials-card {
+      grid-column: span 2;
+      grid-row: span 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-section {
+      min-height: auto;
+      padding: var(--spacing-sm) 0;
+    }
+
+    .container {
+      height: auto;
+      gap: var(--spacing-sm);
+    }
+
+    .dashboard-header {
+      padding: var(--spacing-sm);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+    }
+
+    .user-name {
+      font-size: var(--font-size-base);
+    }
+
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+
+    .tutorials-card {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+
+    .actions-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-card {
+      padding: var(--spacing-sm);
+    }
+  }
+</style>

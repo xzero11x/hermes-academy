@@ -1,0 +1,148 @@
+---
+// Navegación simplificada para la landing page
+---
+
+<nav class='landing-header'>
+  <div class='container'>
+    <div class='header-content'>
+      <!-- Logo y nombre -->
+      <a href='/' class='logo'>
+        <img src='/logo/logo.png' alt='Hermes Academy' class='logo-img' />
+        <span class='logo-text'>Hermes Academy</span>
+      </a>
+
+      <!-- Botón de iniciar sesión -->
+      <div class='auth-action'>
+        <a href='/auth' class='login-btn'>
+          <i class='fas fa-sign-in-alt'></i>
+          Iniciar Sesión
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* ===== HEADER LANDING ===== */
+  .landing-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--bg-principal);
+    border-bottom: 1px solid var(--border-medium);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    height: var(--header-height);
+  }
+
+  .container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    height: 100%;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  /* ===== LOGO ===== */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .logo:hover {
+    transform: translateY(-1px);
+  }
+
+  .logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+
+  .logo-text {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+  }
+
+  /* ===== BOTÓN LOGIN ===== */
+  .auth-action {
+    display: flex;
+    align-items: center;
+  }
+
+  .login-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(124, 134, 255, 0.3);
+  }
+
+  .login-btn:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 134, 255, 0.4);
+  }
+
+  .login-btn i {
+    font-size: var(--font-size-sm);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 var(--spacing-sm);
+    }
+
+    .logo-text {
+      font-size: var(--font-size-base);
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .login-btn {
+      padding: var(--spacing-xs) var(--spacing-md);
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-btn span {
+      display: none;
+    }
+
+    .login-btn {
+      padding: var(--spacing-sm);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,0 +1,325 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title='Hermes Academy - Tutorías Universitarias Especializadas'>
+  <header class='header'>
+    <div class='container'>
+      <a href='/' class='logo'>
+        <img src='/logo/logo.png' alt='Hermes Academy' />
+        <span>Hermes Academy</span>
+      </a>
+      <nav class='nav'>
+        <a href='/become-tutor'>Ser tutor</a>
+        <a href='/auth' class='btn'>Comenzar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class='main-content'>
+    <!-- Hero Section -->
+    <section class='hero-section'>
+      <div class='container'>
+        <h1>Tutores de tu misma universidad</h1>
+        <p>Conecta con estudiantes que conocen exactamente tu metodología académica y sistema de evaluación.</p>
+
+        <div class='hero-buttons'>
+          <a href='/universities' class='btn-primary'>Encontrar tutor</a>
+          <a href='/become-tutor' class='btn-secondary'>Ser tutor</a>
+        </div>
+
+        <!-- Simple university logos -->
+        <div class='universities-row'>
+          <img src='/universidades/utec.jpg' alt='UTEC' />
+          <img src='/universidades/pucp.png' alt='PUCP' />
+          <img src='/universidades/uni.png' alt='UNI' />
+          <img src='/universidades/UPC_logo_transparente.png' alt='UPC' />
+          <img src='/universidades/u_de_lima.png' alt='U de Lima' />
+          <img src='/universidades/san_marcos.png' alt='San Marcos' />
+        </div>
+      </div>
+    </section>
+
+    <!-- Simple CTA Section -->
+    <section class='cta-section'>
+      <div class='container'>
+        <h2>¿Dominas alguna materia?</h2>
+        <p>Comparte tu conocimiento y genera ingresos ayudando a estudiantes de tu universidad.</p>
+        <a href='/become-tutor' class='btn-cta'>Aplicar como tutor</a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    line-height: 1.5;
+    color: #333;
+    background: #fff;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Header */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #eee;
+    z-index: 50;
+    height: 70px;
+  }
+
+  .header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .logo img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .nav a {
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav a:hover {
+    color: #333;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: #fff !important;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    background: #2563eb;
+  }
+
+  /* Main content */
+  .main-content {
+    padding-top: 70px;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 80px 0 60px;
+    text-align: left;
+  }
+
+  .hero-section h1 {
+    font-size: 48px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .hero-section h1::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: #3b82f6;
+    margin: 16px 0 0 0;
+    border-radius: 2px;
+  }
+
+  .hero-section p {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    margin-bottom: 60px;
+  }
+
+  .btn-primary {
+    padding: 14px 32px;
+    background: #3b82f6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    padding: 14px 32px;
+    background: transparent;
+    color: #3b82f6;
+    text-decoration: none;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: #3b82f6;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .universities-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    opacity: 0.8;
+  }
+
+  .universities-row img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    transition: all 0.2s;
+  }
+
+  .universities-row img:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  /* CTA Section */
+  .cta-section {
+    padding: 80px 0;
+    background: #f8f9fa;
+    text-align: left;
+  }
+
+  .cta-section h2 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 12px;
+  }
+
+  .cta-section p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 24px;
+    max-width: 500px;
+  }
+
+  .btn-cta {
+    padding: 16px 32px;
+    background: #3b82f6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-cta:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 16px;
+    }
+
+    .nav a:not(.btn) {
+      display: none;
+    }
+
+    .hero-section h1 {
+      font-size: 36px;
+    }
+
+    .hero-section p {
+      font-size: 18px;
+    }
+
+    .hero-buttons {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .universities-row {
+      gap: 20px;
+    }
+
+    .universities-row img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .cta-section h2 {
+      font-size: 28px;
+    }
+  }
+</style>

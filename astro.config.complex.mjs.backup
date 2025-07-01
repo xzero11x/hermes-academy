@@ -1,0 +1,130 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+
+// https://astro.build/config
+export default defineConfig({
+  // Configuración de sitio
+  site: 'https://hermesacademy.edu.pe',
+  base: '/',
+
+  // Configuración de compilación optimizada
+  build: {
+    // Directorio de assets
+    assets: '_assets',
+    // Inlining de assets pequeños para mejor performance
+    inlineStylesheets: 'auto',
+    // Formato de archivos JS
+    format: 'directory',
+  },
+
+  // Configuración de desarrollo
+  server: {
+    port: 4322,
+    host: true, // Permite acceso desde red local
+    open: false, // No abrir navegador automáticamente
+  },
+
+  // Configuración de renderizado
+  output: 'static',
+
+  // Configuración de imágenes optimizada
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/sharp',
+      config: {
+        limitInputPixels: false,
+      }
+    }
+  },
+
+  // Configuración de Vite avanzada
+  vite: {
+    // Configuración de CSS
+    css: {
+      devSourcemap: true,
+    },
+
+    // Configuración de build optimizada
+    build: {
+      // Tamaño mínimo para chunk splitting
+      chunkSizeWarningLimit: 1000,
+      // Configuración de Rollup
+      rollupOptions: {
+        output: {
+          // Estrategia de chunking mejorada
+          manualChunks: (id) => {
+            // Vendor chunks para librerías externas
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+
+            // Data chunks para nuestros módulos de datos
+            if (id.includes('/src/data/')) {
+              if (id.includes('universities') || id.includes('careers')) {
+                return 'data-static';
+              }
+              if (id.includes('courses') || id.includes('tutors')) {
+                return 'data-dynamic';
+              }
+              return 'data-core';
+            }
+
+            // Components chunks
+            if (id.includes('/src/components/')) {
+              return 'components';
+            }
+
+            // Default chunk
+            return undefined;
+          },
+
+          // Nombres de archivos optimizados
+          entryFileNames: 'js/[name]-[hash].js',
+          chunkFileNames: 'js/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
+
+            if (/\.(css)$/.test(assetInfo.name)) {
+              return 'css/[name]-[hash][extname]';
+            }
+            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif)$/.test(assetInfo.name)) {
+              return 'images/[name]-[hash][extname]';
+            }
+            return 'assets/[name]-[hash][extname]';
+          }
+        }
+      },
+
+      // Configuración de minificación
+      minify: 'terser',
+    },
+
+    // Configuración de dependencias
+    optimizeDeps: {
+      exclude: []
+    },
+
+    // Configuración de resolución con alias
+    resolve: {
+      alias: {
+        '@': '/src',
+        '@components': '/src/components',
+        '@data': '/src/data',
+        '@layouts': '/src/layouts',
+        '@pages': '/src/pages',
+        '@styles': '/src/styles',
+        '@utils': '/src/utils',
+        '@assets': '/src/assets'
+      }
+    }
+  },
+
+  // Configuración experimental disponible
+  experimental: {
+    clientPrerender: true,
+    contentIntellisense: true
+  },
+
+  // Configuración de compresión HTML
+  compressHTML: true
+});

@@ -1,0 +1,81 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".astro"
+  ],
+  "compilerOptions": {
+    // Configuración de módulos
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    // Configuración de paths para alias
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@data/*": [
+        "./src/data/*"
+      ],
+      "@layouts/*": [
+        "./src/layouts/*"
+      ],
+      "@pages/*": [
+        "./src/pages/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@assets/*": [
+        "./src/assets/*"
+      ]
+    },
+    // Configuración de tipos
+    "types": [
+      "astro/client"
+    ],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    // Configuración estricta mejorada
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    // Configuración de resolución
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    // Configuración de output
+    "removeComments": true,
+    "sourceMap": true,
+    "declaration": false,
+    // Configuración para JSX si se usa React
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+    // Configuración adicional
+    "allowJs": true,
+    "checkJs": false,
+    "incremental": true
+  }
+}

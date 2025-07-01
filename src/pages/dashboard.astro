@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import DashboardComponent from '../components/Dashboard.astro';
+---
+
+<Layout title='Dashboard - Hermes Academy'>
+  <Navigation currentSection='dashboard' />
+
+  <!-- Script para verificar autenticación -->
+  <script>
+    // Verificar si el usuario está logueado al cargar la página
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn) {
+      window.location.href = '/auth';
+    }
+  </script>
+
+  <main class='dashboard-main'>
+    <DashboardComponent />
+  </main>
+</Layout>
+
+<style>
+  .dashboard-main {
+    min-height: calc(100vh - 70px);
+    padding-top: 70px;
+  }
+</style>

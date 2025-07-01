@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import UniversitiesComponent from '../components/Universities.astro';
+---
+
+<Layout title="Universidades - Hermes Academy">
+	<Navigation currentSection="universidades" />
+	<main class="universities-main">
+		<UniversitiesComponent />
+	</main>
+</Layout>
+
+<style>
+	.universities-main {
+		min-height: calc(100vh - 70px);
+		padding-top: 70px;
+	}
+</style>

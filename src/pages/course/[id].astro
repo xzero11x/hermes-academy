@@ -1,0 +1,410 @@
+---
+import Navigation from '../../components/Navigation.astro';
+import { courses } from '../../data/courses.js';
+import { getTutorsByCourseFast, getUniversityByIdFast } from '../../data/optimized.js';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  return courses.map(course => ({
+    params: { id: course.id.toString() },
+    props: { course },
+  }));
+}
+
+const { course } = Astro.props;
+
+// Obtener datos relacionados usando funciones optimizadas
+const university = getUniversityByIdFast(course.universityId);
+
+// Función para convertir números a números romanos
+function toRoman(num: number): string {
+  const values = [10, 9, 5, 4, 1];
+  const symbols = ['X', 'IX', 'V', 'IV', 'I'];
+
+  let result = '';
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    const symbol = symbols[i];
+    if (value && symbol) {
+      while (num >= value) {
+        result += symbol;
+        num -= value;
+      }
+    }
+  }
+  return result;
+}
+
+// Filtrar tutores que pueden enseñar este curso usando función optimizada
+const availableTutors = getTutorsByCourseFast(course.id);
+---
+
+<Layout title={`${course.name} - ${university?.name || 'Universidad'} - Hermes Academy`}>
+  <Navigation currentSection='cursos' />
+  <main class='course-detail-main'>
+    <section class='course-detail-section'>
+      <div class='container'>
+        <!-- Breadcrumb -->
+        <nav class='breadcrumb'>
+          <a href='/courses' class='breadcrumb-link'>Cursos</a>
+          <span class='breadcrumb-separator'>/</span>
+          <span class='breadcrumb-current'>{course.name}</span>
+        </nav>
+
+        <!-- Header del curso -->
+        <div class='course-header'>
+          <div class='course-basic-info'>
+            <div class='course-university-info'>
+              <div class='university-logo'>
+                <img src={university?.logo || '/universidades/default.png'} alt={university?.name || 'Universidad'} />
+              </div>
+              <div class='university-details'>
+                <h1 class='course-title'>{course.name}</h1>
+                <p class='university-name'>{university?.name || 'Universidad'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <div class='course-description'>
+            <h2>Descripción del curso</h2>
+            <p>{course.description}</p>
+          </div>
+
+          <!-- Información del curso -->
+          <div class='course-details'>
+            <div class='detail-item'>
+              <span class='detail-label'>Ciclo:</span>
+              <span class='detail-value'>{toRoman(course.cycle)}</span>
+            </div>
+            <div class='detail-item'>
+              <span class='detail-label'>Área:</span>
+              <span class='detail-value'>{course.area}</span>
+            </div>
+            <div class='detail-item'>
+              <span class='detail-label'>Código:</span>
+              <span class='detail-value'>{course.code}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tutores disponibles -->
+        <div class='tutors-section'>
+          <h2 class='section-title'>Tutores disponibles</h2>
+          <div class='tutors-grid'>
+            {
+              availableTutors.map((tutor: any) => (
+                <div class='tutor-card'>
+                  <div class='tutor-header'>
+                    <div class='tutor-avatar'>
+                      <i class='fas fa-user' />
+                    </div>
+                    <div class='tutor-basic-info'>
+                      <h3 class='tutor-name'>{tutor.name}</h3>
+                      <div class='tutor-rating'>
+                        <div class='stars'>
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <i
+                              class={`fas fa-star ${i < Math.floor(tutor.rating) ? 'filled' : i === Math.floor(tutor.rating) && tutor.rating % 1 >= 0.5 ? 'half-filled' : ''}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class='tutor-description'>{tutor.bio}</p>
+                  <div class='tutor-actions'>
+                    <a href={`/tutor/${course.id}/${tutor.id}`} class='btn btn-primary btn-block'>
+                      Contactar
+                    </a>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .course-detail-main {
+    min-height: calc(100vh - 64px);
+    padding-top: 64px;
+  }
+
+  .course-detail-section {
+    padding: var(--spacing-3xl) 0;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-sm);
+  }
+
+  .breadcrumb-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .breadcrumb-link:hover {
+    opacity: 0.8;
+  }
+
+  .breadcrumb-separator {
+    color: var(--text-light);
+  }
+
+  .breadcrumb-current {
+    color: var(--text-secondary);
+  }
+
+  /* Header del curso */
+  .course-header {
+    background: var(--bg-principal);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--border-light);
+  }
+
+  .course-basic-info {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .course-university-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .university-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+
+  .university-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: white;
+  }
+
+  .university-details h1 {
+    margin: 0;
+  }
+
+  .course-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.2;
+  }
+
+  .university-name {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Descripción */
+  .course-description h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .course-description p {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--spacing-lg) 0;
+  }
+
+  /* Detalles del curso */
+  .course-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-light);
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .detail-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .detail-value {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Sección de tutores */
+  .tutors-section {
+    margin-top: var(--spacing-3xl);
+  }
+
+  .section-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+  }
+
+  .tutors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  /* Tarjeta de tutor */
+  .tutor-card {
+    background: var(--bg-principal);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-light);
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tutor-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+  }
+
+  .tutor-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .tutor-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .tutor-basic-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tutor-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+    line-height: 1.3;
+  }
+
+  .tutor-rating {
+    display: flex;
+    align-items: center;
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .stars i {
+    font-size: 14px;
+    color: #e0e0e0;
+    transition: color 0.2s ease;
+  }
+
+  .stars i.filled {
+    color: #ffd700;
+  }
+
+  .stars i.half-filled {
+    background: linear-gradient(90deg, #ffd700 50%, #e0e0e0 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tutor-description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0 0 var(--spacing-md) 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Botones */
+  .btn-block {
+    width: 100%;
+    display: block;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .course-header {
+      padding: var(--spacing-lg);
+    }
+
+    .course-university-info {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--spacing-sm);
+    }
+
+    .course-title {
+      font-size: var(--font-size-2xl);
+    }
+
+    .course-details {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .tutors-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .tutors-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

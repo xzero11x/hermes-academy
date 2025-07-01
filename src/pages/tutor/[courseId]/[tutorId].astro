@@ -1,0 +1,942 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Navigation from '../../../components/Navigation.astro';
+import { courses } from '../../../data/courses.js';
+import { tutors } from '../../../data/tutors.js';
+import { getUniversityByIdFast } from '../../../data/optimized.js';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+
+  courses.forEach(course => {
+    const courseTutors = tutors.filter(tutor => tutor.coursesTaught.includes(course.id));
+    courseTutors.forEach(tutor => {
+      paths.push({
+        params: {
+          courseId: course.id.toString(),
+          tutorId: tutor.id.toString(),
+        },
+        props: { course, tutor },
+      });
+    });
+  });
+
+  return paths;
+}
+
+const { course, tutor } = Astro.props;
+
+// Obtener datos relacionados usando funciones optimizadas
+const university = getUniversityByIdFast(course.universityId);
+
+// Configuración del calendario de horarios
+const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const timeHours = [
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+];
+
+// Convertir la disponibilidad del tutor al formato esperado
+const tutorAvailability: Record<string, string[]> = {
+  Lunes: tutor.availability.monday || [],
+  Martes: tutor.availability.tuesday || [],
+  Miércoles: tutor.availability.wednesday || [],
+  Jueves: tutor.availability.thursday || [],
+  Viernes: tutor.availability.friday || [],
+  Sábado: tutor.availability.saturday || [],
+};
+---
+
+<Layout title={`Contratar ${tutor.name} - ${course.name} - Hermes Academy`}>
+  <Navigation currentSection='cursos' />
+  <main class='booking-main'>
+    <section class='booking-section'>
+      <div class='container'>
+        <!-- Breadcrumb -->
+        <nav class='breadcrumb'>
+          <a href='/courses' class='breadcrumb-link'>Cursos</a>
+          <span class='breadcrumb-separator'>/</span>
+          <a href={`/course/${course.id}`} class='breadcrumb-link'>{course.name}</a>
+          <span class='breadcrumb-separator'>/</span>
+          <span class='breadcrumb-current'>Contratar tutor</span>
+        </nav>
+
+        <!-- Contenido principal en 2 columnas -->
+        <div class='booking-container'>
+          <!-- Columna izquierda -->
+          <div class='booking-left'>
+            <!-- Información del curso -->
+            <div class='course-info-card'>
+              <div class='course-header'>
+                <div class='university-logo'>
+                  <img src={university?.logo || '/universidades/default.png'} alt={university?.name || 'Universidad'} />
+                </div>
+                <div class='course-details'>
+                  <h2 class='course-name'>{course.name}</h2>
+                  <p class='university-name'>{university?.name || 'Universidad'}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Información del tutor -->
+            <div class='tutor-info-card'>
+              <a href={`/tutor-profile/${tutor.id}`} class='btn-profile'>Ver perfil</a>
+              <div class='tutor-header'>
+                <div class='tutor-avatar-large'>
+                  <i class='fas fa-user'></i>
+                </div>
+                <div class='tutor-details'>
+                  <h3 class='tutor-name'>{tutor.name}</h3>
+                  <div class='tutor-rating'>
+                    <div class='stars'>
+                      {
+                        Array.from({ length: 5 }, (_, i) => (
+                          <i
+                            class={`fas fa-star ${i < Math.floor(tutor.rating) ? 'filled' : i === Math.floor(tutor.rating) && tutor.rating % 1 >= 0.5 ? 'half-filled' : ''}`}
+                          />
+                        ))
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class='tutor-description'>{tutor.bio}</p>
+            </div>
+
+            <!-- Selección de horario -->
+            <div class='schedule-card'>
+              <h3 class='schedule-title'>Selecciona tu horario</h3>
+              <p class='schedule-subtitle'>Haz clic en los bloques disponibles para seleccionar tu horario de clases</p>
+
+              <div class='schedule-table-container'>
+                <table class='schedule-table'>
+                  <thead>
+                    <tr>
+                      <th class='time-header'>Hora</th>
+                      {daysOfWeek.map(day => <th class='day-header'>{day}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {
+                      timeHours.map(hour => (
+                        <tr class='time-row'>
+                          <td class='time-cell'>{hour}</td>
+                          {daysOfWeek.map(day => {
+                            const isAvailable = tutorAvailability[day]?.includes(hour);
+                            const timeSlotId = `${day}-${hour}`;
+                            return (
+                              <td class='schedule-cell'>
+                                <button
+                                  class={`time-block ${isAvailable ? 'available' : 'unavailable'}`}
+                                  data-day={day}
+                                  data-time={hour}
+                                  data-slot-id={timeSlotId}
+                                  disabled={!isAvailable}
+                                >
+                                  <span class='time-range'>
+                                    {hour}-{String(parseInt(hour.split(':')[0] || '0') + 1).padStart(2, '0')}:00
+                                  </span>
+                                </button>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class='schedule-legend'>
+                <div class='legend-item'>
+                  <div class='legend-color available'></div>
+                  <span>Disponible</span>
+                </div>
+                <div class='legend-item'>
+                  <div class='legend-color unavailable'></div>
+                  <span>No disponible</span>
+                </div>
+                <div class='legend-item'>
+                  <div class='legend-color selected'></div>
+                  <span>Seleccionado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha -->
+          <div class='booking-right'>
+            <div class='booking-form-card'>
+              <h3 class='form-title'>Confirmar solicitud</h3>
+
+              <!-- Resumen de horas seleccionadas -->
+              <div class='selected-hours'>
+                <h4>Horas seleccionadas</h4>
+                <div class='selected-slots-list' id='selectedSlots'>
+                  <p class='no-selection'>No hay horarios seleccionados</p>
+                </div>
+              </div>
+
+              <!-- Mensaje opcional -->
+              <div class='message-field'>
+                <label for='message'>Mensaje opcional</label>
+                <textarea id='message' placeholder='Describe tus objetivos o necesidades específicas...' rows='4'>
+                </textarea>
+              </div>
+
+              <!-- Oferta por hora -->
+              <div class='price-field'>
+                <label for='hourlyRate'>Oferta por hora (S/)</label>
+                <input type='number' id='hourlyRate' placeholder='30' min='20' max='100' value='30' />
+                <small>Tarifa sugerida: S/{tutor.hourlyRate}/hora</small>
+              </div>
+
+              <!-- Resumen de costo -->
+              <div class='cost-summary'>
+                <div class='cost-item'>
+                  <span>Horas seleccionadas:</span>
+                  <span id='totalHours'>0</span>
+                </div>
+                <div class='cost-item'>
+                  <span>Precio por hora:</span>
+                  <span id='displayRate'>S/30</span>
+                </div>
+                <div class='cost-total'>
+                  <span>Total estimado:</span>
+                  <span id='totalCost'>S/0</span>
+                </div>
+              </div>
+
+              <!-- Botón de envío -->
+              <button class='btn btn-primary btn-block btn-send-request'>Enviar solicitud</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .booking-main {
+    min-height: calc(100vh - 64px);
+    padding-top: 64px;
+    background: linear-gradient(to bottom, #fafafa, #ffffff);
+  }
+
+  .booking-section {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-sm);
+  }
+
+  .breadcrumb-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .breadcrumb-link:hover {
+    opacity: 0.8;
+  }
+
+  .breadcrumb-separator {
+    color: var(--text-light);
+  }
+
+  .breadcrumb-current {
+    color: var(--text-secondary);
+  }
+
+  /* Layout de 2 columnas */
+  .booking-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-xl);
+    align-items: start;
+  }
+
+  /* Columna izquierda */
+  .booking-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  /* Tarjetas base */
+  .course-info-card,
+  .tutor-info-card,
+  .schedule-card,
+  .booking-form-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    border: 1px solid #f1f5f9;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 4px 8px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+  }
+
+  .course-info-card:hover,
+  .tutor-info-card:hover,
+  .schedule-card:hover {
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.05),
+      0 10px 15px rgba(0, 0, 0, 0.03);
+    border-color: #e2e8f0;
+  }
+
+  /* Información del curso */
+  .course-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .university-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .university-logo:hover {
+    border-color: #e2e8f0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .university-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: white;
+  }
+
+  .course-name {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .university-name {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* Información del tutor */
+  .tutor-info-card {
+    position: relative;
+  }
+
+  .btn-profile {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    padding: 6px 12px;
+    background: #7c86ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .btn-profile:hover {
+    background: #6366f1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .tutor-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .tutor-avatar-large {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 36px;
+    flex-shrink: 0;
+    border: 3px solid white;
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(99, 102, 241, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .tutor-avatar-large:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.1),
+      0 4px 8px rgba(99, 102, 241, 0.15);
+  }
+
+  .tutor-name {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .tutor-rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .stars i {
+    font-size: 14px;
+    color: #e0e0e0;
+    transition: color 0.2s ease;
+  }
+
+  .stars i.filled {
+    color: #ffd700;
+  }
+
+  .stars i.half-filled {
+    background: linear-gradient(90deg, #ffd700 50%, #e0e0e0 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tutor-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Selección de horario */
+  .schedule-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .schedule-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .schedule-table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    border: 1px solid var(--border-light);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .time-header,
+  .day-header {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    padding: var(--spacing-sm);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .time-header {
+    width: 80px;
+    min-width: 80px;
+    background: var(--bg-secondary);
+    position: sticky;
+    left: 0;
+    z-index: 3;
+  }
+
+  .time-cell {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    padding: var(--spacing-sm);
+    width: 80px;
+    min-width: 80px;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  .schedule-cell {
+    padding: 4px;
+    background: white;
+  }
+
+  .time-block {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .time-block.available {
+    background: #f0f9ff;
+    border: 2px solid #e0f2fe;
+    color: var(--color-primary);
+  }
+
+  .time-block.available:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .time-block.unavailable {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    color: var(--text-light);
+    cursor: not-allowed;
+  }
+
+  .time-block.selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .time-range {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  /* Leyenda */
+  .schedule-legend {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-sm);
+    border: 2px solid;
+  }
+
+  .legend-color.available {
+    background: #f0f9ff;
+    border-color: #e0f2fe;
+  }
+
+  .legend-color.unavailable {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+  }
+
+  .legend-color.selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  /* Columna derecha - Formulario */
+  .booking-form-card {
+    position: sticky;
+    top: calc(64px + var(--spacing-lg));
+  }
+
+  .form-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .selected-hours h4,
+  .message-field label,
+  .price-field label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    display: block;
+  }
+
+  .selected-hours {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .selected-slots-list {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    min-height: 60px;
+  }
+
+  .no-selection {
+    color: var(--text-light);
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+  }
+
+  .selected-slot-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .selected-slot-item:last-child {
+    border-bottom: none;
+  }
+
+  .remove-slot {
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+  }
+
+  /* Campos del formulario */
+  .message-field,
+  .price-field {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .message-field textarea,
+  .price-field input {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    resize: vertical;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .message-field textarea:focus,
+  .price-field input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+  }
+
+  .price-field small {
+    color: var(--text-light);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-xs);
+    display: block;
+  }
+
+  /* Resumen de costo */
+  .cost-summary {
+    background: #f8fafc;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid #e2e8f0;
+  }
+
+  .cost-item,
+  .cost-total {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .cost-total {
+    font-weight: 600;
+    color: var(--text-primary);
+    border-top: 1px solid #e2e8f0;
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+    font-size: var(--font-size-base);
+  }
+
+  .btn-send-request {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-lg);
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  }
+
+  .btn-send-request:hover {
+    background: #5b5bd6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.25);
+  }
+
+  .btn-send-request:active {
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .booking-container {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-lg);
+    }
+
+    .booking-form-card {
+      position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .course-header,
+    .tutor-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .schedule-table-container {
+      font-size: var(--font-size-xs);
+    }
+
+    .time-block {
+      height: 40px;
+      padding: 2px;
+    }
+
+    .time-range {
+      font-size: 9px;
+    }
+
+    .schedule-table {
+      min-width: 600px;
+    }
+
+    .time-header,
+    .day-header {
+      padding: var(--spacing-xs);
+      font-size: 11px;
+    }
+
+    .time-cell {
+      padding: var(--spacing-xs);
+      font-size: 10px;
+    }
+
+    .legend-item {
+      font-size: 11px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .schedule-legend {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .schedule-table {
+      min-width: 500px;
+    }
+
+    .time-block {
+      height: 36px;
+    }
+  }
+
+  /* Botones */
+  .btn-block {
+    width: 100%;
+    display: block;
+  }
+</style>
+
+<script>
+  // Funcionalidad interactiva para selección de horarios
+  document.addEventListener('DOMContentLoaded', function () {
+    const timeBlocks = document.querySelectorAll('.time-block.available');
+    const selectedSlotsList = document.getElementById('selectedSlots');
+    const totalHoursElement = document.getElementById('totalHours');
+    const totalCostElement = document.getElementById('totalCost');
+    const hourlyRateInput = document.getElementById('hourlyRate');
+    const displayRateElement = document.getElementById('displayRate');
+
+    let selectedSlots: any[] = [];
+
+    // Actualizar precio mostrado
+    function updateDisplayRate() {
+      if (!hourlyRateInput || !displayRateElement) return;
+      const rate = (hourlyRateInput as HTMLInputElement).value || '30';
+      displayRateElement.textContent = `S/${rate}`;
+      updateTotalCost();
+    }
+
+    // Actualizar costo total
+    function updateTotalCost() {
+      if (!totalCostElement || !hourlyRateInput) return;
+      const rate = parseInt((hourlyRateInput as HTMLInputElement).value) || 30;
+      const total = selectedSlots.length * rate;
+      totalCostElement.textContent = `S/${total}`;
+    }
+
+    // Actualizar lista de horarios seleccionados
+    function updateSelectedSlotsList() {
+      if (!selectedSlotsList || !totalHoursElement) return;
+
+      totalHoursElement.textContent = selectedSlots.length.toString();
+
+      if (selectedSlots.length === 0) {
+        selectedSlotsList.innerHTML = '<p class="no-selection">No hay horarios seleccionados</p>';
+      } else {
+        selectedSlotsList.innerHTML = selectedSlots
+          .map(
+            slot => `
+					<div class="selected-slot-item">
+						<span>${slot.day} ${slot.time}-${slot.endTime}</span>
+						<span class="remove-slot" data-day="${slot.day}" data-time="${slot.time}">×</span>
+					</div>
+				`
+          )
+          .join('');
+      }
+      updateTotalCost();
+    }
+
+    // Manejar clicks en bloques de horario
+    timeBlocks.forEach(block => {
+      block.addEventListener('click', function (this: HTMLElement) {
+        const day = this.dataset.day;
+        const time = this.dataset.time;
+
+        if (!day || !time) return;
+
+        // Calcular hora de fin (una hora después)
+        const startHour = parseInt(time.split(':')[0] || '0');
+        const endTime = `${String(startHour + 1).padStart(2, '0')}:00`;
+
+        if (this.classList.contains('selected')) {
+          // Deseleccionar
+          this.classList.remove('selected');
+          selectedSlots = selectedSlots.filter(s => !(s.day === day && s.time === time));
+        } else {
+          // Seleccionar
+          this.classList.add('selected');
+          selectedSlots.push({ day, time, endTime });
+        }
+
+        updateSelectedSlotsList();
+      });
+    });
+
+    // Manejar eliminación de horarios seleccionados
+    if (selectedSlotsList) {
+      selectedSlotsList.addEventListener('click', function (e) {
+        const target = e.target as HTMLElement;
+        if (target && target.classList && target.classList.contains('remove-slot')) {
+          const day = target.dataset?.day;
+          const time = target.dataset?.time;
+
+          if (day && time) {
+            // Remover de la lista
+            selectedSlots = selectedSlots.filter(s => !(s.day === day && s.time === time));
+
+            // Deseleccionar el botón correspondiente
+            const slotButton = document.querySelector(`[data-day="${day}"][data-time="${time}"]`);
+            if (slotButton) {
+              slotButton.classList.remove('selected');
+            }
+
+            updateSelectedSlotsList();
+          }
+        }
+      });
+    }
+
+    // Manejar cambio en precio por hora
+    if (hourlyRateInput) {
+      hourlyRateInput.addEventListener('input', updateDisplayRate);
+    }
+
+    // Inicializar
+    updateSelectedSlotsList();
+    updateDisplayRate();
+  });
+</script>

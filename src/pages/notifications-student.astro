@@ -1,0 +1,835 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import { notifications } from '../data/notifications.js';
+
+// Filtrar solo las notificaciones relevantes para el estudiante
+const studentNotifications = notifications.filter(notification => 
+  notification.type === 'counteroffer_received' || 
+  notification.type === 'session_confirmed' || 
+  notification.type === 'new_message'
+);
+
+// Función para formatear fecha relativa
+function getRelativeTime(timestamp: string): string {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+  
+  if (diffInHours < 1) return 'Hace menos de 1 hora';
+  if (diffInHours < 24) return `Hace ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`;
+}
+
+// Función para obtener el icono según el tipo de notificación
+function getNotificationIcon(type: string): string {
+  const icons: { [key: string]: string } = {
+    'counteroffer_received': 'fas fa-exchange-alt',
+    'session_confirmed': 'fas fa-check-circle',
+    'new_message': 'fas fa-envelope'
+  };
+  return icons[type] || 'fas fa-bell';
+}
+
+// Función para obtener el color según el tipo
+function getNotificationColor(type: string): string {
+  const colors: { [key: string]: string } = {
+    'counteroffer_received': '#f59e0b',
+    'session_confirmed': '#10b981',
+    'new_message': '#6366f1'
+  };
+  return colors[type] || '#6b7280';
+}
+
+// Función para obtener el título de la notificación
+function getNotificationTitle(notification: any): string {
+  switch (notification.type) {
+    case 'counteroffer_received':
+      return 'Contraoferta recibida';
+    case 'tutorial_accepted':
+      return 'Solicitud aceptada';
+    case 'tutorial_rejected':
+      return 'Solicitud rechazada';
+    default:
+      return 'Notificación';
+  }
+}
+---
+
+<Layout title="Notificaciones - Hermes Academy">
+  <Navigation currentSection="notifications" />
+  <main class="notifications-main">
+    <section class="notifications-section">
+      <div class="container">
+        <!-- Header simplificado -->
+        <div class="notifications-header">
+          <h1 class="notifications-title">Notificaciones</h1>
+          <p class="notifications-subtitle">Respuestas a tus solicitudes de tutoría</p>
+        </div>
+
+        <!-- Lista de notificaciones -->
+        <div class="notifications-container">
+          {studentNotifications.length === 0 ? (
+            <div class="no-notifications">
+              <div class="empty-icon">
+                <i class="fas fa-bell-slash"></i>
+              </div>
+              <h3>No tienes notificaciones</h3>
+              <p>Cuando recibas respuestas a tus solicitudes aparecerán aquí</p>
+            </div>
+          ) : (
+            studentNotifications.map((notification) => (
+              <div class="notification-card" data-notification-id={notification.id}>
+                <div class="notification-header">
+                  <div class="notification-icon" style={`background-color: ${getNotificationColor(notification.type)}15; color: ${getNotificationColor(notification.type)}`}>
+                    <i class={getNotificationIcon(notification.type)}></i>
+                  </div>
+                  <div class="notification-info">
+                    <h3 class="notification-title">{getNotificationTitle(notification)}</h3>
+                    <p class="notification-time">{getRelativeTime(notification.timestamp)}</p>
+                  </div>
+                  <button class="notification-toggle" onclick={`toggleNotification(${notification.id})`}>
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                </div>
+
+                <div class="notification-summary">
+                  <div class="summary-item">
+                    <span class="summary-label">Curso:</span>
+                    <span class="summary-value">{notification.data.courseName}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Horario:</span>
+                    <span class="summary-value">{notification.data.proposedSchedule || notification.data.time}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Precio:</span>
+                    <span class="summary-value price">
+                      {notification.type === 'counteroffer_received' ? 
+                        `S/${notification.data.counterPrice}` : 
+                        notification.data.originalPrice ? `S/${notification.data.originalPrice}` :
+                        'Por definir'}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Detalles expandibles -->
+                <div class="notification-details" id={`details-${notification.id}`}>
+                  {notification.message && (
+                    <div class="message-section">
+                      <h4>Mensaje del tutor:</h4>
+                      <p class="notification-message">{notification.message}</p>
+                    </div>
+                  )}
+
+                  {notification.type === 'counteroffer_received' && (
+                    <div class="price-comparison">
+                      <div class="price-item">
+                        <span class="price-label">Tu oferta original:</span>
+                        <span class="price-original">S/{notification.data.originalPrice}</span>
+                      </div>
+                      <div class="price-item">
+                        <span class="price-label">Contraoferta del tutor:</span>
+                        <span class="price-counter">S/{notification.data.counterPrice}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <!-- Acciones para contraofertas del tutor -->
+                  {notification.type === 'counteroffer' && (
+                    <div class="notification-actions">
+                      <button class="btn btn-success" onclick={`acceptCounterOffer(${notification.id})`}>
+                        <i class="fas fa-check"></i>
+                        Aceptar contraoferta
+                      </button>
+                      <button class="btn btn-danger" onclick={`rejectCounterOffer(${notification.id})`}>
+                        <i class="fas fa-times"></i>
+                        Rechazar
+                      </button>
+                      <button class="btn btn-warning" onclick={`showNewCounterOfferModal(${notification.id})`}>
+                        <i class="fas fa-exchange-alt"></i>
+                        Nueva contraoferta
+                      </button>
+                    </div>
+                  )}
+
+                  <!-- Acciones para solicitudes aceptadas -->
+                  {notification.type === 'tutorial_accepted' && (
+                    <div class="notification-actions">
+                      <button class="btn btn-primary" onclick={`goToSession(${notification.id})`}>
+                        <i class="fas fa-video"></i>
+                        Ir a sesión
+                      </button>
+                      <button class="btn btn-secondary" onclick={`contactTutor(${notification.id})`}>
+                        <i class="fas fa-message"></i>
+                        Contactar tutor
+                      </button>
+                    </div>
+                  )}
+
+                  <!-- Acciones para solicitudes rechazadas -->
+                  {notification.type === 'tutorial_rejected' && (
+                    <div class="notification-actions">
+                      <button class="btn btn-primary" onclick={`findAlternativeTutor(${notification.id})`}>
+                        <i class="fas fa-search"></i>
+                        Buscar otro tutor
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal para nueva contraoferta del estudiante -->
+  <div class="modal" id="newCounterOfferModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Nueva contraoferta</h3>
+        <button class="modal-close" onclick="closeModal('newCounterOfferModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label for="newStudentPrice">Tu nueva oferta (S/)</label>
+          <input type="number" id="newStudentPrice" placeholder="28" min="20" max="100" />
+        </div>
+        <div class="field-group">
+          <label for="newStudentMessage">Mensaje opcional</label>
+          <textarea id="newStudentMessage" placeholder="Explica tu nueva oferta..." rows="3"></textarea>
+        </div>
+        <div class="counter-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Esta será tu última contraoferta. Si el tutor la rechaza, deberás buscar otro tutor o aceptar su precio.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('newCounterOfferModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitNewCounterOffer()">Enviar contraoferta</button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .notifications-main {
+    min-height: calc(100vh - 64px);
+    padding-top: 64px;
+    background: #fafbfc;
+  }
+
+  .notifications-section {
+    padding: 2rem 0;
+  }
+
+  /* Header minimalista */
+  .notifications-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .notifications-title {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .notifications-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  /* Container */
+  .notifications-container {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Estado vacío */
+  .no-notifications {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+  }
+
+  .empty-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8fafc;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+  }
+
+  .empty-icon i {
+    font-size: 20px;
+    color: #9ca3af;
+  }
+
+  .no-notifications h3 {
+    font-size: 1rem;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .no-notifications p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  /* Tarjetas de notificación minimalistas */
+  .notification-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+
+  .notification-card:hover {
+    border-color: #e2e8f0;
+  }
+
+  /* Header de notificación */
+  .notification-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .notification-header:hover {
+    background: #fafbfc;
+  }
+
+  .notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .notification-info {
+    flex: 1;
+  }
+
+  .notification-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0 0 2px 0;
+  }
+
+  .notification-time {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .notification-toggle {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    margin-left: auto;
+  }
+
+  .notification-toggle:hover {
+    background: #f1f5f9;
+    color: #6b7280;
+  }
+
+  .notification-toggle.expanded {
+    transform: rotate(180deg);
+  }
+
+  /* Resumen */
+  .notification-summary {
+    padding: 0.75rem 1.25rem;
+    background: #fafbfc;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .summary-label {
+    font-size: 10px;
+    color: #9ca3af;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-value {
+    font-size: 0.8125rem;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .summary-value.price {
+    color: #6366f1;
+    font-weight: 600;
+  }
+
+  /* Detalles */
+  .notification-details {
+    padding: 1rem 1.25rem;
+    display: none;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .notification-details.expanded {
+    display: block;
+  }
+
+  .message-section {
+    margin-bottom: 1rem;
+  }
+
+  .message-section h4 {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+
+  .notification-message {
+    background: #f8fafc;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border-left: 2px solid #6366f1;
+    color: #4b5563;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  /* Comparación de precios minimalista */
+  .price-comparison {
+    background: #fffbeb;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #fde68a;
+  }
+
+  .price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .price-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .price-label {
+    color: #6b7280;
+  }
+
+  .price-original {
+    text-decoration: line-through;
+    color: #9ca3af;
+  }
+
+  .price-counter {
+    font-weight: 600;
+    color: #f59e0b;
+  }
+
+  /* Acciones minimalistas */
+  .notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .btn-success {
+    background: #10b981;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #059669;
+  }
+
+  .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  .btn-warning {
+    background: #f59e0b;
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background: #d97706;
+  }
+
+  .btn-primary {
+    background: #6366f1;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5b5bd6;
+  }
+
+  .btn-secondary {
+    background: #e5e7eb;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background: #d1d5db;
+    color: #374151;
+  }
+
+  /* Modal minimalista */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid #f1f5f9;
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .modal-close:hover {
+    background: #f1f5f9;
+    color: #6b7280;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .field-group {
+    margin-bottom: 1rem;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  .field-group input,
+  .field-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .field-group input:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  }
+
+  .counter-warning {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .counter-warning i {
+    color: #dc2626;
+    margin-top: 1px;
+    font-size: 12px;
+  }
+
+  .counter-warning p {
+    color: #b91c1c;
+    font-size: 0.75rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .notifications-section {
+      padding: 1rem 0;
+    }
+
+    .notifications-container {
+      padding: 0 1rem;
+    }
+
+    .notification-summary {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .notification-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      justify-content: center;
+    }
+
+    .modal-content {
+      width: 95%;
+      margin: 1rem;
+    }
+
+    .modal-footer {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  // Variables globales
+  let currentNotificationId: number | null = null;
+
+  // Alternar detalles de notificación
+  function toggleNotification(id: number) {
+    const details = document.getElementById(`details-${id}`);
+    const toggle = document.querySelector(`[data-notification-id="${id}"] .notification-toggle`);
+    
+    if (details && details.classList.contains('expanded')) {
+      details.classList.remove('expanded');
+      if (toggle) toggle.classList.remove('expanded');
+    } else {
+      // Cerrar otras notificaciones abiertas
+      document.querySelectorAll('.notification-details.expanded').forEach(el => {
+        el.classList.remove('expanded');
+      });
+      document.querySelectorAll('.notification-toggle.expanded').forEach(el => {
+        el.classList.remove('expanded');
+      });
+      
+      // Abrir la actual
+      if (details) details.classList.add('expanded');
+      if (toggle) toggle.classList.add('expanded');
+    }
+  }
+
+  // Mostrar modal
+  function showModal(modalId: string) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('active');
+  }
+
+  // Cerrar modal
+  function closeModal(modalId: string) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+  }
+
+  // Acciones para contraofertas
+  function acceptCounterOffer(id: number) {
+    console.log('Accepting counter offer for notification:', id);
+    alert(`Contraoferta aceptada. ¡Se ha confirmado tu tutoría!`);
+    // Aquí iría la lógica para aceptar la contraoferta
+  }
+
+  function rejectCounterOffer(id: number) {
+    console.log('Rejecting counter offer for notification:', id);
+    if (confirm('¿Estás seguro de que quieres rechazar esta contraoferta?')) {
+      alert(`Contraoferta rechazada. Puedes buscar otro tutor.`);
+      // Aquí iría la lógica para rechazar la contraoferta
+    }
+  }
+
+  function showNewCounterOfferModal(id: number) {
+    currentNotificationId = id;
+    showModal('newCounterOfferModal');
+  }
+
+  function submitNewCounterOffer() {
+    const priceEl = document.getElementById('newStudentPrice') as HTMLInputElement;
+    const messageEl = document.getElementById('newStudentMessage') as HTMLTextAreaElement;
+    
+    if (!priceEl || !priceEl.value) {
+      alert('Por favor ingresa tu nueva oferta');
+      return;
+    }
+    
+    // Usar messageEl para incluir mensaje en la contraoferta
+    const message = messageEl?.value || '';
+    console.log('Mensaje adicional:', message);
+    console.log('ID de notificación actual:', currentNotificationId);
+    
+    alert(`Nueva contraoferta enviada: S/${priceEl.value}`);
+    closeModal('newCounterOfferModal');
+    // Aquí iría la lógica para enviar la nueva contraoferta
+  }
+
+  // Acciones para solicitudes aceptadas
+  function goToSession(id: number) {
+    console.log('Accediendo a sesión ID:', id);
+    alert('Redirigiendo a la sesión de tutoría...');
+    // Aquí iría la lógica para ir a la sesión
+  }
+
+  function contactTutor(id: number) {
+    console.log('Contactando tutor ID:', id);
+    alert('Abriendo chat con el tutor...');
+    // Aquí iría la lógica para contactar al tutor
+  }
+
+  // Acciones para solicitudes rechazadas
+  function findAlternativeTutor(id: number) {
+    console.log('Buscando alternativas para ID:', id);
+    alert('Buscando tutores alternativos...');
+    // Aquí iría la lógica para buscar tutores alternativos
+  }
+
+  // Cerrar modales al hacer clic fuera
+  document.addEventListener('click', function(e) {
+    const target = e.target as HTMLElement;
+    if (target && target.classList.contains('modal')) {
+      target.classList.remove('active');
+    }
+  });
+
+  // Hacer headers clickeables
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.notification-header').forEach(header => {
+      header.addEventListener('click', function(this: HTMLElement) {
+        const card = this.closest('.notification-card') as HTMLElement;
+        if (card && card.dataset.notificationId) {
+          toggleNotification(parseInt(card.dataset.notificationId));
+        }
+      });
+    });
+  });
+
+  // Exponer funciones globalmente para uso en onclick handlers
+  Object.assign(window, {
+    acceptCounterOffer,
+    rejectCounterOffer,
+    showNewCounterOfferModal,
+    submitNewCounterOffer,
+    goToSession,
+    contactTutor,
+    findAlternativeTutor
+  });
+</script>

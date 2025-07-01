@@ -1,0 +1,346 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<nav class='main-header'>
+  <div class='container'>
+    <div class='header-content'>
+      <!-- Logo y nombre -->
+      <a href='/' class='logo'>
+        <img src='/logo/logo.png' alt='Hermes Academy' class='logo-img' />
+        <span class='logo-text'>Hermes Academy</span>
+      </a>
+
+      <!-- Barra de búsqueda -->
+      <div class='search-container'>
+        <div class='search-box'>
+          <i class='fas fa-search search-icon'></i>
+          <input type='text' placeholder='Buscar cursos, tutores o universidades...' class='search-input' />
+        </div>
+      </div>
+
+      <!-- Navegación principal -->
+      <div class='nav-links'>
+        <a href='/dashboard' class={`nav-link ${currentPath === '/dashboard' ? 'active' : ''}`}>Inicio</a>
+        <a href='/universities' class={`nav-link ${currentPath === '/universities' ? 'active' : ''}`}>Universidades</a>
+        <a href='/courses' class={`nav-link ${currentPath === '/courses' ? 'active' : ''}`}>Cursos</a>
+      </div>
+
+      <!-- Acciones del usuario -->
+      <div class='user-actions'>
+        <!-- Notificaciones -->
+        <a href='/notifications' class='action-btn notification-btn' title='Notificaciones'>
+          <i class='fas fa-bell'></i>
+          <span class='notification-badge'>3</span>
+        </a>
+
+        <!-- Perfil del usuario -->
+        <div class='profile-dropdown'>
+          <button class='action-btn profile-btn' onclick='toggleProfileMenu()'>
+            <i class='fas fa-user-circle'></i>
+          </button>
+          <div class='dropdown-menu' id='profileMenu'>
+            <a href='/dashboard' class='dropdown-item'>
+              <i class='fas fa-tachometer-alt'></i>
+              Mi Dashboard
+            </a>
+            <a href='/become-tutor' class='dropdown-item'>
+              <i class='fas fa-chalkboard-teacher'></i>
+              Ser Tutor
+            </a>
+            <div class='dropdown-divider'></div>
+            <a href='#' class='dropdown-item logout' onclick='logout()'>
+              <i class='fas fa-sign-out-alt'></i>
+              Cerrar Sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function toggleProfileMenu() {
+    const menu = document.getElementById('profileMenu');
+    if (menu) {
+      menu.classList.toggle('show');
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    const dropdown = document.querySelector('.profile-dropdown');
+    const menu = document.getElementById('profileMenu');
+    const target = event.target as HTMLElement;
+
+    if (dropdown && menu && !dropdown.contains(target)) {
+      menu.classList.remove('show');
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    window.location.href = '/';
+  }
+
+  (window as any).toggleProfileMenu = toggleProfileMenu;
+  (window as any).logout = logout;
+</script>
+
+<style>
+  /* ===== HEADER PRINCIPAL ===== */
+  .main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--bg-principal);
+    border-bottom: 1px solid var(--border-medium);
+    min-height: var(--header-height);
+  }
+
+  .header-content {
+    min-height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  /* ===== LOGO ===== */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .logo-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  .logo-text {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* ===== BÚSQUEDA ===== */
+  .search-container {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 var(--spacing-sm);
+    min-width: 0;
+  }
+
+  .search-box {
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: var(--font-size-sm);
+  }
+
+  .search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--spacing-md) 0 40px;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    background: var(--bg-general);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .search-input:focus {
+    border-color: var(--color-primary);
+    background: var(--bg-principal);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+
+  /* ===== NAVEGACIÓN ===== */
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  .nav-link {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  .nav-link.active {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    font-weight: 600;
+  }
+
+  /* ===== ACCIONES DE USUARIO ===== */
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  .action-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .action-btn:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 16px;
+    height: 16px;
+    background: var(--color-danger);
+    color: var(--text-white);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* ===== DROPDOWN ===== */
+  .profile-dropdown {
+    position: relative;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + var(--spacing-xs));
+    right: 0;
+    background: var(--bg-principal);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    padding: var(--spacing-xs);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    z-index: 1001;
+  }
+
+  .dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+  }
+
+  .dropdown-item:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  .dropdown-item.logout {
+    color: var(--color-danger);
+  }
+
+  .dropdown-item.logout:hover {
+    background: #fef2f2;
+  }
+
+  .dropdown-item i {
+    font-size: var(--font-size-sm);
+    width: 16px;
+    text-align: center;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: var(--border-medium);
+    margin: var(--spacing-xs) 0;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .header-content {
+      gap: var(--spacing-md);
+    }
+
+    .logo-text {
+      display: none;
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .search-container {
+      margin: 0 var(--spacing-sm);
+      max-width: none;
+    }
+
+    .search-input {
+      height: 36px;
+      font-size: 14px;
+    }
+
+    .dropdown-menu {
+      right: -8px;
+      min-width: 160px;
+    }
+  }
+</style>

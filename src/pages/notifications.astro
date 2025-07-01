@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+---
+
+<Layout title='Notificaciones - Hermes Academy'>
+  <Navigation />
+
+  <main class='container py-8'>
+    <h1>Notificaciones</h1>
+
+    <div class='grid gap-4'>
+      <!-- Solicitud de tutoría recibida -->
+      <div class='card'>
+        <h3>Nueva solicitud de tutoría</h3>
+        <p>María García quiere contratar tus servicios para Cálculo I</p>
+        <p><strong>Precio ofrecido:</strong> S/. 45/hora</p>
+
+        <div class='flex gap-2 mt-4'>
+          <button class='btn btn-success btn-sm' onclick='acceptRequest(1)'>
+            <i class='fas fa-check mr-1'></i> Aceptar
+          </button>
+          <button class='btn btn-warning btn-sm' onclick='counterOffer(1)'>
+            <i class='fas fa-edit mr-1'></i> Contraoferta
+          </button>
+          <button class='btn btn-danger btn-sm' onclick='rejectRequest(1)'>
+            <i class='fas fa-times mr-1'></i> Rechazar
+          </button>
+        </div>
+      </div>
+
+      <!-- Contraoferta recibida -->
+      <div class='card'>
+        <h3>Contraoferta recibida</h3>
+        <p>Carlos López propone S/. 50/hora para Física II (en lugar de S/. 45)</p>
+
+        <div class='flex gap-2 mt-4'>
+          <button class='btn btn-success btn-sm' onclick='acceptCounterOffer(2)'>
+            <i class='fas fa-check mr-1'></i> Aceptar S/. 50
+          </button>
+          <button class='btn btn-danger btn-sm' onclick='rejectCounterOffer(2)'>
+            <i class='fas fa-times mr-1'></i> Rechazar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tutoría confirmada -->
+      <div class='card'>
+        <h3>Tutoría confirmada</h3>
+        <p>Tu tutoría de Álgebra Lineal con Ana Rodríguez está confirmada</p>
+        <p><strong>Fecha:</strong> Hoy, 3:00 PM</p>
+
+        <div class='flex gap-2 mt-4'>
+          <button class='btn btn-primary btn-sm' onclick='joinSession(3)'>
+            <i class='fas fa-video mr-1'></i> Unirse a la sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Funciones simples para simular acciones
+  function acceptRequest(id: number) {
+    alert(`Solicitud ${id} aceptada. Se notificará al estudiante.`);
+  }
+
+  function counterOffer(id: number) {
+    const newPrice = prompt('Ingresa tu precio por hora (S/.):');
+    if (newPrice) {
+      alert(`Contraoferta de S/. ${newPrice}/hora enviada al estudiante con ID ${id}.`);
+    }
+  }
+
+  function rejectRequest(id: number) {
+    alert(`Solicitud ${id} rechazada.`);
+  }
+
+  function acceptCounterOffer(id: number) {
+    alert(`Contraoferta ${id} aceptada. La tutoría ha sido programada.`);
+  }
+
+  function rejectCounterOffer(id: number) {
+    alert(`Contraoferta ${id} rechazada.`);
+  }
+
+  function joinSession(id: number) {
+    alert(`Redirigiendo a la videollamada de la sesión ${id}... (Aquí se abriría la sesión virtual)`);
+  }
+
+  // Exponer funciones globalmente
+  Object.assign(window, {
+    acceptRequest,
+    counterOffer,
+    rejectRequest,
+    acceptCounterOffer,
+    rejectCounterOffer,
+    joinSession,
+  });
+</script>
