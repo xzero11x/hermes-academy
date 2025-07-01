@@ -8,11 +8,11 @@ import DashboardComponent from '../components/Dashboard.astro';
   <Navigation currentSection='dashboard' />
 
   <!-- Script para verificar autenticación -->
-  <script>
+  <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
     // Verificar si el usuario está logueado al cargar la página
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
-      window.location.href = '/auth';
+      window.location.href = baseUrl + '/auth';
     }
   </script>
 
