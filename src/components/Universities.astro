@@ -2,6 +2,9 @@
 import { universities } from '../data/universities.js';
 import { getUniversityStatsFast } from '../data/optimized.js';
 
+// Helper para rutas con base URL
+const getAssetUrl = (path: string) => import.meta.env.BASE_URL + path;
+
 // Obtener estadísticas optimizadas para cada universidad
 const universitiesWithStats = universities.map(university => ({
   ...university,
@@ -33,7 +36,7 @@ const universitiesWithStats = universities.map(university => ({
 				<div class="university-card">
 					<div class="university-header">
 						<div class="university-logo">
-							<img src={university.logo} alt={`Logo de ${university.name}`} class="logo-image" />
+							<img src={getAssetUrl(university.logo)} alt={`Logo de ${university.name}`} class="logo-image" />
 						</div>
 						<div class="university-type">
 							<span class={`type-badge type-${university.type}`}>
@@ -61,7 +64,7 @@ const universitiesWithStats = universities.map(university => ({
 					</div>
 
 					<div class="university-actions">
-						<a href={`/courses?university=${university.id}`} class="btn btn-primary btn-block">
+						<a href={getAssetUrl(`/courses?university=${university.id}`)} class="btn btn-primary btn-block">
 							Ver cursos
 						</a>
 						<button class="btn btn-secondary btn-block">
