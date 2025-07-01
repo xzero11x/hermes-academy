@@ -72,15 +72,15 @@ const university = getUniversityByIdFast(studentData.universityId);
       <div class='dashboard-card actions-card'>
         <h2>Accesos rápidos</h2>
         <div class='actions-grid'>
-          <a href='/courses' class='action-btn'>
+          <a href={import.meta.env.BASE_URL + '/courses'} class='action-btn'>
             <i class='fas fa-search'></i>
             <span>Buscar cursos</span>
           </a>
-          <a href='/universities' class='action-btn'>
+          <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
             <i class='fas fa-university'></i>
             <span>Universidades</span>
           </a>
-          <a href='/auth' class='action-btn'>
+          <a href={import.meta.env.BASE_URL + '/auth'} class='action-btn'>
             <i class='fas fa-user-cog'></i>
             <span>Mi perfil</span>
           </a>
