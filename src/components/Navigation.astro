@@ -21,15 +21,34 @@ const currentPath = Astro.url.pathname;
 
       <!-- Navegación principal -->
       <div class='nav-links'>
-        <a href={import.meta.env.BASE_URL + '/dashboard'} class={`nav-link ${currentPath === '/dashboard' ? 'active' : ''}`}>Inicio</a>
-        <a href={import.meta.env.BASE_URL + '/universities'} class={`nav-link ${currentPath === '/universities' ? 'active' : ''}`}>Universidades</a>
-        <a href={import.meta.env.BASE_URL + '/courses'} class={`nav-link ${currentPath === '/courses' ? 'active' : ''}`}>Cursos</a>
+        <a
+          href={import.meta.env.BASE_URL + '/dashboard'}
+          class={`nav-link ${currentPath === '/dashboard' ? 'active' : ''}`}
+        >
+          Inicio
+        </a>
+        <a
+          href={import.meta.env.BASE_URL + '/universities'}
+          class={`nav-link ${currentPath === '/universities' ? 'active' : ''}`}
+        >
+          Universidades
+        </a>
+        <a
+          href={import.meta.env.BASE_URL + '/courses'}
+          class={`nav-link ${currentPath === '/courses' ? 'active' : ''}`}
+        >
+          Cursos
+        </a>
       </div>
 
       <!-- Acciones del usuario -->
       <div class='user-actions'>
         <!-- Notificaciones -->
-        <a href={import.meta.env.BASE_URL + '/notifications'} class='action-btn notification-btn' title='Notificaciones'>
+        <a
+          href={import.meta.env.BASE_URL + '/notifications'}
+          class='action-btn notification-btn'
+          title='Notificaciones'
+        >
           <i class='fas fa-bell'></i>
           <span class='notification-badge'>3</span>
         </a>
