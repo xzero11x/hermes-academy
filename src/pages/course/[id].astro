@@ -56,7 +56,7 @@ const availableTutors = getTutorsByCourseFast(course.id);
           <div class='course-basic-info'>
             <div class='course-university-info'>
               <div class='university-logo'>
-                <img src={university?.logo || '/universidades/default.png'} alt={university?.name || 'Universidad'} />
+                <img src={import.meta.env.BASE_URL + (university?.logo || '/universidades/default.png')} alt={university?.name || 'Universidad'} />
               </div>
               <div class='university-details'>
                 <h1 class='course-title'>{course.name}</h1>
@@ -114,7 +114,7 @@ const availableTutors = getTutorsByCourseFast(course.id);
                   </div>
                   <p class='tutor-description'>{tutor.bio}</p>
                   <div class='tutor-actions'>
-                    <a href={`/tutor/${course.id}/${tutor.id}`} class='btn btn-primary btn-block'>
+                    <a href={import.meta.env.BASE_URL + `/tutor/${course.id}/${tutor.id}`} class='btn btn-primary btn-block'>
                       Contactar
                     </a>
                   </div>

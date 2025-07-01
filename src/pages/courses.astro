@@ -21,7 +21,7 @@ if (universityId) {
 // Función para obtener el logo de la universidad por ID
 function getUniversityLogo(universityId: number) {
   const university = getUniversityByIdFast(universityId);
-  return university ? university.logo : '/universidades/default.png';
+  return university ? import.meta.env.BASE_URL + university.logo : import.meta.env.BASE_URL + '/universidades/default.png';
 }
 
 // Función para obtener el nombre de la universidad por ID
@@ -79,7 +79,7 @@ const enrichedCourses = filteredCourses.map(course => ({
                       <img src={selectedUniversity.logo} alt={selectedUniversity.name} class='filter-logo' />
                       <span class='filter-text'>{enrichedCourses.length} cursos disponibles</span>
                     </div>
-                    <a href='/courses' class='remove-filter'>
+                    <a href={import.meta.env.BASE_URL + '/courses'} class='remove-filter'>
                       <i class='fas fa-times' />
                       Ver todos los cursos
                     </a>
@@ -138,7 +138,7 @@ const enrichedCourses = filteredCourses.map(course => ({
                 </div>
 
                 <div class='course-actions'>
-                  <a href={`/course/${course.id}`} class='btn btn-primary btn-block'>
+                  <a href={import.meta.env.BASE_URL + `/course/${course.id}`} class='btn btn-primary btn-block'>
                     Ver detalles
                   </a>
                 </div>

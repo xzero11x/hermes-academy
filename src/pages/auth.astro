@@ -150,11 +150,11 @@ import Layout from '../layouts/Layout.astro';
     window.location.href = baseUrl + '/dashboard';
   }
 
-  function handleLogin(event: Event) {
+  function handleLogin(event) {
     event.preventDefault();
 
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
     // Validación de credenciales simuladas
     if (email === 'juan@gmail.com' && password === 'juan12345') {
@@ -170,7 +170,7 @@ import Layout from '../layouts/Layout.astro';
   }
 
   function togglePassword() {
-    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const passwordInput = document.getElementById('password');
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordInput.setAttribute('type', type);
   }
@@ -180,11 +180,11 @@ import Layout from '../layouts/Layout.astro';
   }
 
   // Hacer las funciones globales
-  (window as any).loginWithGoogle = loginWithGoogle;
-  (window as any).loginWithGithub = loginWithGithub;
-  (window as any).handleLogin = handleLogin;
-  (window as any).togglePassword = togglePassword;
-  (window as any).showRegister = showRegister;
+  window.loginWithGoogle = loginWithGoogle;
+  window.loginWithGithub = loginWithGithub;
+  window.handleLogin = handleLogin;
+  window.togglePassword = togglePassword;
+  window.showRegister = showRegister;
 </script>
 
 <style>

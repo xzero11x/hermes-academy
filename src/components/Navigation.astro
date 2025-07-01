@@ -90,7 +90,7 @@ const currentPath = Astro.url.pathname;
   document.addEventListener('click', function (event) {
     const dropdown = document.querySelector('.profile-dropdown');
     const menu = document.getElementById('profileMenu');
-    const target = event.target as HTMLElement;
+    const target = event.target;
 
     if (dropdown && menu && !dropdown.contains(target)) {
       menu.classList.remove('show');
@@ -103,8 +103,8 @@ const currentPath = Astro.url.pathname;
     window.location.href = baseUrl;
   }
 
-  (window as any).toggleProfileMenu = toggleProfileMenu;
-  (window as any).logout = logout;
+  window.toggleProfileMenu = toggleProfileMenu;
+  window.logout = logout;
 </script>
 
 <style>
