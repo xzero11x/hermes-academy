@@ -21,7 +21,9 @@ if (universityId) {
 // Función para obtener el logo de la universidad por ID
 function getUniversityLogo(universityId: number) {
   const university = getUniversityByIdFast(universityId);
-  return university ? import.meta.env.BASE_URL + university.logo : import.meta.env.BASE_URL + '/universidades/default.png';
+  return university
+    ? import.meta.env.BASE_URL + university.logo
+    : import.meta.env.BASE_URL + '/universidades/default.png';
 }
 
 // Función para obtener el nombre de la universidad por ID

@@ -9,93 +9,356 @@ import Navigation from '../components/Navigation.astro';
   <main class='container py-8'>
     <h1>Notificaciones</h1>
 
-    <div class='grid gap-4'>
-      <!-- Solicitud de tutoría recibida -->
-      <div class='card'>
-        <h3>Nueva solicitud de tutoría</h3>
-        <p>María García quiere contratar tus servicios para Cálculo I</p>
-        <p><strong>Precio ofrecido:</strong> S/. 45/hora</p>
-
-        <div class='flex gap-2 mt-4'>
-          <button class='btn btn-success btn-sm' onclick='acceptRequest(1)'>
-            <i class='fas fa-check mr-1'></i> Aceptar
-          </button>
-          <button class='btn btn-warning btn-sm' onclick='counterOffer(1)'>
-            <i class='fas fa-edit mr-1'></i> Contraoferta
-          </button>
-          <button class='btn btn-danger btn-sm' onclick='rejectRequest(1)'>
-            <i class='fas fa-times mr-1'></i> Rechazar
-          </button>
-        </div>
+    <div class='notifications-container' id='notificationsContainer'>
+      <div class='loading-state' id='loadingState'>
+        <p>Cargando notificaciones...</p>
       </div>
-
-      <!-- Contraoferta recibida -->
-      <div class='card'>
-        <h3>Contraoferta recibida</h3>
-        <p>Carlos López propone S/. 50/hora para Física II (en lugar de S/. 45)</p>
-
-        <div class='flex gap-2 mt-4'>
-          <button class='btn btn-success btn-sm' onclick='acceptCounterOffer(2)'>
-            <i class='fas fa-check mr-1'></i> Aceptar S/. 50
-          </button>
-          <button class='btn btn-danger btn-sm' onclick='rejectCounterOffer(2)'>
-            <i class='fas fa-times mr-1'></i> Rechazar
-          </button>
-        </div>
-      </div>
-
-      <!-- Tutoría confirmada -->
-      <div class='card'>
-        <h3>Tutoría confirmada</h3>
-        <p>Tu tutoría de Álgebra Lineal con Ana Rodríguez está confirmada</p>
-        <p><strong>Fecha:</strong> Hoy, 3:00 PM</p>
-
-        <div class='flex gap-2 mt-4'>
-          <button class='btn btn-primary btn-sm' onclick='joinSession(3)'>
-            <i class='fas fa-video mr-1'></i> Unirse a la sesión
-          </button>
-        </div>
+      <div class='empty-state' id='emptyState' style='display: none;'>
+        <p>No tienes notificaciones</p>
       </div>
     </div>
   </main>
 </Layout>
 
 <script>
-  // Funciones simples para simular acciones
-  function acceptRequest(id: number) {
-    alert(`Solicitud ${id} aceptada. Se notificará al estudiante.`);
-  }
+  // Sistema de autenticación y notificaciones dinámico
+  class AuthManager {
+    constructor() {
+      this.usersKey = 'hermesUsers';
+      this.sessionKey = 'hermesSession';
+    }
 
-  function counterOffer(id: number) {
-    const newPrice = prompt('Ingresa tu precio por hora (S/.):');
-    if (newPrice) {
-      alert(`Contraoferta de S/. ${newPrice}/hora enviada al estudiante con ID ${id}.`);
+    getCurrentSession() {
+      const session = localStorage.getItem(this.sessionKey);
+      return session ? JSON.parse(session) : null;
+    }
+
+    getUsers() {
+      const users = localStorage.getItem(this.usersKey);
+      return users ? JSON.parse(users) : [];
+    }
+
+    getCurrentUser() {
+      const session = this.getCurrentSession();
+      if (!session) return null;
+
+      const users = this.getUsers();
+      return users.find(user => user.id === session.userId) || null;
+    }
+
+    isLoggedIn() {
+      return this.getCurrentUser() !== null;
     }
   }
 
-  function rejectRequest(id: number) {
-    alert(`Solicitud ${id} rechazada.`);
+  // Cargar y mostrar notificaciones dinámicas
+  function loadNotifications() {
+    const auth = new AuthManager();
+    const currentUser = auth.getCurrentUser();
+
+    if (!currentUser) {
+      window.location.href = '/auth';
+      return;
+    }
+
+    const notificationsData = localStorage.getItem('hermesNotifications');
+    const notifications = notificationsData ? JSON.parse(notificationsData) : [];
+    const userNotifications = notifications.filter((n: any) => n.userId === currentUser.id);
+
+    const container = document.getElementById('notificationsContainer');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+
+    if (loadingState) loadingState.style.display = 'none';
+
+    if (userNotifications.length === 0) {
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (container) {
+      container.innerHTML = userNotifications
+        .map(
+          (notification: any) => `
+        <div class='notification-card ${notification.isRead ? 'read' : 'unread'}' data-id='${notification.id}'>
+          <div class='notification-header'>
+            <h3>${notification.title}</h3>
+            <span class='notification-time'>${formatDate(notification.createdAt)}</span>
+          </div>
+          <div class='notification-content'>
+            <p>${notification.message}</p>
+            ${renderNotificationActions(notification)}
+          </div>
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    // Marcar como leídas
+    markNotificationsAsRead(userNotifications.map((n: any) => n.id));
   }
 
-  function acceptCounterOffer(id: number) {
-    alert(`Contraoferta ${id} aceptada. La tutoría ha sido programada.`);
+  function renderNotificationActions(notification: any) {
+    switch (notification.type) {
+      case 'tutoring_confirmed':
+        return `
+          <div class='notification-actions'>
+            <button class='btn btn-primary' onclick='joinSession("${notification.data.sessionType === 'online' ? 'online' : 'presencial'}")'>
+              <i class='fas fa-${notification.data.sessionType === 'online' ? 'video' : 'map-marker-alt'}'></i>
+              ${notification.data.sessionType === 'online' ? 'Unirse a sesión virtual' : 'Ver ubicación'}
+            </button>
+          </div>
+        `;
+      case 'counter_offer':
+        return `
+          <div class='notification-details'>
+            <p><strong>Tu oferta:</strong> S/. ${notification.data.studentOfferedPrice}/hora</p>
+            <p><strong>Contraoferta del tutor:</strong> S/. ${notification.data.tutorCounterPrice}/hora</p>
+            <p><strong>Tarifa normal del tutor:</strong> S/. ${notification.data.tutorOriginalRate}/hora</p>
+            <p><strong>Fecha propuesta:</strong> ${notification.data.sessionDate} a las ${notification.data.sessionTime}</p>
+            <p><strong>Duración:</strong> ${notification.data.duration} minutos</p>
+            <p><strong>Mensaje:</strong> ${notification.data.message}</p>
+          </div>
+          <div class='notification-actions'>
+            <button class='btn btn-success' onclick='acceptCounterOffer("${notification.data.requestId}", ${notification.data.tutorCounterPrice})'>
+              <i class='fas fa-check'></i> Aceptar S/. ${notification.data.tutorCounterPrice}
+            </button>
+            <button class='btn btn-warning' onclick='makeCounterOffer("${notification.data.requestId}", ${notification.data.tutorCounterPrice})'>
+              <i class='fas fa-exchange-alt'></i> Hacer contraoferta
+            </button>
+            <button class='btn btn-danger' onclick='rejectCounterOffer("${notification.data.requestId}")'>
+              <i class='fas fa-times'></i> Rechazar
+            </button>
+          </div>
+        `;
+      default:
+        return '';
+    }
   }
 
-  function rejectCounterOffer(id: number) {
-    alert(`Contraoferta ${id} rechazada.`);
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Hoy';
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7) return `Hace ${diffDays} días`;
+    return date.toLocaleDateString('es-PE');
   }
 
-  function joinSession(id: number) {
-    alert(`Redirigiendo a la videollamada de la sesión ${id}... (Aquí se abriría la sesión virtual)`);
+  function markNotificationsAsRead(notificationIds: string[]) {
+    const notificationsData = localStorage.getItem('hermesNotifications');
+    const notifications = notificationsData ? JSON.parse(notificationsData) : [];
+    const updatedNotifications = notifications.map((n: any) =>
+      notificationIds.includes(n.id) ? { ...n, isRead: true } : n
+    );
+    localStorage.setItem('hermesNotifications', JSON.stringify(updatedNotifications));
   }
 
-  // Exponer funciones globalmente
-  Object.assign(window, {
-    acceptRequest,
-    counterOffer,
-    rejectRequest,
-    acceptCounterOffer,
-    rejectCounterOffer,
-    joinSession,
-  });
+  function joinSession(sessionType: string) {
+    if (sessionType === 'online') {
+      alert('Redirigiendo a la videollamada... (Aquí se abriría la sesión virtual)');
+    } else {
+      alert('Mostrando ubicación de la tutoría presencial...');
+    }
+  }
+
+  function acceptCounterOffer(requestId: string, price: number) {
+    alert(
+      `¡Excelente! Has aceptado la contraoferta de S/. ${price}/hora. La tutoría ha sido programada. Recibirás una confirmación con los detalles de la sesión.`
+    );
+    // Aquí se actualizaría el estado en localStorage y se programaría la tutoría
+    // También se eliminaría la notificación de contraoferta
+  }
+
+  function makeCounterOffer(requestId: string, currentPrice: number) {
+    const newPrice = prompt(
+      `El tutor ofreció S/. ${currentPrice}/hora. ¿Cuál es tu contraoferta? (Ingresa un número):`
+    );
+    if (newPrice && !isNaN(Number(newPrice)) && parseFloat(newPrice) > 0) {
+      alert(`Tu contraoferta de S/. ${newPrice}/hora ha sido enviada al tutor. Te notificaremos cuando responda.`);
+      // Aquí se enviaría la contraoferta del estudiante al tutor
+    } else if (newPrice !== null) {
+      alert('Por favor ingresa un precio válido.');
+    }
+  }
+
+  function rejectCounterOffer(requestId: string) {
+    const confirmed = confirm(
+      '¿Estás seguro de que quieres rechazar esta contraoferta? Esta acción no se puede deshacer.'
+    );
+    if (confirmed) {
+      alert(`Contraoferta rechazada. La negociación ha terminado.`);
+      // Aquí se actualizaría el estado en localStorage y se notificaría al tutor
+    }
+  }
+
+  // Cargar notificaciones al cargar la página
+  document.addEventListener('DOMContentLoaded', loadNotifications);
+
+  // Hacer funciones globales para que puedan ser llamadas desde el HTML
+  (window as any).joinSession = joinSession;
+  (window as any).acceptCounterOffer = acceptCounterOffer;
+  (window as any).makeCounterOffer = makeCounterOffer;
+  (window as any).rejectCounterOffer = rejectCounterOffer;
 </script>
+
+<style>
+  .notifications-container {
+    display: grid;
+    gap: 1rem;
+    max-width: 800px;
+  }
+
+  .notification-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .notification-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .notification-card.unread {
+    border-left: 4px solid #2563eb;
+    background: #f8fafc;
+  }
+
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .notification-header h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .notification-time {
+    font-size: 0.875rem;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .notification-content p {
+    color: #475569;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .notification-details {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+  }
+
+  .notification-details p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .notification-details p:last-child {
+    margin-bottom: 0;
+  }
+
+  .notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-success {
+    background: #059669;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #047857;
+  }
+
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+  }
+
+  .btn-warning {
+    background: #d97706;
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background: #b45309;
+  }
+
+  .loading-state,
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+  }
+
+  .loading-state p,
+  .empty-state p {
+    font-size: 1.125rem;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .notification-header {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .notification-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      justify-content: center;
+    }
+  }
+</style>

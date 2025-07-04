@@ -98,9 +98,12 @@ const currentPath = Astro.url.pathname;
   });
 
   function logout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    window.location.href = baseUrl;
+    // Importar y usar el sistema de autenticación
+    import('../utils/auth.js').then(module => {
+      const auth = module.default;
+      auth.logout();
+      window.location.href = baseUrl;
+    });
   }
 
   window.toggleProfileMenu = toggleProfileMenu;

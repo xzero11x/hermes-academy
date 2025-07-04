@@ -1,0 +1,432 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { universities } from '../data/index.js';
+---
+
+<Layout title='Completar Perfil - Hermes Academy'>
+  <main class='profile-main'>
+    <div class='profile-container'>
+      <div class='profile-card'>
+        <!-- Header -->
+        <div class='profile-header'>
+          <h1 class='profile-title'>¡Bienvenido a Hermes Academy!</h1>
+          <p class='profile-subtitle'>Completa tu perfil para acceder a todas las funciones de la plataforma</p>
+        </div>
+
+        <!-- Formulario de perfil -->
+        <form class='profile-form' id='profileForm' onsubmit='handleCompleteProfile(event)'>
+          <!-- Información Personal -->
+          <div class='form-section'>
+            <h3 class='section-title'>Información Personal</h3>
+
+            <div class='form-grid'>
+              <div class='field-group'>
+                <label for='fullName'>Nombre completo *</label>
+                <input type='text' id='fullName' name='fullName' required placeholder='Ej: Ana María Pérez González' />
+              </div>
+
+              <div class='field-group'>
+                <label for='phone'>Teléfono *</label>
+                <input type='tel' id='phone' name='phone' required placeholder='+51 999 999 999' />
+              </div>
+            </div>
+          </div>
+
+          <!-- Información Académica -->
+          <div class='form-section'>
+            <h3 class='section-title'>Información Académica</h3>
+
+            <div class='form-grid'>
+              <div class='field-group'>
+                <label for='university'>Universidad *</label>
+                <select id='university' name='university' required>
+                  <option value=''>Selecciona tu universidad</option>
+                  {
+                    universities.map(university => (
+                      <option value={university.name} data-id={university.id}>
+                        {university.name}
+                      </option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <div class='field-group'>
+                <label for='career'>Carrera *</label>
+                <input type='text' id='career' name='career' required placeholder='Ej: Ingeniería de Sistemas' />
+              </div>
+
+              <div class='field-group'>
+                <label for='semester'>Ciclo actual *</label>
+                <select id='semester' name='semester' required>
+                  <option value=''>Selecciona tu ciclo</option>
+                  <option value='1'>1er ciclo</option>
+                  <option value='2'>2do ciclo</option>
+                  <option value='3'>3er ciclo</option>
+                  <option value='4'>4to ciclo</option>
+                  <option value='5'>5to ciclo</option>
+                  <option value='6'>6to ciclo</option>
+                  <option value='7'>7mo ciclo</option>
+                  <option value='8'>8vo ciclo</option>
+                  <option value='9'>9no ciclo</option>
+                  <option value='10'>10mo ciclo</option>
+                </select>
+              </div>
+
+              <div class='field-group'>
+                <label for='studentId'>Código de estudiante *</label>
+                <input type='text' id='studentId' name='studentId' required placeholder='Ej: 2021123456' />
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferencias -->
+          <div class='form-section'>
+            <h3 class='section-title'>Preferencias de Aprendizaje</h3>
+
+            <div class='field-group'>
+              <label for='learningGoals'>¿En qué materias necesitas más ayuda? (opcional)</label>
+              <textarea
+                id='learningGoals'
+                name='learningGoals'
+                rows='3'
+                placeholder='Ej: Matemáticas, Programación, Contabilidad...'
+              >
+              </textarea>
+            </div>
+          </div>
+
+          <!-- Botón de envío -->
+          <div class='form-actions'>
+            <button type='submit' class='complete-btn' id='completeBtn'>
+              <i class='fas fa-user-check'></i>
+              Completar Perfil
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+  // Sistema de autenticación integrado
+  class AuthManager {
+    constructor() {
+      this.usersKey = 'hermesUsers';
+      this.sessionKey = 'hermesSession';
+    }
+
+    getUsers() {
+      const users = localStorage.getItem(this.usersKey);
+      return users ? JSON.parse(users) : [];
+    }
+
+    saveUsers(users) {
+      localStorage.setItem(this.usersKey, JSON.stringify(users));
+    }
+
+    getCurrentSession() {
+      const session = localStorage.getItem(this.sessionKey);
+      return session ? JSON.parse(session) : null;
+    }
+
+    saveSession(session) {
+      localStorage.setItem(this.sessionKey, JSON.stringify(session));
+    }
+
+    isLoggedIn() {
+      const session = this.getCurrentSession();
+      return session && session.isLoggedIn;
+    }
+
+    getCurrentUser() {
+      const session = this.getCurrentSession();
+      if (!session) return null;
+
+      const users = this.getUsers();
+      return users.find(user => user.id === session.userId) || null;
+    }
+  }
+
+  // Obtener parámetro de redirección de la URL o del sessionStorage
+  function getRedirectParam() {
+    // Primero revisar la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectParam = urlParams.get('redirect');
+
+    if (redirectParam) {
+      // Guardar en sessionStorage para mantenerlo después del flujo de auth
+      sessionStorage.setItem('authRedirect', redirectParam);
+      return redirectParam;
+    }
+
+    // Si no está en URL, revisar sessionStorage
+    return sessionStorage.getItem('authRedirect');
+  }
+
+  // Función para redireccionar después de completar perfil
+  function redirectAfterProfileComplete() {
+    const redirectParam = getRedirectParam();
+
+    // Limpiar el parámetro guardado
+    sessionStorage.removeItem('authRedirect');
+
+    // Redireccionar según el parámetro
+    if (redirectParam === 'become-tutor') {
+      window.location.href = baseUrl + '/become-tutor';
+    } else {
+      // Por defecto ir al dashboard
+      window.location.href = baseUrl + '/dashboard';
+    }
+  }
+
+  // Crear instancia global
+  window.auth = new AuthManager();
+
+  // Verificar que el usuario esté logueado
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.auth.isLoggedIn()) {
+      window.location.href = baseUrl + '/auth';
+      return;
+    }
+
+    // Verificar si ya completó el perfil
+    const user = window.auth.getCurrentUser();
+    if (user && user.isProfileComplete) {
+      redirectAfterProfileComplete();
+      return;
+    }
+
+    // Pre-llenar el email con el del usuario actual
+    const currentUser = window.auth.getCurrentUser();
+    if (currentUser) {
+      document.getElementById('fullName').focus();
+    }
+  });
+
+  // Manejar completar perfil
+  function handleCompleteProfile(event) {
+    event.preventDefault();
+
+    const currentUser = window.auth.getCurrentUser();
+    if (!currentUser) {
+      window.location.href = baseUrl + '/auth';
+      return;
+    }
+
+    // Obtener datos del formulario
+    const formData = new FormData(event.target);
+    const universitySelect = document.getElementById('university');
+    const selectedOption = universitySelect.options[universitySelect.selectedIndex];
+
+    const profileData = {
+      fullName: formData.get('fullName'),
+      phone: formData.get('phone'),
+      university: formData.get('university'),
+      universityId: selectedOption ? parseInt(selectedOption.dataset.id) : null,
+      career: formData.get('career'),
+      semester: parseInt(formData.get('semester')),
+      studentId: formData.get('studentId'),
+      learningGoals: formData.get('learningGoals') || '',
+      completedAt: new Date().toISOString(),
+    };
+
+    // Actualizar usuario con perfil completo
+    const users = JSON.parse(localStorage.getItem('hermesUsers') || '[]');
+    const userIndex = users.findIndex(u => u.id === currentUser.id);
+
+    if (userIndex !== -1) {
+      users[userIndex] = {
+        ...users[userIndex],
+        profile: profileData,
+        isProfileComplete: true,
+        // Preservar roles existentes
+        roles: users[userIndex].roles || {
+          isStudent: true,
+          isTutor: false,
+          tutorStatus: null,
+        },
+        tutorProfile: users[userIndex].tutorProfile || null,
+      };
+
+      localStorage.setItem('hermesUsers', JSON.stringify(users));
+
+      // Actualizar sesión
+      const session = window.auth.getCurrentSession();
+      session.user = users[userIndex];
+      window.auth.saveSession(session);
+
+      alert('¡Perfil completado exitosamente!');
+      redirectAfterProfileComplete();
+    } else {
+      alert('Error al completar el perfil');
+    }
+  }
+
+  // Hacer la función global
+  window.handleCompleteProfile = handleCompleteProfile;
+</script>
+
+<style>
+  /* Reset body padding for profile page */
+  :global(body) {
+    padding-top: 0 !important;
+  }
+
+  .profile-main {
+    min-height: 100vh;
+    background: #fafbfc;
+    padding: 2rem 1rem;
+  }
+
+  .profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .profile-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+  }
+
+  .profile-header {
+    text-align: center;
+    padding: 2rem 1.5rem 1rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+  }
+
+  .profile-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .profile-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  .profile-form {
+    padding: 0;
+  }
+
+  .form-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .form-section:last-child {
+    border-bottom: none;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 3px;
+    height: 1rem;
+    background: #6366f1;
+    border-radius: 2px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .field-group label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    padding: 0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  }
+
+  .form-actions {
+    padding: 1.5rem;
+    background: #f8fafc;
+    text-align: center;
+  }
+
+  .complete-btn {
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .complete-btn:hover {
+    background: #5b5bd6;
+    transform: translateY(-1px);
+  }
+
+  .complete-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .profile-main {
+      padding: 1rem 0.5rem;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-header {
+      padding: 1.5rem 1rem 1rem;
+    }
+
+    .profile-title {
+      font-size: 1.25rem;
+    }
+  }
+</style>

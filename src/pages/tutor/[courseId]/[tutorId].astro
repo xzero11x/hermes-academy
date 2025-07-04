@@ -79,7 +79,10 @@ const tutorAvailability: Record<string, string[]> = {
             <div class='course-info-card'>
               <div class='course-header'>
                 <div class='university-logo'>
-                  <img src={university?.logo || '/universidades/default.png'} alt={university?.name || 'Universidad'} />
+                  <img
+                    src={import.meta.env.BASE_URL + (university?.logo || '/universidades/default.png')}
+                    alt={university?.name || 'Universidad'}
+                  />
                 </div>
                 <div class='course-details'>
                   <h2 class='course-name'>{course.name}</h2>

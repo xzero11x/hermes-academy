@@ -264,7 +264,7 @@ export const getCoursesByCareer = (careerId) => {
 
 export const searchCourses = (query) => {
   const searchTerm = query.toLowerCase();
-  return courses.filter(course => 
+  return courses.filter(course =>
     course.isActive && (
       course.name.toLowerCase().includes(searchTerm) ||
       course.code.toLowerCase().includes(searchTerm) ||

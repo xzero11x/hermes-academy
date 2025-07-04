@@ -9,11 +9,62 @@ import DashboardComponent from '../components/Dashboard.astro';
 
   <!-- Script para verificar autenticación -->
   <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
-    // Verificar si el usuario está logueado al cargar la página
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) {
-      window.location.href = baseUrl + '/auth';
+    // Sistema de autenticación integrado
+    class AuthManager {
+      constructor() {
+        this.usersKey = 'hermesUsers';
+        this.sessionKey = 'hermesSession';
+      }
+
+      getCurrentSession() {
+        const session = localStorage.getItem(this.sessionKey);
+        return session ? JSON.parse(session) : null;
+      }
+
+      getUsers() {
+        const users = localStorage.getItem(this.usersKey);
+        return users ? JSON.parse(users) : [];
+      }
+
+      isLoggedIn() {
+        const session = this.getCurrentSession();
+        return session && session.isLoggedIn;
+      }
+
+      getCurrentUser() {
+        const session = this.getCurrentSession();
+        if (!session) return null;
+
+        const users = this.getUsers();
+        return users.find(user => user.id === session.userId) || null;
+      }
     }
+
+    // Crear instancia global
+    window.auth = new AuthManager();
+
+    // Verificar si el usuario está logueado al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('Verificando autenticación en dashboard...');
+
+      if (!window.auth.isLoggedIn()) {
+        console.log('Usuario no logueado, redirigiendo a auth');
+        window.location.href = baseUrl + '/auth';
+        return;
+      }
+
+      const user = window.auth.getCurrentUser();
+      console.log('Usuario actual en dashboard:', user);
+
+      if (user && !user.isProfileComplete) {
+        console.log('Perfil incompleto, redirigiendo a complete-profile');
+        window.location.href = baseUrl + '/complete-profile';
+        return;
+      }
+
+      // Usuario autenticado y con perfil completo
+      console.log('Usuario autenticado y con perfil completo');
+    });
   </script>
 
   <main class='dashboard-main'>

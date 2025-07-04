@@ -1,9 +1,6 @@
 ---
-import { getUniversityByIdFast } from '../data/optimized.js';
-import { studentData } from '../data/student.js';
-
-// Obtener datos relacionados usando función optimizada
-const university = getUniversityByIdFast(studentData.universityId);
+// Los datos reales del usuario se obtendrán vía JavaScript en el cliente
+// Por ahora solo definimos la estructura
 ---
 
 <section class='dashboard-section'>
@@ -13,101 +10,380 @@ const university = getUniversityByIdFast(studentData.universityId);
       <div class='user-welcome'>
         <div class='user-avatar'>
           <i class='fas fa-user'></i>
+          <!-- Badge de tutor verificado -->
+          <div class='tutor-verified-badge' id='tutorBadge' style='display: none;'>
+            <i class='fas fa-shield-check'></i>
+          </div>
         </div>
         <div class='user-info'>
-          <h1 class='user-name'>¡Hola, {studentData.name}!</h1>
-          <p class='user-university'>{university?.name || 'Universidad'}</p>
+          <h1 class='user-name' id='userName'>¡Hola, Usuario!</h1>
+          <p class='user-university' id='userUniversity'>Universidad</p>
+          <!-- Badge de texto para tutor -->
+          <span class='tutor-status-text' id='tutorStatusText' style='display: none;'>
+            <i class='fas fa-chalkboard-teacher'></i>
+            Tutor Verificado
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Grid principal -->
-    <div class='dashboard-grid'>
-      <!-- Próximas tutorías -->
-      <div class='dashboard-card tutorials-card'>
-        <div class='card-header'>
-          <h2>Próximas tutorías</h2>
-          <span class='count-badge'>{studentData.upcomingTutorials.length}</span>
+    <!-- Grid principal dividido -->
+    <div class='dashboard-main-grid'>
+      <!-- Columna Estudiante (Izquierda) -->
+      <div class='student-column'>
+        <div class='column-header'>
+          <h3><i class='fas fa-user-graduate'></i> Panel Estudiante</h3>
         </div>
-        <div class='tutorials-list'>
-          {
-            studentData.upcomingTutorials.map(tutorial => (
-              <div class='tutorial-item'>
-                <div class='tutorial-info'>
-                  <h3 class='tutorial-course'>{tutorial.courseName}</h3>
-                  <p class='tutorial-tutor'>con {tutorial.tutorName}</p>
-                  <div class='tutorial-schedule'>
-                    <span class='date'>{tutorial.date}</span>
-                    <span class='time'>{tutorial.time}</span>
-                  </div>
-                </div>
-                <div class='tutorial-status'>
-                  <span class={`status ${tutorial.status}`}>
-                    {tutorial.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                  </span>
-                </div>
-              </div>
-            ))
-          }
-        </div>
-      </div>
 
-      <!-- Recomendaciones -->
-      <div class='dashboard-card recommendations-card'>
-        <h2>Recomendaciones</h2>
-        <div class='recommendations-list'>
-          {
-            studentData.recommendations.map(rec => (
-              <div class='recommendation-item'>
-                <h3 class='rec-course'>{rec.courseName}</h3>
-                <p class='rec-tutor'>Tutor: {rec.tutorName}</p>
-                <p class='rec-reason'>{rec.reason}</p>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-
-      <!-- Accesos rápidos -->
-      <div class='dashboard-card actions-card'>
-        <h2>Accesos rápidos</h2>
-        <div class='actions-grid'>
-          <a href={import.meta.env.BASE_URL + '/courses'} class='action-btn'>
-            <i class='fas fa-search'></i>
-            <span>Buscar cursos</span>
-          </a>
-          <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
-            <i class='fas fa-university'></i>
-            <span>Universidades</span>
-          </a>
-          <a href={import.meta.env.BASE_URL + '/auth'} class='action-btn'>
-            <i class='fas fa-user-cog'></i>
-            <span>Mi perfil</span>
-          </a>
-          <a href='#' class='action-btn'>
-            <i class='fas fa-calendar'></i>
-            <span>Calendario</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Estadísticas simples -->
-      <div class='dashboard-card stats-card'>
-        <h2>Resumen</h2>
-        <div class='stats-grid'>
-          <div class='stat-item'>
-            <span class='stat-number'>{studentData.upcomingTutorials.length}</span>
-            <span class='stat-label'>Tutorías programadas</span>
+        <!-- Próximas tutorías -->
+        <div class='dashboard-card tutorials-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-clock'></i> Próximas tutorías</h2>
+            <span class='count-badge' id='tutorialsCount'>0</span>
           </div>
-          <div class='stat-item'>
-            <span class='stat-number'>{studentData.recommendations.length}</span>
-            <span class='stat-label'>Recomendaciones</span>
+          <div class='tutorials-list' id='tutorialsList'>
+            <div class='empty-state'>
+              <i class='fas fa-calendar-plus'></i>
+              <p>No tienes tutorías programadas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accesos rápidos estudiante -->
+        <div class='dashboard-card actions-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-rocket'></i> Accesos rápidos</h2>
+          </div>
+          <div class='actions-grid'>
+            <a href={import.meta.env.BASE_URL + '/courses'} class='action-btn'>
+              <i class='fas fa-search'></i>
+              <span>Buscar cursos</span>
+            </a>
+            <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
+              <i class='fas fa-university'></i>
+              <span>Universidades</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Tutor (Derecha) -->
+      <div class='tutor-column' id='tutorColumn' style='display: none;'>
+        <div class='column-header'>
+          <h3><i class='fas fa-chalkboard-teacher'></i> Panel Tutor</h3>
+          <span class='tutor-badge' id='tutorStatus'>Verificado</span>
+        </div>
+
+        <!-- Información del curso que enseña -->
+        <div class='dashboard-card tutor-course-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-book'></i> Mi Curso</h2>
+          </div>
+          <div class='tutor-course-info' id='tutorCourseInfo'>
+            <div class='course-item'>
+              <i class='fas fa-code'></i>
+              <div class='course-details'>
+                <span class='course-name' id='tutorCourseName'>-</span>
+                <span class='course-code' id='tutorCourseCode'>-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estadísticas del tutor -->
+        <div class='dashboard-card tutor-stats-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-chart-bar'></i> Estadísticas</h2>
+          </div>
+          <div class='tutor-stats'>
+            <div class='tutor-stat'>
+              <i class='fas fa-star stat-icon'></i>
+              <span class='stat-number' id='tutorRating'>4.8</span>
+              <span class='stat-label'>Rating</span>
+            </div>
+            <div class='tutor-stat'>
+              <i class='fas fa-users stat-icon'></i>
+              <span class='stat-number' id='tutorSessions'>27</span>
+              <span class='stat-label'>Sesiones</span>
+            </div>
+            <div class='tutor-stat'>
+              <i class='fas fa-book-open stat-icon'></i>
+              <span class='stat-number' id='tutorCourses'>1</span>
+              <span class='stat-label'>Cursos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disponibilidad -->
+        <div class='dashboard-card availability-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-calendar'></i> Horarios Disponibles</h2>
+          </div>
+          <div class='availability-tags'>
+            <span class='availability-tag'><i class='fas fa-clock'></i> Lun: 14:00-16:00</span>
+            <span class='availability-tag'><i class='fas fa-clock'></i> Mié: 18:00-20:00</span>
+            <span class='availability-tag'><i class='fas fa-clock'></i> Sáb: 09:00-12:00</span>
+          </div>
+        </div>
+
+        <!-- Acciones del tutor -->
+        <div class='dashboard-card tutor-actions-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-tasks'></i> Acciones</h2>
+          </div>
+          <div class='tutor-actions-expanded'>
+            <button class='tutor-btn-primary' onclick='viewTutorRequests()'>
+              <i class='fas fa-inbox'></i>
+              <span>Solicitudes Pendientes</span>
+              <span class='notification-count'>3</span>
+            </button>
+            <button class='tutor-btn-secondary' onclick='manageCourses()'>
+              <i class='fas fa-calendar-edit'></i>
+              <span>Gestionar Horarios</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+  // Sistema de autenticación integrado
+  class AuthManager {
+    constructor() {
+      this.usersKey = 'hermesUsers';
+      this.sessionKey = 'hermesSession';
+    }
+
+    getCurrentSession() {
+      const session = localStorage.getItem(this.sessionKey);
+      return session ? JSON.parse(session) : null;
+    }
+
+    getUsers() {
+      const users = localStorage.getItem(this.usersKey);
+      return users ? JSON.parse(users) : [];
+    }
+
+    getCurrentUser() {
+      const session = this.getCurrentSession();
+      if (!session) return null;
+
+      const users = this.getUsers();
+      return users.find(user => user.id === session.userId) || null;
+    }
+
+    logout() {
+      localStorage.removeItem(this.sessionKey);
+      return { success: true };
+    }
+  }
+
+  // Crear instancia global
+  window.auth = new AuthManager();
+
+  // Asegurar que existen usuarios demo
+  function ensureDemoUsers() {
+    const users = window.auth.getUsers();
+    if (users.length === 0) {
+      // Redirigir a la página principal para inicializar datos
+      window.location.href = baseUrl + '/';
+      return false;
+    }
+    return true;
+  }
+
+  // Cargar datos del usuario al cargar la página
+  document.addEventListener('DOMContentLoaded', function () {
+    loadUserData();
+  });
+  function loadUserData() {
+    // Asegurar que existen usuarios demo
+    if (!ensureDemoUsers()) {
+      return;
+    }
+
+    const user = window.auth.getCurrentUser();
+
+    if (!user) {
+      window.location.href = baseUrl + '/auth';
+      return;
+    }
+
+    // Actualizar nombre del usuario
+    const userName = document.getElementById('userName');
+    if (userName) {
+      userName.textContent = user.profile ? `¡Hola, ${user.profile.fullName}!` : `¡Hola, ${user.email}!`;
+    }
+
+    // Actualizar universidad
+    const userUniversity = document.getElementById('userUniversity');
+    if (userUniversity && user.profile && user.profile.university) {
+      userUniversity.textContent = user.profile.university;
+    }
+
+    // Cargar tutorías programadas del estudiante
+    loadScheduledTutorings(user);
+
+    // Mostrar módulo tutor si corresponde
+    if (user.roles && user.roles.isTutor) {
+      showTutorModule(user);
+    }
+  }
+
+  function loadScheduledTutorings(user) {
+    console.log('loadScheduledTutorings called with user:', user);
+    console.log('User scheduledTutorings:', user.scheduledTutorings);
+
+    if (!user.scheduledTutorings || user.scheduledTutorings.length === 0) {
+      console.log('No scheduled tutorings found');
+      return; // Mantener el estado vacío por defecto
+    }
+
+    const tutorialsList = document.getElementById('tutorialsList');
+    const tutorialsCount = document.getElementById('tutorialsCount');
+
+    if (!tutorialsList || !tutorialsCount) return;
+
+    // Actualizar contador
+    tutorialsCount.textContent = user.scheduledTutorings.length;
+    console.log('Updated tutorials count to:', user.scheduledTutorings.length);
+
+    // Limpiar lista y agregar tutorías
+    tutorialsList.innerHTML = '';
+    console.log('Cleared tutorials list');
+
+    user.scheduledTutorings.forEach((tutoring, index) => {
+      console.log(`Rendering tutoring ${index}:`, tutoring);
+      const tutorialItem = document.createElement('div');
+      tutorialItem.className = 'tutorial-item';
+
+      // Formatear fecha
+      const date = new Date(tutoring.date);
+      const dateStr = date.toLocaleDateString('es-PE', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+
+      tutorialItem.innerHTML = `
+        <div class="tutorial-header">
+          <h4 class="tutorial-course">${tutoring.courseName}</h4>
+          <span class="status-badge ${tutoring.status}">${tutoring.status === 'confirmed' ? 'Confirmada' : tutoring.status}</span>
+        </div>
+        <p class="tutorial-tutor">Tutor: ${tutoring.tutorName}</p>
+        <div class="tutorial-schedule">
+          <div class="schedule-item">
+            <i class="fas fa-calendar"></i>
+            <span>${dateStr}</span>
+          </div>
+          <div class="schedule-item">
+            <i class="fas fa-clock"></i>
+            <span>${tutoring.time} (${tutoring.duration} min)</span>
+          </div>
+        </div>
+        <div class="tutorial-actions">
+          <button class="btn-action btn-primary" onclick="joinTutoringSession('${tutoring.id}')">
+            <i class="fas fa-play"></i>
+            Ingresar
+          </button>
+        </div>
+      `;
+
+      tutorialsList.appendChild(tutorialItem);
+      console.log(`Added tutoring item ${index} to the list`);
+    });
+    console.log('Finished rendering all tutorings');
+  }
+  function showTutorModule(user) {
+    // Mostrar elementos del header para tutores (solo badges)
+    const tutorBadge = document.getElementById('tutorBadge');
+    const tutorStatusText = document.getElementById('tutorStatusText');
+
+    if (tutorBadge) {
+      tutorBadge.style.display = 'flex';
+    }
+    if (tutorStatusText) {
+      tutorStatusText.style.display = 'flex';
+    }
+
+    // Mostrar columna tutor
+    const tutorColumn = document.getElementById('tutorColumn');
+    if (tutorColumn) {
+      tutorColumn.style.display = 'flex';
+    }
+
+    // Actualizar estado del tutor
+    const statusElement = document.getElementById('tutorStatus');
+    if (statusElement && user.roles.tutorStatus) {
+      statusElement.textContent =
+        user.roles.tutorStatus === 'approved'
+          ? 'Verificado'
+          : user.roles.tutorStatus === 'pending'
+            ? 'Pendiente'
+            : 'Rechazado';
+      statusElement.className = `tutor-badge ${user.roles.tutorStatus}`;
+    }
+
+    // Actualizar información del tutor
+    if (user.tutorProfile) {
+      // Mostrar información del curso
+      if (user.tutorProfile.courses && user.tutorProfile.courses.length > 0) {
+        const course = user.tutorProfile.courses[0];
+        const courseNameEl = document.getElementById('tutorCourseName');
+        const courseCodeEl = document.getElementById('tutorCourseCode');
+
+        if (courseNameEl) courseNameEl.textContent = course.courseName || '-';
+        if (courseCodeEl) courseCodeEl.textContent = course.courseCode || '-';
+      }
+
+      // Actualizar estadísticas
+      document.getElementById('tutorRating').textContent = user.tutorProfile.rating || '4.8';
+      document.getElementById('tutorSessions').textContent = user.tutorProfile.totalSessions || '27';
+      document.getElementById('tutorCourses').textContent = user.tutorProfile.courses
+        ? user.tutorProfile.courses.length
+        : '1';
+    }
+  }
+
+  function viewTutorRequests() {
+    alert('Función "Ver solicitudes" estará disponible próximamente');
+  }
+
+  function manageCourses() {
+    alert('Función "Gestionar horarios" estará disponible próximamente');
+  }
+
+  function openTutorPanel() {
+    // Modal o página dedicada al panel del tutor
+    alert(
+      '🎓 Panel de Tutor\n\nFunciones disponibles:\n• Gestionar solicitudes\n• Ver estadísticas\n• Configurar horarios\n• Actualizar perfil\n\n(En desarrollo...)'
+    );
+  }
+
+  function logout() {
+    const result = window.auth.logout();
+    if (result.success) {
+      alert('Sesión cerrada exitosamente');
+      window.location.href = baseUrl + '/auth';
+    }
+  }
+
+  function joinTutoringSession(sessionId) {
+    // Aquí se abriría la sesión virtual o se mostraría información de la sesión
+    alert(
+      `Redirigiendo a la sesión virtual... (Session ID: ${sessionId})\n\n🎥 En una aplicación real, esto abriría:\n• Sala de videollamada\n• Chat integrado\n• Pizarra compartida\n• Recursos del curso`
+    );
+  }
+
+  // Hacer funciones globales
+  window.logout = logout;
+  window.viewTutorRequests = viewTutorRequests;
+  window.manageCourses = manageCourses;
+  window.openTutorPanel = openTutorPanel;
+  window.joinTutoringSession = joinTutoringSession;
+</script>
 
 <style>
   .dashboard-section {
@@ -120,7 +396,10 @@ const university = getUniversityByIdFast(studentData.universityId);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-    height: calc(100vh - 64px - 2rem);
+    min-height: calc(100vh - 64px - 2rem);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
   }
 
   /* Header del Dashboard */
@@ -131,6 +410,9 @@ const university = getUniversityByIdFast(studentData.universityId);
     border: 1px solid #f1f5f9;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .user-welcome {
@@ -149,6 +431,67 @@ const university = getUniversityByIdFast(studentData.universityId);
     justify-content: center;
     color: white;
     font-size: 18px;
+    position: relative;
+  }
+
+  /* Badge de tutor verificado */
+  .tutor-verified-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Badge de texto para tutor */
+  .tutor-status-text {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: #10b981;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+  }
+
+  /* Acciones del header */
+  .header-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .header-action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  }
+
+  .header-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .header-action-btn:active {
+    transform: translateY(0);
   }
 
   .user-name {
@@ -165,13 +508,44 @@ const university = getUniversityByIdFast(studentData.universityId);
   }
 
   /* Dashboard Grid */
-  .dashboard-grid {
-    flex: 1;
+  .dashboard-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-md);
-    min-height: 0;
+    align-items: start;
+  }
+
+  /* Columnas */
+  .student-column,
+  .tutor-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  }
+
+  .column-header h3 {
+    margin: 0;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .tutor-column .column-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
   }
 
   .dashboard-card {
@@ -180,9 +554,7 @@ const university = getUniversityByIdFast(studentData.universityId);
     padding: var(--spacing-md);
     border: 1px solid #f1f5f9;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
     transition: all 0.2s ease;
-    min-height: 0;
     display: flex;
     flex-direction: column;
   }
@@ -198,11 +570,44 @@ const university = getUniversityByIdFast(studentData.universityId);
     color: var(--text-primary);
     margin: 0 0 var(--spacing-sm) 0;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
   }
 
-  /* Tutorías card - ocupa 2 filas */
+  .dashboard-card h2 i {
+    color: #6366f1;
+    font-size: var(--font-size-sm);
+  }
+
+  /* Cards específicas */
   .tutorials-card {
-    grid-row: span 2;
+    min-height: 300px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    min-height: 0;
+  }
+
+  .stat-icon {
+    font-size: var(--font-size-lg);
+    color: #6366f1;
+    margin-bottom: var(--spacing-xs);
   }
 
   .card-header {
@@ -223,69 +628,127 @@ const university = getUniversityByIdFast(studentData.universityId);
   }
 
   .tutorials-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
   }
 
-  .tutorial-item {
-    padding: var(--spacing-sm);
-    background: #f8fafc;
-    border-radius: var(--radius-md);
-    border: 1px solid #f1f5f9;
-    flex-shrink: 0;
+  .tutorials-list .tutorial-item {
+    padding: 16px !important;
+    background: white !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
   }
 
-  .tutorial-course {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 var(--spacing-xs) 0;
+  .tutorials-list .tutorial-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px) !important;
   }
 
-  .tutorial-tutor {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin: 0 0 var(--spacing-xs) 0;
+  .tutorial-item .tutorial-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 12px !important;
   }
 
-  .tutorial-schedule {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
+  .tutorial-item .tutorial-course {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
   }
 
-  .date,
-  .time {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    background: white;
-    padding: 2px var(--spacing-xs);
-    border-radius: var(--radius-sm);
+  .tutorial-item .status-badge {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
   }
 
-  .tutorial-status {
-    text-align: right;
+  .tutorial-item .status-badge.confirmed {
+    background: #dcfce7 !important;
+    color: #166534 !important;
   }
 
-  .status {
-    font-size: var(--font-size-xs);
-    padding: 2px var(--spacing-xs);
-    border-radius: var(--radius-sm);
-    font-weight: 500;
+  .tutorial-item .status-badge.pending {
+    background: #fef3c7 !important;
+    color: #92400e !important;
   }
 
-  .status.confirmed {
-    background: #dcfce7;
-    color: #166534;
+  .tutorial-item .tutorial-tutor {
+    font-size: 14px !important;
+    color: #64748b !important;
+    margin: 0 0 16px 0 !important;
+    font-weight: 500 !important;
   }
 
-  .status.pending {
-    background: #fef3c7;
-    color: #92400e;
+  .tutorial-item .tutorial-schedule {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .tutorial-item .schedule-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+    color: #64748b !important;
+  }
+
+  .tutorial-item .schedule-item i {
+    width: 16px !important;
+    color: #2563eb !important;
+    font-size: 14px !important;
+  }
+
+  .tutorial-actions {
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .tutorial-item .btn-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    font-family: inherit !important;
+  }
+
+  .tutorial-item .btn-action:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .tutorial-item .btn-primary {
+    background: #2563eb !important;
+    color: white !important;
+  }
+
+  .tutorial-item .btn-primary:hover {
+    background: #1d4ed8 !important;
+  }
+
+  .tutorial-item .btn-action i {
+    color: white !important;
+    font-size: 12px !important;
   }
 
   /* Recomendaciones */
@@ -331,7 +794,6 @@ const university = getUniversityByIdFast(studentData.universityId);
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xs);
-    flex: 1;
   }
 
   .action-btn {
@@ -348,7 +810,7 @@ const university = getUniversityByIdFast(studentData.universityId);
     color: var(--text-primary);
     transition: all 0.2s ease;
     font-size: var(--font-size-xs);
-    min-height: 0;
+    min-height: 80px;
   }
 
   .action-btn:hover {
@@ -394,16 +856,260 @@ const university = getUniversityByIdFast(studentData.universityId);
     color: var(--text-secondary);
   }
 
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: var(--spacing-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .empty-state i {
+    font-size: var(--font-size-xl);
+    color: #cbd5e1;
+  }
+
+  /* Perfil */
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .profile-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .profile-item:last-child {
+    border-bottom: none;
+  }
+
+  .profile-item .label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .profile-item .label i {
+    color: #6366f1;
+    width: 14px;
+    text-align: center;
+  }
+
+  .profile-item .value {
+    font-size: var(--font-size-xs);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Módulo Tutor */
+  .tutor-course-info {
+    padding: var(--spacing-md);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 1px solid #e2e8f0;
+  }
+
+  .course-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .course-item i {
+    color: #10b981;
+    font-size: var(--font-size-base);
+    width: 20px;
+    text-align: center;
+  }
+
+  .course-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .course-name {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .course-code {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+  }
+
+  .tutor-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .tutor-stat {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .tutor-stat .stat-number {
+    display: block;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: #10b981;
+  }
+
+  .tutor-stat .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+  }
+
+  .tutor-stat .stat-icon {
+    font-size: var(--font-size-base);
+    color: #10b981;
+  }
+
+  /* Disponibilidad */
+  .availability-tags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .availability-tag {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: 1px solid #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .availability-tag i {
+    color: #3b82f6;
+  }
+
+  /* Badges de tutor */
+  .tutor-badge {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+
+  .tutor-badge.approved {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .tutor-badge.pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .tutor-badge.rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Acciones del tutor */
+  .tutor-actions-expanded {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tutor-btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  }
+
+  .tutor-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  .tutor-btn-primary .notification-count {
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  .tutor-btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tutor-btn-secondary:hover {
+    background: #f0fdf4;
+    border-color: #10b981;
+    color: #059669;
+    transform: translateY(-1px);
+  }
+
   /* Responsive */
   @media (max-width: 1024px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto;
+    .dashboard-main-grid {
+      grid-template-columns: 1fr;
     }
 
-    .tutorials-card {
-      grid-column: span 2;
-      grid-row: span 1;
+    .student-column,
+    .tutor-column {
+      order: 1;
+    }
+
+    .tutor-column {
+      order: 2;
     }
   }
 
@@ -414,12 +1120,14 @@ const university = getUniversityByIdFast(studentData.universityId);
     }
 
     .container {
-      height: auto;
+      min-height: auto;
       gap: var(--spacing-sm);
     }
 
     .dashboard-header {
       padding: var(--spacing-sm);
+      flex-direction: column;
+      gap: var(--spacing-sm);
     }
 
     .user-avatar {
@@ -428,18 +1136,19 @@ const university = getUniversityByIdFast(studentData.universityId);
       font-size: 16px;
     }
 
+    .tutor-verified-badge {
+      width: 16px;
+      height: 16px;
+      font-size: 7px;
+    }
+
     .user-name {
       font-size: var(--font-size-base);
     }
 
-    .dashboard-grid {
+    .dashboard-main-grid {
       grid-template-columns: 1fr;
-      grid-template-rows: auto;
-    }
-
-    .tutorials-card {
-      grid-column: span 1;
-      grid-row: span 1;
+      gap: var(--spacing-sm);
     }
 
     .actions-grid {
@@ -448,6 +1157,23 @@ const university = getUniversityByIdFast(studentData.universityId);
 
     .dashboard-card {
       padding: var(--spacing-sm);
+    }
+
+    .column-header {
+      padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .column-header h3 {
+      font-size: var(--font-size-sm);
+    }
+
+    .tutor-stats {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xs);
+    }
+
+    .availability-tags {
+      gap: var(--spacing-xs);
     }
   }
 </style>

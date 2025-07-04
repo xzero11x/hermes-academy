@@ -10,8 +10,20 @@ import Layout from '../layouts/Layout.astro';
         <span>Hermes Academy</span>
       </a>
       <nav class='nav'>
-        <a href={import.meta.env.BASE_URL + '/become-tutor'}>Ser tutor</a>
-        <a href={import.meta.env.BASE_URL + '/auth'} class='btn'>Comenzar</a>
+        <a href='#' onclick='handleTutorRedirect(); return false;'>Ser tutor</a>
+        <a href='#' onclick='handleStudentRedirect(); return false;' class='btn'>
+          Comenzar
+          <svg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path
+              d='M5 12H19M19 12L12 5M19 12L12 19'
+              stroke='currentColor'
+              stroke-width='2'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+            >
+            </path>
+          </svg>
+        </a>
       </nav>
     </div>
   </header>
@@ -20,38 +32,335 @@ import Layout from '../layouts/Layout.astro';
     <!-- Hero Section -->
     <section class='hero-section'>
       <div class='container'>
-        <h1>Tutores de tu misma universidad</h1>
-        <p>Conecta con estudiantes que conocen exactamente tu metodología académica y sistema de evaluación.</p>
+        <div class='hero-content'>
+          <h1>Tutores de tu misma universidad</h1>
+          <p>Conecta con estudiantes que conocen exactamente tu metodología académica y sistema de evaluación.</p>
 
-        <div class='hero-buttons'>
-          <a href={import.meta.env.BASE_URL + '/universities'} class='btn-primary'>Encontrar tutor</a>
-          <a href={import.meta.env.BASE_URL + '/become-tutor'} class='btn-secondary'>Ser tutor</a>
+          <div class='hero-buttons'>
+            <a href='#' onclick='handleStudentRedirect(); return false;' class='btn-primary'>
+              Comenzar
+              <svg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <path
+                  d='M5 12H19M19 12L12 5M19 12L12 19'
+                  stroke='currentColor'
+                  stroke-width='2'
+                  stroke-linecap='round'
+                  stroke-linejoin='round'
+                >
+                </path>
+              </svg>
+            </a>
+            <a href='#' onclick='handleTutorRedirect(); return false;' class='btn-secondary'>Ser tutor</a>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Simple university logos -->
-        <div class='universities-row'>
+    <!-- Universities Strip -->
+    <section class='universities-strip'>
+      <div class='container'>
+        <div class='universities-carousel'>
           <img src={import.meta.env.BASE_URL + '/universidades/utec.jpg'} alt='UTEC' />
           <img src={import.meta.env.BASE_URL + '/universidades/pucp.png'} alt='PUCP' />
           <img src={import.meta.env.BASE_URL + '/universidades/uni.png'} alt='UNI' />
           <img src={import.meta.env.BASE_URL + '/universidades/UPC_logo_transparente.png'} alt='UPC' />
           <img src={import.meta.env.BASE_URL + '/universidades/u_de_lima.png'} alt='U de Lima' />
           <img src={import.meta.env.BASE_URL + '/universidades/san_marcos.png'} alt='San Marcos' />
+          <img src={import.meta.env.BASE_URL + '/universidades/cayetano_heredia.jpg'} alt='UPCH' />
+          <img src={import.meta.env.BASE_URL + '/universidades/ucv.png'} alt='UCV' />
+          <img src={import.meta.env.BASE_URL + '/universidades/universidad_de_piura.jpg'} alt='UDEP' />
+          <img src={import.meta.env.BASE_URL + '/universidades/UPacifico.png'} alt='UP' />
         </div>
       </div>
     </section>
 
-    <!-- Simple CTA Section -->
+    <!-- CTA Section -->
     <section class='cta-section'>
       <div class='container'>
-        <h2>¿Dominas alguna materia?</h2>
-        <p>Comparte tu conocimiento y genera ingresos ayudando a estudiantes de tu universidad.</p>
-        <a href={import.meta.env.BASE_URL + '/become-tutor'} class='btn-cta'>Aplicar como tutor</a>
+        <div class='cta-content'>
+          <h2>¿Dominas alguna materia?</h2>
+          <p>Comparte tu conocimiento y genera ingresos ayudando a estudiantes de tu universidad.</p>
+          <a href='#' onclick='handleTutorRedirect(); return false;' class='btn-cta'>
+            Aplicar como tutor
+            <svg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path
+                d='M5 12H19M19 12L12 5M19 12L12 19'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+              >
+              </path>
+            </svg>
+          </a>
+        </div>
       </div>
     </section>
   </main>
 </Layout>
 
+<script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+  // Sistema de autenticación para manejo de redirecciones
+  class AuthManager {
+    constructor() {
+      this.usersKey = 'hermesUsers';
+      this.sessionKey = 'hermesSession';
+    }
+
+    getCurrentSession() {
+      const session = localStorage.getItem(this.sessionKey);
+      return session ? JSON.parse(session) : null;
+    }
+
+    getUsers() {
+      const users = localStorage.getItem(this.usersKey);
+      return users ? JSON.parse(users) : [];
+    }
+
+    saveUsers(users) {
+      localStorage.setItem(this.usersKey, JSON.stringify(users));
+    }
+
+    getCurrentUser() {
+      const session = this.getCurrentSession();
+      if (!session) return null;
+
+      const users = this.getUsers();
+      return users.find(user => user.id === session.userId) || null;
+    }
+
+    isLoggedIn() {
+      return this.getCurrentUser() !== null;
+    }
+  }
+
+  // Crear instancia global
+  const auth = new AuthManager();
+
+  // Inicializar usuarios demo si no existen
+  function initializeDemoUsers() {
+    const users = auth.getUsers();
+
+    // Solo crear usuarios demo si no existen
+    if (users.length === 0) {
+      const demoUsers = [
+        // Usuario tutor Jorge Ramírez Silva
+        {
+          id: 2,
+          email: 'jorge.ramirez@utec.edu.pe',
+          password: 'tutor123',
+          isProfileComplete: true,
+          createdAt: '2024-01-15T10:00:00.000Z',
+          profile: {
+            fullName: 'Jorge Ramírez Silva',
+            university: 'Universidad de Ingeniería y Tecnología',
+            universityId: 1,
+            career: 'Ingeniería de Sistemas',
+            semester: 8,
+            phone: '+51 987654321',
+            studentId: '201901234',
+            completedAt: '2024-01-15T10:30:00.000Z',
+          },
+          roles: {
+            isStudent: true,
+            isTutor: true,
+            tutorStatus: 'approved',
+          },
+          tutorProfile: {
+            courses: [
+              {
+                courseId: 3,
+                university: 'Universidad de Ingeniería y Tecnología',
+                courseName: 'Estructuras de Datos',
+                courseCode: 'CS2001',
+                grade: 18,
+                semester: '2023-2',
+                isApproved: true,
+                hourlyRate: 32,
+                description: 'Algoritmos y estructuras de datos fundamentales. Implementación práctica en Python.',
+              },
+            ],
+            totalSessions: 45,
+            rating: 4.8,
+            description: 'Tutor especializado en Estructuras de Datos con 2 años de experiencia enseñando.',
+            verificationStatus: 'verified',
+            verifiedAt: '2024-01-15T10:30:00.000Z',
+            availability: {
+              monday: ['14:00-16:00', '18:00-20:00'],
+              tuesday: ['16:00-18:00'],
+              wednesday: ['14:00-16:00', '18:00-20:00'],
+              thursday: ['16:00-18:00'],
+              friday: ['14:00-17:00'],
+              saturday: ['09:00-12:00'],
+              sunday: [],
+            },
+          },
+        },
+        // Usuario estudiante demo - Juan Carlos
+        {
+          id: 1000,
+          email: 'juanc4@utec.edu.pe',
+          password: 'juanca123',
+          isProfileComplete: true,
+          createdAt: '2024-02-01T09:00:00.000Z',
+          profile: {
+            fullName: 'Juan Carlos Mendoza Rivera',
+            university: 'Universidad de Ingeniería y Tecnología',
+            universityId: 1,
+            career: 'Ingeniería de Sistemas',
+            semester: 4,
+            phone: '+51 912345678',
+            studentId: '202011567',
+            learningGoals: 'Matemáticas, Programación, Estructuras de Datos',
+            completedAt: '2024-02-01T09:30:00.000Z',
+          },
+          roles: {
+            isStudent: true,
+            isTutor: false,
+            tutorStatus: null,
+          },
+          tutorProfile: null,
+          scheduledTutorings: [
+            {
+              id: 'TUT001',
+              tutorId: 2,
+              tutorName: 'Jorge Ramírez Silva',
+              courseId: 3,
+              courseName: 'Estructuras de Datos',
+              courseCode: 'CS2001',
+              date: '2025-07-08',
+              time: '14:00',
+              duration: 60,
+              price: 32,
+              status: 'confirmed',
+              sessionType: 'online',
+              meetingLink: 'https://hermes-academy.com/room/TUT001',
+              confirmedAt: '2025-07-02T10:00:00.000Z',
+            },
+            {
+              id: 'TUT002',
+              tutorId: 2,
+              tutorName: 'Jorge Ramírez Silva',
+              courseId: 3,
+              courseName: 'Estructuras de Datos',
+              courseCode: 'CS2001',
+              date: '2025-07-10',
+              time: '16:00',
+              duration: 60,
+              price: 32,
+              status: 'confirmed',
+              sessionType: 'online',
+              meetingLink: 'https://hermes-academy.com/room/TUT002',
+              confirmedAt: '2025-07-03T14:00:00.000Z',
+            },
+          ],
+        },
+      ];
+
+      // Guardar usuarios demo
+      auth.saveUsers(demoUsers);
+
+      // Crear notificaciones demo para Juan Carlos
+      const notifications = [
+        {
+          id: 'NOT001',
+          userId: 1000,
+          type: 'tutoring_confirmed',
+          title: 'Tutoría confirmada',
+          message: 'Tu solicitud de tutoría para Estructuras de Datos con Jorge Ramírez ha sido aceptada',
+          data: {
+            tutorName: 'Jorge Ramírez Silva',
+            courseName: 'Estructuras de Datos',
+            date: '2025-07-08',
+            time: '14:00',
+            price: 32,
+            sessionType: 'online',
+          },
+          isRead: false,
+          createdAt: '2025-07-02T10:00:00.000Z',
+        },
+        {
+          id: 'NOT002',
+          userId: 1000,
+          type: 'tutoring_confirmed',
+          title: 'Tutoría confirmada',
+          message: 'Tu solicitud de tutoría para Estructuras de Datos con Jorge Ramírez ha sido aceptada',
+          data: {
+            tutorName: 'Jorge Ramírez Silva',
+            courseName: 'Estructuras de Datos',
+            date: '2025-07-10',
+            time: '16:00',
+            price: 32,
+            sessionType: 'online',
+          },
+          isRead: false,
+          createdAt: '2025-07-03T14:00:00.000Z',
+        },
+        {
+          id: 'NOT003',
+          userId: 1000,
+          type: 'counter_offer',
+          title: 'Contraoferta recibida',
+          message:
+            'Jorge Ramírez te envió una contraoferta para Estructuras de Datos: S/. 30/hora (Tu oferta: S/. 25/hora)',
+          data: {
+            tutorName: 'Jorge Ramírez Silva',
+            courseName: 'Estructuras de Datos',
+            studentOfferedPrice: 25,
+            tutorCounterPrice: 30,
+            tutorOriginalRate: 32,
+            message:
+              'Hola! Vi tu solicitud para Estructuras de Datos. Te puedo ofrecer S/. 30 por hora. ¿Te parece bien?',
+            requestId: 'REQ001',
+            sessionDate: '2025-07-12',
+            sessionTime: '15:00',
+            duration: 60,
+          },
+          isRead: false,
+          createdAt: '2025-07-04T08:30:00.000Z',
+        },
+      ];
+
+      // Guardar notificaciones
+      localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+
+      console.log('Usuarios demo y notificaciones creados automáticamente');
+    }
+  }
+
+  // Inicializar usuarios demo al cargar la página
+  initializeDemoUsers();
+
+  // Función para manejar redirección de estudiantes (botón "Comenzar")
+  function handleStudentRedirect() {
+    if (auth.isLoggedIn()) {
+      // Si ya está logueado, ir directamente al dashboard
+      window.location.href = baseUrl + '/dashboard';
+    } else {
+      // Si no está logueado, ir a login/registro con parámetro para indicar destino
+      window.location.href = baseUrl + '/auth?redirect=dashboard';
+    }
+  }
+
+  // Función para manejar redirección de tutores (botón "Ser tutor")
+  function handleTutorRedirect() {
+    if (auth.isLoggedIn()) {
+      // Si ya está logueado, ir directamente al formulario de tutor
+      window.location.href = baseUrl + '/become-tutor';
+    } else {
+      // Si no está logueado, ir a login/registro con parámetro para indicar destino
+      window.location.href = baseUrl + '/auth?redirect=become-tutor';
+    }
+  }
+
+  // Hacer funciones globales para que los enlaces las puedan usar
+  window.handleStudentRedirect = handleStudentRedirect;
+  window.handleTutorRedirect = handleTutorRedirect;
+</script>
+
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
   * {
     margin: 0;
     padding: 0;
@@ -63,16 +372,22 @@ import Layout from '../layouts/Layout.astro';
       'Inter',
       -apple-system,
       BlinkMacSystemFont,
+      'Segoe UI',
       sans-serif;
-    line-height: 1.5;
-    color: #333;
-    background: #fff;
+    line-height: 1.6;
+    color: #0f172a;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
   }
 
   /* Header */
@@ -81,11 +396,11 @@ import Layout from '../layouts/Layout.astro';
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid #eee;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
     z-index: 50;
-    height: 70px;
+    height: 72px;
   }
 
   .header .container {
@@ -98,228 +413,299 @@ import Layout from '../layouts/Layout.astro';
   .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     text-decoration: none;
-    color: #333;
+    color: #0f172a;
     font-weight: 600;
     font-size: 18px;
   }
 
   .logo img {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
 
   .nav {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
   }
 
   .nav a {
     text-decoration: none;
-    color: #666;
+    color: #64748b;
     font-weight: 500;
-    transition: color 0.2s;
+    font-size: 15px;
+    transition: color 0.2s ease;
   }
 
   .nav a:hover {
-    color: #333;
+    color: #0f172a;
   }
 
   .btn {
-    padding: 10px 20px;
-    background: #3b82f6;
-    color: #fff !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: #2563eb;
+    color: #ffffff !important;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 5px;
     font-weight: 500;
-    transition: all 0.2s;
+    font-size: 15px;
+    transition: all 0.2s ease;
   }
 
   .btn:hover {
-    background: #2563eb;
+    background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+
+  .btn svg {
+    transition: transform 0.2s ease;
+  }
+
+  .btn:hover svg {
+    transform: translateX(2px);
   }
 
   /* Main content */
   .main-content {
-    padding-top: 70px;
+    padding-top: 72px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Hero Section */
   .hero-section {
-    padding: 80px 0 60px;
-    text-align: left;
+    padding: 40px 0 20px;
+    background: #ffffff;
+  }
+
+  .hero-content {
+    max-width: 800px;
   }
 
   .hero-section h1 {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 700;
-    color: #000;
+    color: #0f172a;
     margin-bottom: 16px;
     letter-spacing: -0.02em;
     line-height: 1.1;
   }
 
-  .hero-section h1::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 4px;
-    background: #3b82f6;
-    margin: 16px 0 0 0;
-    border-radius: 2px;
-  }
-
   .hero-section p {
-    font-size: 20px;
-    color: #666;
+    font-size: 18px;
+    color: #64748b;
     margin-bottom: 32px;
     max-width: 600px;
+    line-height: 1.5;
   }
 
   .hero-buttons {
     display: flex;
-    gap: 12px;
-    justify-content: flex-start;
-    margin-bottom: 60px;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
   }
 
   .btn-primary {
-    padding: 14px 32px;
-    background: #3b82f6;
-    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: #2563eb;
+    color: #ffffff;
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 5px;
+    font-weight: 500;
     font-size: 16px;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
   }
 
   .btn-primary:hover {
-    background: #2563eb;
+    background: #1d4ed8;
     transform: translateY(-1px);
+  }
+
+  .btn-primary svg {
+    transition: transform 0.2s ease;
+  }
+
+  .btn-primary:hover svg {
+    transform: translateX(2px);
   }
 
   .btn-secondary {
-    padding: 14px 32px;
+    padding: 10px 22px;
     background: transparent;
-    color: #3b82f6;
+    color: #64748b;
     text-decoration: none;
-    border: 2px solid #3b82f6;
-    border-radius: 8px;
-    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    font-weight: 500;
     font-size: 16px;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
   }
 
   .btn-secondary:hover {
-    background: #3b82f6;
-    color: #fff;
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
     transform: translateY(-1px);
   }
 
-  .universities-row {
+  /* Universities Strip */
+  .universities-strip {
+    background: #ffffff;
+    padding: 16px 0 32px 0;
+  }
+
+  .universities-carousel {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    gap: 32px;
+    justify-content: flex-start;
+    gap: 48px;
     flex-wrap: wrap;
-    opacity: 0.8;
+    max-width: 100%;
+    overflow: hidden;
   }
 
-  .universities-row img {
-    width: 40px;
-    height: 40px;
+  .universities-carousel img {
+    width: 44px;
+    height: 44px;
     object-fit: contain;
-    transition: all 0.2s;
-  }
-
-  .universities-row img:hover {
     opacity: 1;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   }
 
   /* CTA Section */
   .cta-section {
-    padding: 80px 0;
-    background: #f8f9fa;
-    text-align: left;
+    padding: 40px 0 60px 0;
+    background: #2563eb;
+    margin-top: auto;
+  }
+
+  .cta-content {
+    max-width: 600px;
   }
 
   .cta-section h2 {
     font-size: 32px;
-    font-weight: 600;
-    color: #000;
+    font-weight: 700;
+    color: #ffffff;
     margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   .cta-section p {
     font-size: 18px;
-    color: #666;
+    color: #e2e8f0;
     margin-bottom: 24px;
-    max-width: 500px;
+    line-height: 1.5;
   }
 
   .btn-cta {
-    padding: 16px 32px;
-    background: #3b82f6;
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: #ffffff;
+    color: #2563eb;
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 5px;
+    font-weight: 500;
     font-size: 16px;
-    transition: all 0.2s;
-    display: inline-block;
+    transition: all 0.2s ease;
   }
 
   .btn-cta:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
+    background: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  .btn-cta svg {
+    transition: transform 0.2s ease;
+  }
+
+  .btn-cta:hover svg {
+    transform: translateX(2px);
   }
 
   /* Responsive */
   @media (max-width: 768px) {
     .container {
-      padding: 0 16px;
+      padding: 0 20px;
     }
 
     .nav a:not(.btn) {
       display: none;
     }
 
+    .hero-section {
+      padding: 30px 0 20px;
+    }
+
     .hero-section h1 {
-      font-size: 36px;
+      font-size: 32px;
     }
 
     .hero-section p {
-      font-size: 18px;
+      font-size: 16px;
     }
 
     .hero-buttons {
       flex-direction: column;
       align-items: flex-start;
-      gap: 8px;
+      margin-bottom: 20px;
     }
 
     .btn-primary,
     .btn-secondary {
       width: 100%;
-      max-width: 280px;
+      max-width: 300px;
+      justify-content: center;
     }
 
-    .universities-row {
-      gap: 20px;
+    .universities-carousel {
+      gap: 32px;
     }
 
-    .universities-row img {
-      width: 32px;
-      height: 32px;
+    .universities-carousel img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .cta-section {
+      padding: 30px 0 50px 0;
     }
 
     .cta-section h2 {
       font-size: 28px;
+    }
+
+    .cta-section p {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-section h1 {
+      font-size: 28px;
+    }
+
+    .cta-section h2 {
+      font-size: 24px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-cta {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>

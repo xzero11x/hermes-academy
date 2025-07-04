@@ -1056,15 +1056,15 @@ export const getTutorsByUniversity = (universityId) => {
 };
 
 export const getTutorsByCourse = (courseId) => {
-  return tutors.filter(tutor => 
+  return tutors.filter(tutor =>
     tutor.coursesTaught.includes(courseId) && tutor.isActive
   );
 };
 
 export const getTutorsAvailableAt = (day, time) => {
-  return tutors.filter(tutor => 
-    tutor.isActive && 
-    tutor.availability[day] && 
+  return tutors.filter(tutor =>
+    tutor.isActive &&
+    tutor.availability[day] &&
     tutor.availability[day].includes(time)
   );
 };

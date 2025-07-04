@@ -68,14 +68,7 @@ import Layout from '../layouts/Layout.astro';
                 >
                 </path>
               </svg>
-              <input
-                type='email'
-                placeholder='example@gmail.com'
-                value='juan@gmail.com'
-                class='form-input'
-                id='email'
-                required
-              />
+              <input type='email' placeholder='example@gmail.com' class='form-input' id='email' required />
             </div>
           </div>
 
@@ -88,14 +81,7 @@ import Layout from '../layouts/Layout.astro';
                 >
                 </path>
               </svg>
-              <input
-                type='password'
-                placeholder='••••••••••'
-                value='juan12345'
-                class='form-input'
-                id='password'
-                required
-              />
+              <input type='password' placeholder='••••••••••' class='form-input' id='password' required />
               <button type='button' class='toggle-password' onclick='togglePassword()'>
                 <svg width='20' height='20' viewBox='0 0 20 20' fill='none'>
                   <path
@@ -127,45 +113,518 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Register Link -->
         <div class='register-link'>
-          Don't have an account? <a href='#' onclick='showRegister()'>Register</a>
+          <span id='authToggleText'>Don't have an account?</span>
+          <a href='#' onclick='toggleAuthMode()' id='authToggleLink'>Register</a>
         </div>
+
+        <!-- Register Form (hidden initially) -->
+        <form class='register-form' id='registerForm' style='display: none;' onsubmit='handleRegister(event)'>
+          <div class='input-group'>
+            <div class='input-wrapper'>
+              <svg class='input-icon' width='20' height='20' viewBox='0 0 20 20' fill='none'>
+                <path
+                  d='M3.33333 3.33333H16.6667C17.5833 3.33333 18.3333 4.08333 18.3333 5V15C18.3333 15.9167 17.5833 16.6667 16.6667 16.6667H3.33333C2.41667 16.6667 1.66667 15.9167 1.66667 15V5C1.66667 4.08333 2.41667 3.33333 3.33333 3.33333ZM16.6667 5L10 10.8333L3.33333 5H16.6667Z'
+                  fill='currentColor'
+                >
+                </path>
+              </svg>
+              <input
+                type='email'
+                placeholder='tu-email@universidad.edu.pe'
+                class='form-input'
+                id='registerEmail'
+                required
+              />
+            </div>
+          </div>
+
+          <div class='input-group'>
+            <div class='input-wrapper'>
+              <svg class='input-icon' width='20' height='20' viewBox='0 0 20 20' fill='none'>
+                <path
+                  d='M15.8333 9.16667H15V6.66667C15 3.905 12.7617 1.66667 10 1.66667C7.23833 1.66667 5 3.905 5 6.66667V9.16667H4.16667C3.24167 9.16667 2.5 9.90833 2.5 10.8333V16.6667C2.5 17.5917 3.24167 18.3333 4.16667 18.3333H15.8333C16.7583 18.3333 17.5 17.5917 17.5 16.6667V10.8333C17.5 9.90833 16.7583 9.16667 15.8333 9.16667ZM6.66667 6.66667C6.66667 4.825 8.15833 3.33333 10 3.33333C11.8417 3.33333 13.3333 4.825 13.3333 6.66667V9.16667H6.66667V6.66667Z'
+                  fill='currentColor'
+                >
+                </path>
+              </svg>
+              <input
+                type='password'
+                placeholder='••••••••••'
+                class='form-input'
+                id='registerPassword'
+                required
+                minlength='6'
+              />
+            </div>
+          </div>
+
+          <div class='input-group'>
+            <div class='input-wrapper'>
+              <svg class='input-icon' width='20' height='20' viewBox='0 0 20 20' fill='none'>
+                <path
+                  d='M15.8333 9.16667H15V6.66667C15 3.905 12.7617 1.66667 10 1.66667C7.23833 1.66667 5 3.905 5 6.66667V9.16667H4.16667C3.24167 9.16667 2.5 9.90833 2.5 10.8333V16.6667C2.5 17.5917 3.24167 18.3333 4.16667 18.3333H15.8333C16.7583 18.3333 17.5 17.5917 17.5 16.6667V10.8333C17.5 9.90833 16.7583 9.16667 15.8333 9.16667ZM6.66667 6.66667C6.66667 4.825 8.15833 3.33333 10 3.33333C11.8417 3.33333 13.3333 4.825 13.3333 6.66667V9.16667H6.66667V6.66667Z'
+                  fill='currentColor'
+                >
+                </path>
+              </svg>
+              <input
+                type='password'
+                placeholder='Confirmar contraseña'
+                class='form-input'
+                id='confirmPassword'
+                required
+                minlength='6'
+              />
+            </div>
+          </div>
+
+          <button type='submit' class='login-btn' id='registerBtn'>Crear Cuenta</button>
+        </form>
       </div>
     </div>
   </main>
 </Layout>
 
 <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
-  // Funciones de autenticación simulada
-  function loginWithGoogle() {
-    alert('Login with Google simulation');
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', 'google-user@gmail.com');
-    window.location.href = baseUrl + '/dashboard';
+  // Sistema de autenticación integrado
+  class AuthManager {
+    constructor() {
+      this.usersKey = 'hermesUsers';
+      this.sessionKey = 'hermesSession';
+    }
+
+    getUsers() {
+      const users = localStorage.getItem(this.usersKey);
+      return users ? JSON.parse(users) : [];
+    }
+
+    saveUsers(users) {
+      localStorage.setItem(this.usersKey, JSON.stringify(users));
+    }
+
+    getCurrentSession() {
+      const session = localStorage.getItem(this.sessionKey);
+      return session ? JSON.parse(session) : null;
+    }
+
+    saveSession(session) {
+      localStorage.setItem(this.sessionKey, JSON.stringify(session));
+    }
+
+    register(email, password) {
+      const users = this.getUsers();
+
+      if (users.find(user => user.email === email)) {
+        return {
+          success: false,
+          error: 'Este email ya está registrado',
+        };
+      }
+
+      const newUser = {
+        id: Date.now(),
+        email: email,
+        password: password,
+        isProfileComplete: false,
+        createdAt: new Date().toISOString(),
+        roles: {
+          isStudent: true,
+          isTutor: false,
+          tutorStatus: null,
+        },
+        tutorProfile: null,
+      };
+
+      users.push(newUser);
+      this.saveUsers(users);
+
+      const session = {
+        userId: newUser.id,
+        email: newUser.email,
+        isLoggedIn: true,
+        loginAt: new Date().toISOString(),
+      };
+      this.saveSession(session);
+
+      return {
+        success: true,
+        user: newUser,
+        session: session,
+      };
+    }
+
+    login(email, password) {
+      const users = this.getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (!user) {
+        return {
+          success: false,
+          error: 'Email o contraseña incorrectos',
+        };
+      }
+
+      const session = {
+        userId: user.id,
+        email: user.email,
+        isLoggedIn: true,
+        loginAt: new Date().toISOString(),
+      };
+      this.saveSession(session);
+
+      return {
+        success: true,
+        user: user,
+        session: session,
+      };
+    }
+
+    logout() {
+      localStorage.removeItem(this.sessionKey);
+      return { success: true };
+    }
+
+    isLoggedIn() {
+      const session = this.getCurrentSession();
+      return session && session.isLoggedIn;
+    }
+
+    getCurrentUser() {
+      const session = this.getCurrentSession();
+      if (!session) return null;
+
+      const users = this.getUsers();
+      return users.find(user => user.id === session.userId) || null;
+    }
   }
 
-  function loginWithGithub() {
-    alert('Login with Github simulation');
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', 'github-user@gmail.com');
-    window.location.href = baseUrl + '/dashboard';
+  // Crear instancia global
+  window.auth = new AuthManager();
+
+  // Inicializar usuarios demo (incluye tutor y estudiante)
+  function initializeDemoUsers() {
+    const users = window.auth.getUsers();
+
+    console.log('Inicializando usuarios demo. Usuarios existentes:', users.length);
+
+    // Verificar si ya existen los usuarios demo específicos
+    const studentExists = users.find(u => u.email === 'juanc4@utec.edu.pe');
+    const tutorExists = users.find(u => u.email === 'jorge.ramirez@utec.edu.pe');
+
+    if (!studentExists || !tutorExists) {
+      console.log('Creando usuarios demo...');
+
+      const existingUsers = window.auth.getUsers();
+      const allUsers = [...existingUsers];
+
+      // Agregar tutor si no existe
+      if (!tutorExists) {
+        allUsers.push({
+          id: 2,
+          email: 'jorge.ramirez@utec.edu.pe',
+          password: 'tutor123',
+          isProfileComplete: true,
+          createdAt: '2024-01-15T10:00:00.000Z',
+          profile: {
+            fullName: 'Jorge Ramírez Silva',
+            university: 'Universidad de Ingeniería y Tecnología',
+            universityId: 1,
+            career: 'Ingeniería de Sistemas',
+            semester: 8,
+            phone: '+51 987654321',
+            studentId: '201901234',
+            completedAt: '2024-01-15T10:30:00.000Z',
+          },
+          roles: {
+            isStudent: true,
+            isTutor: true,
+            tutorStatus: 'approved',
+          },
+          tutorProfile: {
+            courses: [
+              {
+                courseId: 3,
+                university: 'Universidad de Ingeniería y Tecnología',
+                courseName: 'Estructuras de Datos',
+                courseCode: 'CS2001',
+                grade: 18,
+                semester: '2023-2',
+                isApproved: true,
+                hourlyRate: 32,
+                description: 'Algoritmos y estructuras de datos fundamentales.',
+              },
+            ],
+            totalSessions: 45,
+            rating: 4.8,
+            description: 'Tutor especializado en Estructuras de Datos.',
+            verificationStatus: 'verified',
+            verifiedAt: '2024-01-15T10:30:00.000Z',
+            availability: {
+              monday: ['14:00-16:00', '18:00-20:00'],
+              tuesday: ['16:00-18:00'],
+              wednesday: ['14:00-16:00', '18:00-20:00'],
+              thursday: ['16:00-18:00'],
+              friday: ['14:00-17:00'],
+              saturday: ['09:00-12:00'],
+              sunday: [],
+            },
+          },
+        });
+      }
+
+      // Agregar estudiante si no existe
+      if (!studentExists) {
+        allUsers.push({
+          id: 1000,
+          email: 'juanc4@utec.edu.pe',
+          password: 'juanca123',
+          isProfileComplete: true,
+          createdAt: '2024-02-01T09:00:00.000Z',
+          profile: {
+            fullName: 'Juan Carlos Mendoza Rivera',
+            university: 'Universidad de Ingeniería y Tecnología',
+            universityId: 1,
+            career: 'Ingeniería de Sistemas',
+            semester: 4,
+            phone: '+51 912345678',
+            studentId: '202011567',
+            learningGoals: 'Matemáticas, Programación, Estructuras de Datos',
+            completedAt: '2024-02-01T09:30:00.000Z',
+          },
+          roles: {
+            isStudent: true,
+            isTutor: false,
+            tutorStatus: null,
+          },
+          tutorProfile: null,
+          scheduledTutorings: [
+            {
+              id: 'TUT001',
+              tutorId: 2,
+              tutorName: 'Jorge Ramírez Silva',
+              courseId: 3,
+              courseName: 'Estructuras de Datos',
+              courseCode: 'CS2001',
+              date: '2025-07-08',
+              time: '14:00',
+              duration: 60,
+              price: 32,
+              status: 'confirmed',
+              sessionType: 'online',
+              meetingLink: 'https://hermes-academy.com/room/TUT001',
+              confirmedAt: '2025-07-02T10:00:00.000Z',
+            },
+            {
+              id: 'TUT002',
+              tutorId: 2,
+              tutorName: 'Jorge Ramírez Silva',
+              courseId: 3,
+              courseName: 'Estructuras de Datos',
+              courseCode: 'CS2001',
+              date: '2025-07-10',
+              time: '16:00',
+              duration: 60,
+              price: 32,
+              status: 'confirmed',
+              sessionType: 'online',
+              meetingLink: 'https://hermes-academy.com/room/TUT002',
+              confirmedAt: '2025-07-03T14:00:00.000Z',
+            },
+          ],
+        });
+      }
+
+      window.auth.saveUsers(allUsers);
+      console.log('Usuarios demo guardados correctamente. Total:', allUsers.length);
+
+      // Crear notificaciones solo si no existen
+      const existingNotifications = localStorage.getItem('hermesNotifications');
+      if (!existingNotifications) {
+        const notifications = [
+          {
+            id: 'NOT001',
+            userId: 1000,
+            type: 'tutoring_confirmed',
+            title: 'Tutoría confirmada',
+            message: 'Tu solicitud de tutoría para Estructuras de Datos con Jorge Ramírez ha sido aceptada',
+            data: {
+              tutorName: 'Jorge Ramírez Silva',
+              courseName: 'Estructuras de Datos',
+              date: '2025-07-08',
+              time: '14:00',
+              price: 32,
+              sessionType: 'online',
+            },
+            isRead: false,
+            createdAt: '2025-07-02T10:00:00.000Z',
+          },
+          {
+            id: 'NOT002',
+            userId: 1000,
+            type: 'tutoring_confirmed',
+            title: 'Tutoría confirmada',
+            message: 'Tu solicitud de tutoría para Estructuras de Datos con Jorge Ramírez ha sido aceptada',
+            data: {
+              tutorName: 'Jorge Ramírez Silva',
+              courseName: 'Estructuras de Datos',
+              date: '2025-07-10',
+              time: '16:00',
+              price: 32,
+              sessionType: 'online',
+            },
+            isRead: false,
+            createdAt: '2025-07-03T14:00:00.000Z',
+          },
+          {
+            id: 'NOT003',
+            userId: 1000,
+            type: 'counter_offer',
+            title: 'Contraoferta recibida',
+            message:
+              'Jorge Ramírez te envió una contraoferta para Estructuras de Datos: S/. 30/hora (Tu oferta: S/. 25/hora)',
+            data: {
+              tutorName: 'Jorge Ramírez Silva',
+              courseName: 'Estructuras de Datos',
+              studentOfferedPrice: 25,
+              tutorCounterPrice: 30,
+              tutorOriginalRate: 32,
+              message:
+                'Hola! Vi tu solicitud para Estructuras de Datos. Te puedo ofrecer S/. 30 por hora. ¿Te parece bien?',
+              requestId: 'REQ001',
+              sessionDate: '2025-07-12',
+              sessionTime: '15:00',
+              duration: 60,
+            },
+            isRead: false,
+            createdAt: '2025-07-04T08:30:00.000Z',
+          },
+        ];
+
+        localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+        console.log('Notificaciones demo creadas correctamente');
+      }
+
+      console.log('Usuario tutor Jorge y estudiante Juan Carlos creados correctamente');
+    } else {
+      console.log('Usuarios demo ya existen');
+    }
   }
 
+  // Inicializar usuarios demo al cargar
+  initializeDemoUsers();
+
+  let isLoginMode = true;
+
+  // Alternar entre login y registro
+  function toggleAuthMode() {
+    const loginForm = document.querySelector('.login-form');
+    const registerForm = document.getElementById('registerForm');
+    const authToggleText = document.getElementById('authToggleText');
+    const authToggleLink = document.getElementById('authToggleLink');
+
+    if (isLoginMode) {
+      // Mostrar formulario de registro
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'flex';
+      authToggleText.textContent = 'Already have an account?';
+      authToggleLink.textContent = 'Login';
+      isLoginMode = false;
+    } else {
+      // Mostrar formulario de login
+      loginForm.style.display = 'flex';
+      registerForm.style.display = 'none';
+      authToggleText.textContent = "Don't have an account?";
+      authToggleLink.textContent = 'Register';
+      isLoginMode = true;
+    }
+  }
+
+  // Obtener parámetro de redirección de la URL
+  function getRedirectParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('redirect');
+  }
+
+  // Función para redireccionar según el parámetro
+  function redirectAfterAuth(user) {
+    const redirectParam = getRedirectParam();
+
+    // Si no está completo el perfil, siempre ir a completar perfil primero
+    if (!user.isProfileComplete) {
+      window.location.href = baseUrl + '/complete-profile';
+      return;
+    }
+
+    // Si hay parámetro de redirección, usarlo
+    if (redirectParam === 'become-tutor') {
+      window.location.href = baseUrl + '/become-tutor';
+    } else if (redirectParam === 'dashboard') {
+      window.location.href = baseUrl + '/dashboard';
+    } else {
+      // Por defecto ir al dashboard
+      window.location.href = baseUrl + '/dashboard';
+    }
+  }
+
+  // Manejar login
   function handleLogin(event) {
     event.preventDefault();
+
+    // Asegurarse de que los usuarios demo existan antes del login
+    initializeDemoUsers();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Validación de credenciales simuladas
-    if (email === 'juan@gmail.com' && password === 'juan12345') {
-      alert('Login successful! Welcome Juan!');
-      // Simular guardado de sesión
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email);
-      // Redirigir al dashboard
-      window.location.href = baseUrl + '/dashboard';
+    console.log('Intentando login con:', email, password);
+    console.log('Usuarios disponibles:', window.auth.getUsers());
+
+    const result = window.auth.login(email, password);
+
+    console.log('Resultado del login:', result);
+
+    if (result.success) {
+      alert('¡Inicio de sesión exitoso!');
+      redirectAfterAuth(result.user);
     } else {
-      alert('Invalid credentials! Please use:\nEmail: juan@gmail.com\nPassword: juan12345');
+      alert(result.error);
+    }
+  }
+
+  // Manejar registro
+  function handleRegister(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Validar que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    // Validar email universitario
+    if (!email.includes('.edu.pe')) {
+      alert('Debes usar un email universitario (.edu.pe)');
+      return;
+    }
+
+    // Usar el sistema de autenticación real
+    const result = window.auth.register(email, password);
+
+    if (result.success) {
+      alert('¡Cuenta creada exitosamente! Ahora completa tu perfil.');
+      // Pasar el parámetro de redirección a complete-profile
+      const redirectParam = getRedirectParam();
+      if (redirectParam) {
+        window.location.href = baseUrl + '/complete-profile?redirect=' + redirectParam;
+      } else {
+        window.location.href = baseUrl + '/complete-profile';
+      }
+    } else {
+      alert(result.error);
     }
   }
 
@@ -175,16 +634,32 @@ import Layout from '../layouts/Layout.astro';
     passwordInput.setAttribute('type', type);
   }
 
-  function showRegister() {
-    alert('Register functionality would be implemented here');
+  // Deshabilitar botones de redes sociales por ahora
+  function loginWithGoogle() {
+    alert('Login con Google estará disponible próximamente');
   }
+
+  function loginWithGithub() {
+    alert('Login con GitHub estará disponible próximamente');
+  }
+
+  // Verificar si ya está logueado al cargar la página
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.auth.isLoggedIn()) {
+      const user = window.auth.getCurrentUser();
+      if (user) {
+        redirectAfterAuth(user);
+      }
+    }
+  });
 
   // Hacer las funciones globales
   window.loginWithGoogle = loginWithGoogle;
   window.loginWithGithub = loginWithGithub;
   window.handleLogin = handleLogin;
+  window.handleRegister = handleRegister;
   window.togglePassword = togglePassword;
-  window.showRegister = showRegister;
+  window.toggleAuthMode = toggleAuthMode;
 </script>
 
 <style>
@@ -308,6 +783,11 @@ import Layout from '../layouts/Layout.astro';
 
   .login-form {
     display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .register-form {
     flex-direction: column;
     gap: 0.625rem;
   }
