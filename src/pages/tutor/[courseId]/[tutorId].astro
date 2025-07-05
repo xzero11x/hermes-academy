@@ -1045,6 +1045,7 @@ const tutorAvailability: Record<string, string[]> = {
         studentId: studentId,
         tutorId: tutorId,
         courseId: courseId,
+        courseName: course.name, // Agregar nombre del curso
         studentOfferedPrice: requestData.offeredPrice,
         scheduledSessions: requestData.scheduledSessions, // Todas las sesiones en una sola solicitud
         status: 'pending',
@@ -1063,7 +1064,7 @@ const tutorAvailability: Record<string, string[]> = {
         userId: tutorId,
         type: 'new_request',
         title: 'Nueva solicitud de tutoría',
-        message: `Tienes una nueva solicitud de tutoría con ${requestData.scheduledSessions.length} sesión(es)`,
+        message: `Tienes una nueva solicitud de tutoría para ${course.name} con ${requestData.scheduledSessions.length} sesión(es)`,
         data: {
           requestId: singleRequest.id,
           studentId: studentId,

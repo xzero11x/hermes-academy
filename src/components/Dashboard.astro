@@ -440,7 +440,7 @@
         'padding: 0.5rem; background: white; border-radius: 5px; border: 1px solid #e2e8f0; margin-bottom: 0.25rem;';
 
       // Obtener información del curso y tutor
-      const courseName = getCourseName(request.courseId);
+      const courseName = request.courseName || getCourseName(request.courseId);
       const tutorName = getTutorName(request.tutorId);
 
       // Determinar estado y color
@@ -517,18 +517,12 @@
       return 'Curso no especificado';
     }
 
-    // Datos de cursos (versión simplificada para el frontend)
+    // Datos de cursos (versión simplificada para el frontend - UTEC)
     const courses = [
-      { id: 1, name: 'Introducción a la Programación' },
-      { id: 2, name: 'Cálculo Diferencial' },
-      { id: 3, name: 'Estructuras de Datos' },
-      { id: 4, name: 'Programación Orientada a Objetos' },
-      { id: 5, name: 'Base de Datos' },
-      { id: 6, name: 'Algoritmos y Complejidad' },
-      { id: 7, name: 'Ingeniería de Software' },
-      { id: 8, name: 'Redes de Computadoras' },
-      { id: 9, name: 'Inteligencia Artificial' },
-      { id: 10, name: 'Desarrollo Web' },
+      { id: 1, name: 'Cálculo de una Variable' },
+      { id: 2, name: 'Introducción a la Mecánica' },
+      { id: 3, name: 'Química General' },
+      { id: 18, name: 'Ecuaciones Diferenciales' },
     ];
 
     const course = courses.find(c => c.id.toString() === courseId.toString());
@@ -586,7 +580,7 @@
       id: 'REQ_TEST_' + Date.now(),
       studentId: user.id,
       tutorId: 2, // Jorge Ramírez Silva
-      courseId: 3, // Estructuras de Datos
+      courseId: 3, // Química General
       studentOfferedPrice: 35,
       sessionDay: 'Lunes',
       sessionTime: '14:00',
@@ -661,7 +655,7 @@
       requestItem.className = 'tutor-request-item';
 
       // Obtener información del curso y estudiante
-      const courseName = getCourseName(request.courseId);
+      const courseName = request.courseName || getCourseName(request.courseId);
       const studentName = getStudentName(request.studentId);
 
       requestItem.innerHTML = `
