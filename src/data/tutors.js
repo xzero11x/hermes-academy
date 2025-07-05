@@ -52,7 +52,7 @@ export const tutors = [
     rating: 4.6,
     totalSessions: 98,
     specializations: ["Programación", "Estructuras de Datos", "Algoritmos"],
-    coursesTaught: [1, 3], // Introducción a la Programación, Estructuras de Datos
+    coursesTaught: [1, 3], // Cálculo de una Variable, Química General
     availability: {
       monday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
       tuesday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],

@@ -34,12 +34,16 @@ class TutoringRequestManager {
     const requests = this.getAllRequests();
     const notifications = this.getNotifications();
 
+    // Obtener el nombre del curso si no se proporciona
+    const courseName = requestData.courseName || this.getCourseName(courseId);
+
     // Crear nueva solicitud
     const newRequest = {
       id: 'REQ_' + Date.now(),
       studentId: studentId,
       tutorId: tutorId,
       courseId: courseId,
+      courseName: courseName, // Agregar nombre del curso
       studentOfferedPrice: requestData.offeredPrice,
       sessionDate: requestData.sessionDate,
       sessionTime: requestData.sessionTime,
@@ -60,12 +64,12 @@ class TutoringRequestManager {
       userId: tutorId,
       type: 'tutoring_request',
       title: 'Nueva solicitud de tutoría',
-      message: `${requestData.studentName} quiere clases de ${requestData.courseName} por S/. ${requestData.offeredPrice}/hora`,
+      message: `${requestData.studentName} quiere clases de ${courseName} por S/. ${requestData.offeredPrice}/hora`,
       data: {
         requestId: newRequest.id,
         studentId: studentId,
         studentName: requestData.studentName,
-        courseName: requestData.courseName,
+        courseName: courseName,
         courseCode: requestData.courseCode,
         offeredPrice: requestData.offeredPrice,
         requestedDate: requestData.sessionDate,
@@ -268,7 +272,7 @@ class TutoringRequestManager {
         tutorId: request.tutorId,
         tutorName: tutorName,
         courseId: request.courseId,
-        courseName: request.data?.courseName || 'Estructuras de Datos',
+        courseName: request.data?.courseName || 'Curso no especificado',
         courseCode: request.data?.courseCode || 'CS2001',
         date: request.sessionDate,
         time: request.sessionTime,
@@ -324,6 +328,20 @@ class TutoringRequestManager {
       tutor: tutor || null,
       course: course || null
     };
+  }
+
+  // Obtener nombre del curso por ID
+  getCourseName(courseId) {
+    // Datos simplificados de cursos para UTEC (los más comunes)
+    const courses = [
+      { id: 1, name: "Cálculo de una Variable" },
+      { id: 2, name: "Introducción a la Mecánica" },
+      { id: 3, name: "Química General" },
+      { id: 18, name: "Ecuaciones Diferenciales" }
+    ];
+
+    const course = courses.find(c => c.id === courseId);
+    return course ? course.name : 'Curso no encontrado';
   }
 }
 
