@@ -8,14 +8,26 @@ import Layout from '../layouts/Layout.astro';
 const url = new URL(Astro.request.url);
 let universityId = url.searchParams.get('university');
 
-// Si no hay query param, intentar obtener del hash (fallback)
+// WORKAROUND: Si no hay query param en server, intentar obtenerlo del cliente
 if (!universityId) {
-  const hash = url.hash;
-  const hashMatch = hash.match(/university=(\d+)/);
-  if (hashMatch && hashMatch[1]) {
-    universityId = hashMatch[1];
+  // Intentar extraer de la URL completa como fallback
+  const fullUrl = url.toString();
+  const match = fullUrl.match(/[?&]university=(\d+)/);
+  if (match && match[1]) {
+    universityId = match[1];
   }
 }
+
+// DEBUG: Logs para verificar el filtrado
+console.log('🔍 DEBUG FILTRADO DETALLADO:');
+console.log('URL original:', Astro.request.url);
+console.log('URL parseada:', url.toString());
+console.log('URL.href:', url.href);
+console.log('URL.search:', url.search);
+console.log('Query params completos:', Object.fromEntries(url.searchParams));
+console.log('universityId directo:', url.searchParams.get('university'));
+console.log('universityId obtenido:', universityId);
+console.log('Total cursos disponibles:', courses.length);
 
 // Filtrar cursos por universidad si se especifica
 let filteredCourses = courses;
@@ -23,12 +35,23 @@ let selectedUniversity = null;
 
 if (universityId && universityId !== 'null' && universityId.trim() !== '') {
   const univId = parseInt(universityId, 10);
+  console.log('universityId parseado:', univId);
 
   if (!isNaN(univId)) {
     filteredCourses = courses.filter(course => course.universityId === univId);
     selectedUniversity = getUniversityByIdFast(univId);
+    console.log('✅ Filtrado aplicado - Universidad:', selectedUniversity?.name);
+    console.log('✅ Cursos filtrados:', filteredCourses.length);
+    console.log(
+      '✅ IDs de cursos filtrados:',
+      filteredCourses.map(c => `${c.id}:${c.name}`)
+    );
   }
+} else {
+  console.log('❌ No se aplicó filtrado - universityId inválido');
 }
+
+console.log('Cursos finales a mostrar:', filteredCourses.length);
 
 // Función para obtener el logo de la universidad por ID
 function getUniversityLogo(universityId: number) {
@@ -65,6 +88,14 @@ function toRoman(num: number): string {
 
 // Enriquecer cursos con datos de universidades y tutores
 const enrichedCourses = filteredCourses.map(course => ({
+  ...course,
+  universityName: getUniversityName(course.universityId),
+  universityLogo: getUniversityLogo(course.universityId),
+  tutorsCount: getTutorsByCourseFast(course.id).length,
+}));
+
+// Pasar datos al cliente para filtrado híbrido
+const allEnrichedCourses = courses.map(course => ({
   ...course,
   universityName: getUniversityName(course.universityId),
   universityLogo: getUniversityLogo(course.universityId),
@@ -208,14 +239,14 @@ const enrichedCourses = filteredCourses.map(course => ({
     margin-bottom: var(--spacing-lg);
   }
 
-  .section-title {
+  :global(.section-title) {
     font-size: var(--font-size-4xl);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-md);
   }
 
-  .section-description {
+  :global(.section-description) {
     font-size: var(--font-size-lg);
     color: var(--text-secondary);
     line-height: 1.6;
@@ -223,7 +254,18 @@ const enrichedCourses = filteredCourses.map(course => ({
     margin: 0 auto;
   }
 
-  .university-filter {
+  :global(.section-title-filtered) {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    line-height: 1.4;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-lg) auto;
+  }
+
+  :global(.university-filter) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -239,26 +281,26 @@ const enrichedCourses = filteredCourses.map(course => ({
     margin-top: var(--spacing-lg);
   }
 
-  .filter-info {
+  :global(.filter-info) {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
   }
 
-  .filter-logo {
+  :global(.filter-logo) {
     width: 32px;
     height: 32px;
     border-radius: 6px;
     object-fit: cover;
   }
 
-  .filter-text {
+  :global(.filter-text) {
     font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--text-primary);
   }
 
-  .remove-filter {
+  :global(.remove-filter) {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
@@ -271,7 +313,7 @@ const enrichedCourses = filteredCourses.map(course => ({
     transition: all 0.2s ease;
   }
 
-  .remove-filter:hover {
+  :global(.remove-filter:hover) {
     background: var(--surface-primary);
     color: var(--text-primary);
   }
@@ -279,6 +321,32 @@ const enrichedCourses = filteredCourses.map(course => ({
   .header-search {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  :global(.view-all-btn) {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  :global(.view-all-btn:hover) {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+  }
+
+  :global(.view-all-btn i) {
+    font-size: var(--font-size-xs);
   }
 
   .search-box {
@@ -332,14 +400,14 @@ const enrichedCourses = filteredCourses.map(course => ({
   }
 
   /* Grid de cursos */
-  .courses-grid {
+  :global(.courses-grid) {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: var(--spacing-xl);
     margin-bottom: var(--spacing-3xl);
   }
 
-  .course-card {
+  :global(.course-card) {
     background: var(--bg-principal);
     border-radius: var(--radius-xl);
     padding: var(--spacing-lg);
@@ -349,19 +417,19 @@ const enrichedCourses = filteredCourses.map(course => ({
       border-color 0.2s ease;
   }
 
-  .course-card:hover {
+  :global(.course-card:hover) {
     transform: translateY(-2px);
     border-color: var(--color-primary);
   }
 
-  .course-header {
+  :global(.course-header) {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: var(--spacing-md);
   }
 
-  .course-name {
+  :global(.course-name) {
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--text-primary);
@@ -373,12 +441,12 @@ const enrichedCourses = filteredCourses.map(course => ({
     gap: var(--spacing-xs);
   }
 
-  .course-name i {
+  :global(.course-name i) {
     color: var(--color-primary);
     font-size: var(--font-size-md);
   }
 
-  .cycle-number {
+  :global(.cycle-number) {
     font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--color-primary);
@@ -388,22 +456,22 @@ const enrichedCourses = filteredCourses.map(course => ({
     flex-shrink: 0;
   }
 
-  .course-cycle {
+  :global(.course-cycle) {
     flex-shrink: 0;
   }
 
-  .course-info {
+  :global(.course-info) {
     margin-bottom: var(--spacing-md);
   }
 
-  .course-university {
+  :global(.course-university) {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
     margin-bottom: var(--spacing-sm);
   }
 
-  .university-logo-small {
+  :global(.university-logo-small) {
     flex-shrink: 0;
     width: 24px;
     height: 24px;
@@ -412,40 +480,40 @@ const enrichedCourses = filteredCourses.map(course => ({
     border: 1px solid var(--border-light);
   }
 
-  .university-logo-small img {
+  :global(.university-logo-small img) {
     width: 100%;
     height: 100%;
     object-fit: contain;
     background: white;
   }
 
-  .university-name {
+  :global(.university-name) {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-weight: 500;
   }
 
-  .course-code {
+  :global(.course-code) {
     font-size: var(--font-size-sm);
     color: var(--text-primary);
     margin-bottom: var(--spacing-sm);
     font-weight: 600;
   }
 
-  .course-description {
+  :global(.course-description) {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
     margin-bottom: var(--spacing-md);
     line-height: 1.5;
   }
 
-  .course-details {
+  :global(.course-details) {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
   }
 
-  .detail-item {
+  :global(.detail-item) {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -453,20 +521,20 @@ const enrichedCourses = filteredCourses.map(course => ({
     font-size: var(--font-size-sm);
   }
 
-  .detail-icon {
+  :global(.detail-icon) {
     color: var(--color-primary);
     flex-shrink: 0;
   }
 
-  .course-actions {
+  :global(.course-actions) {
     margin-bottom: var(--spacing-md);
   }
 
-  .btn-block {
+  :global(.btn-block) {
     width: 100%;
   }
 
-  .course-stats {
+  :global(.course-stats) {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-sm);
@@ -474,11 +542,11 @@ const enrichedCourses = filteredCourses.map(course => ({
     border-top: 1px solid var(--border-light);
   }
 
-  .stat {
+  :global(.stat) {
     text-align: center;
   }
 
-  .stat-number {
+  :global(.stat-number) {
     display: block;
     font-size: var(--font-size-lg);
     font-weight: 600;
@@ -486,9 +554,33 @@ const enrichedCourses = filteredCourses.map(course => ({
     margin-bottom: var(--spacing-xs);
   }
 
-  .stat-label {
+  :global(.stat-label) {
     font-size: var(--font-size-xs);
     color: var(--text-light);
+  }
+
+  /* Estilos para mensaje sin cursos */
+  :global(.no-courses-message) {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    grid-column: 1 / -1;
+  }
+
+  :global(.no-courses-message i) {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  :global(.no-courses-message h3) {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text-primary);
+  }
+
+  :global(.no-courses-message p) {
+    margin-bottom: 1.5rem;
   }
 
   /* Paginación */
@@ -574,3 +666,222 @@ const enrichedCourses = filteredCourses.map(course => ({
     }
   }
 </style>
+
+<script
+  define:vars={{
+    allEnrichedCourses: allEnrichedCourses,
+    serverFilteredCourses: enrichedCourses,
+    filteredCoursesCount: filteredCourses.length,
+    totalCoursesCount: courses.length,
+    universityIdParam: universityId,
+    selectedUniversityName: selectedUniversity?.name || null,
+  }}
+>
+  // DEBUG: Logs para la consola del navegador
+  console.log('🔍 DEBUG FILTRADO CURSOS:');
+  console.log('URL actual:', window.location.href);
+  console.log('Parámetro university recibido en servidor:', universityIdParam);
+  console.log('Universidad seleccionada:', selectedUniversityName);
+  console.log('Total cursos en sistema:', totalCoursesCount);
+  console.log('Cursos mostrados después del filtro servidor:', filteredCoursesCount);
+
+  // Verificar si necesitamos filtrado del lado del cliente
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientUniversityId = urlParams.get('university');
+
+  console.log('Parámetro university desde cliente:', clientUniversityId);
+
+  // Aplicar filtrado del lado del cliente si es necesario
+  if (clientUniversityId && !universityIdParam) {
+    console.log('🔄 Aplicando filtro del lado del cliente...');
+
+    const universityIdInt = parseInt(clientUniversityId, 10);
+    if (!isNaN(universityIdInt)) {
+      const clientFilteredCourses = allEnrichedCourses.filter(course => course.universityId === universityIdInt);
+      console.log('✅ Filtro cliente aplicado. Cursos encontrados:', clientFilteredCourses.length);
+
+      // Re-renderizar cuando la página esté lista con un pequeño retraso
+      document.addEventListener('DOMContentLoaded', () => {
+        // Pequeño retraso para asegurar que los estilos estén cargados
+        setTimeout(() => {
+          renderClientFilteredCourses(clientFilteredCourses, universityIdInt);
+        }, 100);
+      });
+    }
+  } else if (universityIdParam) {
+    console.log('✅ Filtro aplicado en servidor para universidad ID:', universityIdParam);
+  } else {
+    console.log('❌ Sin filtro - mostrando todos los cursos');
+  }
+
+  console.log('================================');
+
+  // Función para re-renderizar cursos filtrados del lado del cliente
+  function renderClientFilteredCourses(courses, universityId) {
+    console.log('🎯 Re-renderizando cursos filtrados del cliente:', courses.length);
+
+    const coursesGrid = document.querySelector('.courses-grid');
+    const sectionHeader = document.querySelector('.section-header .header-title');
+
+    if (!coursesGrid) return;
+
+    // Actualizar header con información de universidad
+    const university = getUniversityData(universityId);
+    if (university && sectionHeader) {
+      sectionHeader.innerHTML = `
+        <h1 class="section-title-filtered">
+          Explora todos los cursos disponibles en ${university.shortName} y conecta con sus tutores especializados
+        </h1>
+      `;
+    }
+
+    // Agregar botón "Ver todo" al área de búsqueda
+    const headerSearch = document.querySelector('.header-search');
+    if (headerSearch && university) {
+      // Verificar si ya existe el botón para no duplicarlo
+      if (!headerSearch.querySelector('.view-all-btn')) {
+        const viewAllBtn = document.createElement('a');
+        viewAllBtn.href = '/hermes-academy/courses';
+        viewAllBtn.className = 'view-all-btn';
+        viewAllBtn.innerHTML = '<i class="fas fa-grid-2"></i> Ver todo';
+        headerSearch.appendChild(viewAllBtn);
+      }
+    }
+
+    // Limpiar y re-renderizar grid
+    coursesGrid.innerHTML = '';
+
+    if (courses.length === 0) {
+      coursesGrid.innerHTML = `
+        <div class="no-courses-message">
+          <i class="fas fa-search"></i>
+          <h3>No se encontraron cursos</h3>
+          <p>No hay cursos disponibles para esta universidad.</p>
+          <a href="/hermes-academy/courses" class="btn btn-primary">Ver todos los cursos</a>
+        </div>
+      `;
+    } else {
+      courses.forEach(course => {
+        const courseCard = createCourseCard(course);
+        coursesGrid.appendChild(courseCard);
+      });
+    }
+
+    // Re-aplicar FontAwesome si es necesario
+    if (window.FontAwesome && window.FontAwesome.dom) {
+      window.FontAwesome.dom.i2svg();
+    }
+  }
+
+  // Función para crear tarjeta de curso (replica exacta del servidor)
+  function createCourseCard(course) {
+    const card = document.createElement('div');
+    card.className = 'course-card';
+
+    const cycleRoman = toRoman(course.cycle || 1);
+
+    // Usar la misma estructura exacta que el servidor
+    card.innerHTML = `
+      <div class="course-header">
+        <h3 class="course-name">
+          <i class="fa-solid fa-book"></i>
+          ${course.name}
+        </h3>
+        <div class="course-cycle">
+          <span class="cycle-number">${cycleRoman}</span>
+        </div>
+      </div>
+
+      <div class="course-info">
+        <p class="course-code">Código: ${course.code}</p>
+        <div class="course-university">
+          <div class="university-logo-small">
+            <img src="${course.universityLogo}" alt="${course.universityName}" />
+          </div>
+          <span class="university-name">${course.universityName}</span>
+        </div>
+        <p class="course-description">${course.description || 'Descripción del curso'}</p>
+
+        <div class="course-details">
+          <div class="detail-item">
+            <i class="fas fa-university detail-icon"></i>
+            <span>Área: ${course.area || 'Ingeniería'}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-star detail-icon"></i>
+            <span>${course.tutorsCount || 0} tutores disponibles</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="course-actions">
+        <a href="/hermes-academy/course/${course.id}" class="btn btn-primary btn-block">
+          Ver detalles
+        </a>
+      </div>
+    `;
+
+    return card;
+  }
+
+  // Función para obtener datos de universidad
+  function getUniversityData(universityId) {
+    const universities = {
+      1: {
+        name: 'Universidad de Ingeniería y Tecnología',
+        shortName: 'UTEC',
+        logo: '/hermes-academy/universidades/utec.jpg',
+      },
+      3: {
+        name: 'Pontificia Universidad Católica del Perú',
+        shortName: 'PUCP',
+        logo: '/hermes-academy/universidades/pucp.png',
+      },
+      4: {
+        name: 'Universidad Nacional de Ingeniería',
+        shortName: 'UNI',
+        logo: '/hermes-academy/universidades/uni.png',
+      },
+      5: {
+        name: 'Universidad de Lima',
+        shortName: 'UL',
+        logo: '/hermes-academy/universidades/u_de_lima.png',
+      },
+      7: {
+        name: 'Universidad César Vallejo',
+        shortName: 'UCV',
+        logo: '/hermes-academy/universidades/ucv.png',
+      },
+      8: {
+        name: 'Universidad de Piura',
+        shortName: 'UDEP',
+        logo: '/hermes-academy/universidades/universidad_de_piura.jpg',
+      },
+      10: {
+        name: 'Universidad Peruana de Ciencias Aplicadas',
+        shortName: 'UPC',
+        logo: '/hermes-academy/universidades/UPC_logo_transparente.png',
+      },
+      11: {
+        name: 'Universidad Nacional Toribio Rodríguez de Mendoza',
+        shortName: 'UNTRM',
+        logo: '/hermes-academy/universidades/default.png',
+      },
+    };
+    return universities[universityId];
+  }
+
+  // Función para convertir números a romanos (lado cliente)
+  function toRoman(num) {
+    const values = [10, 9, 5, 4, 1];
+    const symbols = ['X', 'IX', 'V', 'IV', 'I'];
+    let result = '';
+    for (let i = 0; i < values.length; i++) {
+      while (num >= values[i]) {
+        result += symbols[i];
+        num -= values[i];
+      }
+    }
+    return result;
+  }
+</script>

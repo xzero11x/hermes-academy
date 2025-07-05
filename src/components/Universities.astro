@@ -9,13 +9,13 @@ const getAssetUrl = (path: string) => import.meta.env.BASE_URL + path;
 const getCourseFilterUrl = (universityId: number) => {
   const baseUrl = import.meta.env.BASE_URL || '';
 
-  // Construcción explícita y defensiva
+  // Construcción explícita y defensiva usando query parameters
   let url = baseUrl;
   if (url && !url.endsWith('/')) {
     url += '/';
   }
-  // Usar hash en lugar de query params como fallback
-  url += `courses#university=${universityId}`;
+  // Usar query parameters para que funcione con Astro SSR
+  url += `courses?university=${universityId}`;
 
   return url;
 };

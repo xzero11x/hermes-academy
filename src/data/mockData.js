@@ -1,20 +1,9 @@
 // Re-exportación de datos modulares (compatibilidad hacia atrás)
 // NOTA: Este archivo se mantiene por compatibilidad, usa las importaciones directas cuando sea posible
 
-export { 
-  universities, 
-  careers, 
-  courses, 
-  tutors, 
-  studentData, 
-  notifications,
-  getUniversityById,
-  getCoursesByUniversity,
-  getTutorsByUniversity,
-  getTutorsByCourse,
-  getCourseById,
-  getTutorById,
-  getCareerById,
-  getCareersByUniversity,
-  getUniversityStats
+export {
+  careers,
+  courses, getCareerById,
+  getCareersByUniversity, getCourseById, getCoursesByUniversity, getTutorById, getTutorsByCourse, getTutorsByUniversity, getUniversityById, getUniversityStats, notifications, tutors, universities
 } from './index.js';
+

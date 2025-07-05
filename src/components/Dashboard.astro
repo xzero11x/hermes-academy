@@ -866,9 +866,9 @@
       universityId = user.profile.universityId;
     }
 
-    // Si tiene universidad, filtrar por ella; si no, mostrar todos
+    // Si tiene universidad, filtrar por ella usando query parameters; si no, mostrar todos
     if (universityId) {
-      const targetUrl = `${baseUrl}/courses#university=${universityId}`;
+      const targetUrl = `${baseUrl}/courses?university=${universityId}`;
       window.location.href = targetUrl;
     } else {
       const targetUrl = `${baseUrl}/courses`;
