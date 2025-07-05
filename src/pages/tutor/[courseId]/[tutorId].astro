@@ -64,9 +64,9 @@ const tutorAvailability: Record<string, string[]> = {
       <div class='container'>
         <!-- Breadcrumb -->
         <nav class='breadcrumb'>
-          <a href='/courses' class='breadcrumb-link'>Cursos</a>
+          <a href='/hermes-academy/courses' class='breadcrumb-link'>Cursos</a>
           <span class='breadcrumb-separator'>/</span>
-          <a href={`/course/${course.id}`} class='breadcrumb-link'>{course.name}</a>
+          <a href={`/hermes-academy/course/${course.id}`} class='breadcrumb-link'>{course.name}</a>
           <span class='breadcrumb-separator'>/</span>
           <span class='breadcrumb-current'>Contratar tutor</span>
         </nav>
@@ -93,7 +93,7 @@ const tutorAvailability: Record<string, string[]> = {
 
             <!-- Información del tutor -->
             <div class='tutor-info-card'>
-              <a href={`/tutor-profile/${tutor.id}`} class='btn-profile'>Ver perfil</a>
+              <a href={`/hermes-academy/tutor-profile/${tutor.id}`} class='btn-profile'>Ver perfil</a>
               <div class='tutor-header'>
                 <div class='tutor-avatar-large'>
                   <i class='fas fa-user'></i>
@@ -223,6 +223,45 @@ const tutorAvailability: Record<string, string[]> = {
               <!-- Botón de envío -->
               <button class='btn btn-primary btn-block btn-send-request'>Enviar solicitud</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de éxito -->
+      <div class='modal-overlay' id='successModal' style='display: none;'>
+        <div class='modal-content success-modal'>
+          <div class='modal-header'>
+            <div class='success-icon'>
+              <i class='fas fa-check-circle'></i>
+            </div>
+            <h3>¡Solicitud enviada exitosamente!</h3>
+          </div>
+          <div class='modal-body'>
+            <p>Tu solicitud de tutoría ha sido enviada al tutor.</p>
+            <p>Recibirás una notificación cuando el tutor responda.</p>
+          </div>
+          <div class='modal-actions'>
+            <button class='btn btn-primary' onclick='goToDashboard()'>Ir al Dashboard</button>
+            <button class='btn btn-secondary' onclick='closeModal()'>Continuar explorando</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de error -->
+      <div class='modal-overlay' id='errorModal' style='display: none;'>
+        <div class='modal-content error-modal'>
+          <div class='modal-header'>
+            <div class='error-icon'>
+              <i class='fas fa-exclamation-circle'></i>
+            </div>
+            <h3>Error al enviar solicitud</h3>
+          </div>
+          <div class='modal-body'>
+            <p>No se pudo enviar tu solicitud de tutoría.</p>
+            <p>Por favor, verifica tu información e intenta nuevamente.</p>
+          </div>
+          <div class='modal-actions'>
+            <button class='btn btn-primary' onclick='closeModal()'>Intentar nuevamente</button>
           </div>
         </div>
       </div>
@@ -830,9 +869,221 @@ const tutorAvailability: Record<string, string[]> = {
     width: 100%;
     display: block;
   }
+
+  /* Estilos del Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.3s ease-out;
+    border: 1px solid #f1f5f9;
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-header {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .success-icon,
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .success-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  }
+
+  .error-icon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .success-modal .modal-header h3 {
+    color: #059669;
+  }
+
+  .error-modal .modal-header h3 {
+    color: #dc2626;
+  }
+
+  .modal-body {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .modal-body p {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+  }
+
+  .modal-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+  }
+
+  .modal-actions .btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: var(--font-size-sm);
+    min-width: 120px;
+  }
+
+  .modal-actions .btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  }
+
+  .modal-actions .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .modal-actions .btn-secondary {
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid #e2e8f0;
+  }
+
+  .modal-actions .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+  }
+
+  /* Responsive para modales */
+  @media (max-width: 768px) {
+    .modal-content {
+      padding: var(--spacing-lg);
+      margin: var(--spacing-md);
+    }
+
+    .modal-actions {
+      flex-direction: column;
+    }
+
+    .modal-actions .btn {
+      width: 100%;
+    }
+  }
 </style>
 
-<script>
+<script define:vars={{ tutorId: tutor.id, courseId: course.id, baseUrl: import.meta.env.BASE_URL }}>
+  // Declaración para window.auth
+
+  // Función para enviar solicitud de tutoría
+  function sendTutoringRequest(studentId, tutorId, courseId, requestData) {
+    try {
+      console.log('sendTutoringRequest called with:', { studentId, tutorId, courseId, requestData });
+
+      const requestsKey = 'hermesTutoringRequests';
+      const notificationsKey = 'hermesNotifications';
+
+      // Obtener datos existentes
+      const requests = JSON.parse(localStorage.getItem(requestsKey) || '[]');
+      const notifications = JSON.parse(localStorage.getItem(notificationsKey) || '[]');
+
+      // Crear UNA sola solicitud que contenga todas las sesiones
+      const singleRequest = {
+        id: 'REQ_' + Date.now(),
+        studentId: studentId,
+        tutorId: tutorId,
+        courseId: courseId,
+        studentOfferedPrice: requestData.offeredPrice,
+        scheduledSessions: requestData.scheduledSessions, // Todas las sesiones en una sola solicitud
+        status: 'pending',
+        message: requestData.message || '',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+      };
+
+      // Agregar la solicitud única
+      requests.push(singleRequest);
+      localStorage.setItem(requestsKey, JSON.stringify(requests));
+
+      // Crear notificación para el tutor
+      const newNotification = {
+        id: 'NOTIF_' + Date.now(),
+        userId: tutorId,
+        type: 'new_request',
+        title: 'Nueva solicitud de tutoría',
+        message: `Tienes una nueva solicitud de tutoría con ${requestData.scheduledSessions.length} sesión(es)`,
+        data: {
+          requestId: singleRequest.id,
+          studentId: studentId,
+          courseId: courseId,
+        },
+        read: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      notifications.push(newNotification);
+      localStorage.setItem(notificationsKey, JSON.stringify(notifications));
+
+      console.log('Solicitud enviada exitosamente:', singleRequest);
+      return true;
+    } catch (error) {
+      console.error('Error enviando solicitud:', error);
+      return false;
+    }
+  }
+
   // Funcionalidad interactiva para selección de horarios
   document.addEventListener('DOMContentLoaded', function () {
     const timeBlocks = document.querySelectorAll('.time-block.available');
@@ -841,13 +1092,15 @@ const tutorAvailability: Record<string, string[]> = {
     const totalCostElement = document.getElementById('totalCost');
     const hourlyRateInput = document.getElementById('hourlyRate');
     const displayRateElement = document.getElementById('displayRate');
+    const sendRequestButton = document.querySelector('.btn-send-request');
+    const messageInput = document.getElementById('message');
 
-    let selectedSlots: any[] = [];
+    let selectedSlots = [];
 
     // Actualizar precio mostrado
     function updateDisplayRate() {
       if (!hourlyRateInput || !displayRateElement) return;
-      const rate = (hourlyRateInput as HTMLInputElement).value || '30';
+      const rate = hourlyRateInput.value || '30';
       displayRateElement.textContent = `S/${rate}`;
       updateTotalCost();
     }
@@ -855,7 +1108,7 @@ const tutorAvailability: Record<string, string[]> = {
     // Actualizar costo total
     function updateTotalCost() {
       if (!totalCostElement || !hourlyRateInput) return;
-      const rate = parseInt((hourlyRateInput as HTMLInputElement).value) || 30;
+      const rate = parseInt(hourlyRateInput.value) || 30;
       const total = selectedSlots.length * rate;
       totalCostElement.textContent = `S/${total}`;
     }
@@ -885,7 +1138,7 @@ const tutorAvailability: Record<string, string[]> = {
 
     // Manejar clicks en bloques de horario
     timeBlocks.forEach(block => {
-      block.addEventListener('click', function (this: HTMLElement) {
+      block.addEventListener('click', function () {
         const day = this.dataset.day;
         const time = this.dataset.time;
 
@@ -912,7 +1165,7 @@ const tutorAvailability: Record<string, string[]> = {
     // Manejar eliminación de horarios seleccionados
     if (selectedSlotsList) {
       selectedSlotsList.addEventListener('click', function (e) {
-        const target = e.target as HTMLElement;
+        const target = e.target;
         if (target && target.classList && target.classList.contains('remove-slot')) {
           const day = target.dataset?.day;
           const time = target.dataset?.time;
@@ -937,6 +1190,128 @@ const tutorAvailability: Record<string, string[]> = {
     if (hourlyRateInput) {
       hourlyRateInput.addEventListener('input', updateDisplayRate);
     }
+
+    // Manejar envío de solicitud
+    if (sendRequestButton) {
+      sendRequestButton.addEventListener('click', async function () {
+        // Validar que haya al menos un horario seleccionado
+        if (selectedSlots.length === 0) {
+          alert('Por favor selecciona al menos un horario');
+          return;
+        }
+
+        console.log('Intentando enviar solicitud...');
+
+        // Obtener el usuario actual usando el AuthManager
+        const currentUser = window.auth.getCurrentUser();
+        console.log('Usuario actual:', currentUser);
+
+        if (!currentUser) {
+          alert('Debes iniciar sesión para enviar una solicitud');
+          window.location.href = '/hermes-academy/auth';
+          return;
+        }
+
+        // Validar que sea un estudiante
+        if (!currentUser.roles?.isStudent) {
+          alert('Solo los estudiantes pueden enviar solicitudes de tutoría');
+          return;
+        }
+
+        // Obtener datos del formulario
+        const offeredPrice = parseInt(hourlyRateInput?.value || '30') || 30;
+        const message = messageInput?.value || '';
+
+        // Preparar datos de la solicitud - múltiples sesiones si hay múltiples horarios
+        const requestData = {
+          offeredPrice: offeredPrice,
+          message: message,
+          scheduledSessions: selectedSlots.map(slot => ({
+            day: slot.day,
+            time: slot.time,
+            endTime: slot.endTime,
+            duration: 60, // 1 hora por defecto
+          })),
+        };
+
+        try {
+          // Deshabilitar botón mientras se procesa
+          if (sendRequestButton) {
+            sendRequestButton.disabled = true;
+            sendRequestButton.textContent = 'Enviando...';
+          }
+
+          // Enviar solicitud usando la función
+          console.log('Sending request with:', { studentId: currentUser.id, tutorId, courseId, requestData });
+          const success = sendTutoringRequest(currentUser.id, tutorId, courseId, requestData);
+
+          if (success) {
+            showSuccessModal();
+
+            // Limpiar formulario
+            selectedSlots = [];
+            updateSelectedSlotsList();
+            if (messageInput) messageInput.value = '';
+          } else {
+            showErrorModal();
+          }
+        } catch (error) {
+          console.error('Error enviando solicitud:', error);
+          showErrorModal();
+        } finally {
+          // Rehabilitar botón
+          if (sendRequestButton) {
+            sendRequestButton.disabled = false;
+            sendRequestButton.textContent = 'Enviar solicitud';
+          }
+        }
+      });
+    }
+
+    // Funciones para manejar modales
+    window.showSuccessModal = function () {
+      const modal = document.getElementById('successModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevenir scroll
+      }
+    };
+
+    window.showErrorModal = function () {
+      const modal = document.getElementById('errorModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevenir scroll
+      }
+    };
+
+    window.closeModal = function () {
+      const successModal = document.getElementById('successModal');
+      const errorModal = document.getElementById('errorModal');
+
+      if (successModal) successModal.style.display = 'none';
+      if (errorModal) errorModal.style.display = 'none';
+
+      document.body.style.overflow = 'auto'; // Restaurar scroll
+    };
+
+    window.goToDashboard = function () {
+      window.location.href = '/hermes-academy/dashboard';
+    };
+
+    // Cerrar modal al hacer clic en el overlay
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+      }
+    });
+
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
 
     // Inicializar
     updateSelectedSlotsList();

@@ -8,8 +8,20 @@ import Layout from '../layouts/Layout.astro';
       <div class='auth-card'>
         <!-- Header -->
         <div class='auth-header'>
-          <h1 class='welcome-text'>Welcome to</h1>
+          <h1 class='welcome-text'>Bienvenido a</h1>
           <h2 class='brand-text'>Hermes Academy</h2>
+        </div>
+
+        <!-- Error Message Container -->
+        <div class='error-message' id='errorMessage' style='display: none;'>
+          <i class='fas fa-exclamation-circle'></i>
+          <span id='errorText'></span>
+        </div>
+
+        <!-- Success Message Container -->
+        <div class='success-message' id='successMessage' style='display: none;'>
+          <i class='fas fa-check-circle'></i>
+          <span id='successText'></span>
         </div>
 
         <!-- Social Login Buttons -->
@@ -37,7 +49,7 @@ import Layout from '../layouts/Layout.astro';
               >
               </path>
             </svg>
-            Login with Google
+            Iniciar con Google
           </button>
 
           <button type='button' class='social-btn github-btn' onclick='loginWithGithub()'>
@@ -48,13 +60,13 @@ import Layout from '../layouts/Layout.astro';
               >
               </path>
             </svg>
-            Login with Github
+            Iniciar con Github
           </button>
         </div>
 
         <!-- Divider -->
         <div class='divider'>
-          <span>OR</span>
+          <span>O</span>
         </div>
 
         <!-- Login Form -->
@@ -68,7 +80,7 @@ import Layout from '../layouts/Layout.astro';
                 >
                 </path>
               </svg>
-              <input type='email' placeholder='example@gmail.com' class='form-input' id='email' required />
+              <input type='email' placeholder='correo@universidad.edu.pe' class='form-input' id='email' required />
             </div>
           </div>
 
@@ -103,18 +115,18 @@ import Layout from '../layouts/Layout.astro';
             <label class='checkbox-label'>
               <input type='checkbox' id='remember' />
               <span class='checkmark'></span>
-              Remember me
+              Recordarme
             </label>
-            <a href='#' class='forgot-link'>Forgot Password?</a>
+            <a href='#' class='forgot-link'>¿Olvidaste tu contraseña?</a>
           </div>
 
-          <button type='submit' class='login-btn'>Login</button>
+          <button type='submit' class='login-btn'>Iniciar sesión</button>
         </form>
 
         <!-- Register Link -->
         <div class='register-link'>
-          <span id='authToggleText'>Don't have an account?</span>
-          <a href='#' onclick='toggleAuthMode()' id='authToggleLink'>Register</a>
+          <span id='authToggleText'>¿No tienes una cuenta?</span>
+          <a href='#' onclick='toggleAuthMode()' id='authToggleLink'>Registrarse</a>
         </div>
 
         <!-- Register Form (hidden initially) -->
@@ -149,7 +161,7 @@ import Layout from '../layouts/Layout.astro';
               </svg>
               <input
                 type='password'
-                placeholder='••••••••••'
+                placeholder='Contraseña (mín. 6 caracteres)'
                 class='form-input'
                 id='registerPassword'
                 required
@@ -526,15 +538,15 @@ import Layout from '../layouts/Layout.astro';
       // Mostrar formulario de registro
       loginForm.style.display = 'none';
       registerForm.style.display = 'flex';
-      authToggleText.textContent = 'Already have an account?';
-      authToggleLink.textContent = 'Login';
+      authToggleText.textContent = '¿Ya tienes una cuenta?';
+      authToggleLink.textContent = 'Iniciar sesión';
       isLoginMode = false;
     } else {
       // Mostrar formulario de login
       loginForm.style.display = 'flex';
       registerForm.style.display = 'none';
-      authToggleText.textContent = "Don't have an account?";
-      authToggleLink.textContent = 'Register';
+      authToggleText.textContent = '¿No tienes una cuenta?';
+      authToggleLink.textContent = 'Registrarse';
       isLoginMode = true;
     }
   }
@@ -566,6 +578,53 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
+  // Funciones para mostrar mensajes inline
+  function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const successDiv = document.getElementById('successMessage');
+
+    // Ocultar mensaje de éxito si está visible
+    if (successDiv) successDiv.style.display = 'none';
+
+    if (errorDiv && errorText) {
+      errorText.textContent = message;
+      errorDiv.style.display = 'flex';
+
+      // Auto-ocultar después de 5 segundos
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+  }
+
+  function showSuccess(message) {
+    const successDiv = document.getElementById('successMessage');
+    const successText = document.getElementById('successText');
+    const errorDiv = document.getElementById('errorMessage');
+
+    // Ocultar mensaje de error si está visible
+    if (errorDiv) errorDiv.style.display = 'none';
+
+    if (successDiv && successText) {
+      successText.textContent = message;
+      successDiv.style.display = 'flex';
+
+      // Auto-ocultar después de 3 segundos
+      setTimeout(() => {
+        successDiv.style.display = 'none';
+      }, 3000);
+    }
+  }
+
+  function hideMessages() {
+    const errorDiv = document.getElementById('errorMessage');
+    const successDiv = document.getElementById('successMessage');
+
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
+  }
+
   // Manejar login
   function handleLogin(event) {
     event.preventDefault();
@@ -584,10 +643,13 @@ import Layout from '../layouts/Layout.astro';
     console.log('Resultado del login:', result);
 
     if (result.success) {
-      alert('¡Inicio de sesión exitoso!');
-      redirectAfterAuth(result.user);
+      showSuccess('¡Inicio de sesión exitoso!');
+      // Esperar un momento antes de redirigir para que el usuario vea el mensaje
+      setTimeout(() => {
+        redirectAfterAuth(result.user);
+      }, 1000);
     } else {
-      alert(result.error);
+      showError(result.error);
     }
   }
 
@@ -601,13 +663,13 @@ import Layout from '../layouts/Layout.astro';
 
     // Validar que las contraseñas coincidan
     if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      showError('Las contraseñas no coinciden');
       return;
     }
 
     // Validar email universitario
     if (!email.includes('.edu.pe')) {
-      alert('Debes usar un email universitario (.edu.pe)');
+      showError('Debes usar un email universitario (.edu.pe)');
       return;
     }
 
@@ -615,16 +677,18 @@ import Layout from '../layouts/Layout.astro';
     const result = window.auth.register(email, password);
 
     if (result.success) {
-      alert('¡Cuenta creada exitosamente! Ahora completa tu perfil.');
-      // Pasar el parámetro de redirección a complete-profile
-      const redirectParam = getRedirectParam();
-      if (redirectParam) {
-        window.location.href = baseUrl + '/complete-profile?redirect=' + redirectParam;
-      } else {
-        window.location.href = baseUrl + '/complete-profile';
-      }
+      showSuccess('¡Cuenta creada exitosamente! Ahora completa tu perfil.');
+      // Esperar un momento y luego redirigir
+      setTimeout(() => {
+        const redirectParam = getRedirectParam();
+        if (redirectParam) {
+          window.location.href = baseUrl + '/complete-profile?redirect=' + redirectParam;
+        } else {
+          window.location.href = baseUrl + '/complete-profile';
+        }
+      }, 1500);
     } else {
-      alert(result.error);
+      showError(result.error);
     }
   }
 
@@ -636,11 +700,11 @@ import Layout from '../layouts/Layout.astro';
 
   // Deshabilitar botones de redes sociales por ahora
   function loginWithGoogle() {
-    alert('Login con Google estará disponible próximamente');
+    showError('Inicio con Google estará disponible próximamente');
   }
 
   function loginWithGithub() {
-    alert('Login con GitHub estará disponible próximamente');
+    showError('Inicio con GitHub estará disponible próximamente');
   }
 
   // Verificar si ya está logueado al cargar la página
@@ -651,6 +715,13 @@ import Layout from '../layouts/Layout.astro';
         redirectAfterAuth(user);
       }
     }
+
+    // Agregar event listeners para ocultar mensajes al escribir
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+      input.addEventListener('input', hideMessages);
+      input.addEventListener('focus', hideMessages);
+    });
   });
 
   // Hacer las funciones globales
@@ -722,6 +793,49 @@ import Layout from '../layouts/Layout.astro';
     color: var(--color-primary);
     font-weight: 700;
     margin: 0;
+  }
+
+  /* Mensajes de error y éxito */
+  .error-message,
+  .success-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .error-message {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+
+  .success-message {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+  }
+
+  .error-message i,
+  .success-message i {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .social-buttons {

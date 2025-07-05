@@ -41,40 +41,6 @@ export const universities = [
     }
   },
   {
-    id: 2,
-    name: "Universidad Nacional Mayor de San Marcos",
-    shortName: "UNMSM",
-    logo: "/universidades/san_marcos.png",
-    type: "publica",
-    location: {
-      city: "Lima",
-      district: "Cercado de Lima",
-      address: "Av. Universitaria cdra. 34 s/n - Ciudad Universitaria"
-    },
-    founded: 1551,
-    description: "La universidad más antigua de América, decana de América con tradición académica",
-    website: "https://unmsm.edu.pe",
-    contact: {
-      phone: "(01) 619-7000",
-      email: "webmaster@unmsm.edu.pe"
-    },
-    stats: {
-      rating: 4.4,
-      studentsCount: 32000,
-      facultiesCount: 20,
-      careersCount: 65
-    },
-    accreditation: {
-      sunedu: true,
-      international: []
-    },
-    metadata: {
-      isActive: true,
-      createdAt: "2023-01-01",
-      updatedAt: "2024-12-01"
-    }
-  },
-  {
     id: 3,
     name: "Pontificia Universidad Católica del Perú",
     shortName: "PUCP",
@@ -177,40 +143,6 @@ export const universities = [
     }
   },
   {
-    id: 6,
-    name: "Universidad Peruana Cayetano Heredia",
-    shortName: "UPCH",
-    logo: "/universidades/cayetano_heredia.jpg",
-    type: "privada",
-    location: {
-      city: "Lima",
-      district: "San Martín de Porres",
-      address: "Av. Honorio Delgado 430, San Martín de Porres 15102"
-    },
-    founded: 1961,
-    description: "Universidad especializada en ciencias de la salud y biomedicina",
-    website: "https://upch.edu.pe",
-    contact: {
-      phone: "(01) 319-0000",
-      email: "informes@upch.edu.pe"
-    },
-    stats: {
-      rating: 4.5,
-      studentsCount: 8500,
-      facultiesCount: 7,
-      careersCount: 20
-    },
-    accreditation: {
-      sunedu: true,
-      international: ["LCME"]
-    },
-    metadata: {
-      isActive: true,
-      createdAt: "2023-01-01",
-      updatedAt: "2024-12-01"
-    }
-  },
-  {
     id: 7,
     name: "Universidad César Vallejo",
     shortName: "UCV",
@@ -279,40 +211,6 @@ export const universities = [
     }
   },
   {
-    id: 9,
-    name: "Universidad del Pacífico",
-    shortName: "UP",
-    logo: "/universidades/UPacifico.png",
-    type: "privada",
-    location: {
-      city: "Lima",
-      district: "Jesús María",
-      address: "Av. Salaverry 2020, Jesús María 15072"
-    },
-    founded: 1962,
-    description: "Universidad especializada en negocios, economía y finanzas",
-    website: "https://up.edu.pe",
-    contact: {
-      phone: "(01) 219-0100",
-      email: "informes@up.edu.pe"
-    },
-    stats: {
-      rating: 4.6,
-      studentsCount: 4000,
-      facultiesCount: 2,
-      careersCount: 8
-    },
-    accreditation: {
-      sunedu: true,
-      international: ["AACSB", "EQUIS"]
-    },
-    metadata: {
-      isActive: true,
-      createdAt: "2023-01-01",
-      updatedAt: "2024-12-01"
-    }
-  },
-  {
     id: 10,
     name: "Universidad Peruana de Ciencias Aplicadas",
     shortName: "UPC",
@@ -339,6 +237,40 @@ export const universities = [
     accreditation: {
       sunedu: true,
       international: ["AACSB"]
+    },
+    metadata: {
+      isActive: true,
+      createdAt: "2023-01-01",
+      updatedAt: "2024-12-01"
+    }
+  },
+  {
+    id: 11,
+    name: "Universidad Nacional Toribio Rodríguez de Mendoza de Amazonas",
+    shortName: "UNTRM",
+    logo: "/universidades/untrm.png",
+    type: "publica",
+    location: {
+      city: "Chachapoyas",
+      district: "Chachapoyas",
+      address: "Calle Higos Urco Nº 342-350-356, Chachapoyas 01001"
+    },
+    founded: 2000,
+    description: "Universidad nacional amazónica con enfoque en desarrollo sostenible y ciencias aplicadas",
+    website: "https://untrm.edu.pe",
+    contact: {
+      phone: "(041) 47-7694",
+      email: "informes@untrm.edu.pe"
+    },
+    stats: {
+      rating: 4.2,
+      studentsCount: 8500,
+      facultiesCount: 6,
+      careersCount: 18
+    },
+    accreditation: {
+      sunedu: true,
+      international: []
     },
     metadata: {
       isActive: true,

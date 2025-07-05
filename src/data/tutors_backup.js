@@ -25,13 +25,13 @@ export const tutors = [
     specializations: ["Matemáticas", "Física", "Química"],
     coursesTaught: [1, 2, 3], // Cálculo de una Variable, Introducción a la Mecánica, Química General
     availability: {
-      monday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
-      tuesday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
-      thursday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
-      friday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
-      saturday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00"],
-      sunday: ["15:00", "16:00", "17:00", "18:00"]
+      monday: ["09:00", "10:00", "14:00", "15:00"],
+      tuesday: [],
+      wednesday: ["10:00", "11:00", "16:00", "17:00"],
+      thursday: [],
+      friday: ["09:00", "10:00", "11:00", "14:00"],
+      saturday: ["10:00", "11:00", "12:00"],
+      sunday: []
     },
     languages: ["Español", "Inglés"],
     teachingExperience: "3 años",
@@ -54,13 +54,13 @@ export const tutors = [
     specializations: ["Programación", "Estructuras de Datos", "Algoritmos"],
     coursesTaught: [1, 3], // Introducción a la Programación, Estructuras de Datos
     availability: {
-      monday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-      tuesday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-      wednesday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-      thursday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-      friday: ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-      saturday: ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"],
-      sunday: ["14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]
+      monday: ["14:00", "15:00", "16:00"],
+      tuesday: ["16:00", "17:00", "18:00"],
+      wednesday: ["14:00", "15:00", "16:00"],
+      thursday: ["16:00", "17:00", "18:00"],
+      friday: ["14:00", "15:00"],
+      saturday: [],
+      sunday: []
     },
     languages: ["Español"],
     teachingExperience: "2 años",
@@ -83,13 +83,13 @@ export const tutors = [
     specializations: ["Matemáticas", "Cálculo", "Física"],
     coursesTaught: [2], // Cálculo Diferencial
     availability: {
-      monday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
-      tuesday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
-      wednesday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
-      thursday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
-      friday: ["09:00", "10:00", "11:00", "12:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
-      saturday: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"],
-      sunday: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+      monday: ["15:00", "16:00", "17:00"],
+      tuesday: ["15:00", "16:00", "17:00"],
+      wednesday: ["15:00", "16:00", "17:00"],
+      thursday: ["15:00", "16:00", "17:00"],
+      friday: ["15:00", "16:00"],
+      saturday: ["10:00", "11:00"],
+      sunday: []
     },
     languages: ["Español", "Inglés"],
     teachingExperience: "1.5 años",
@@ -112,13 +112,13 @@ export const tutors = [
     specializations: ["Programación Avanzada", "Estructuras de Datos", "Algoritmos"],
     coursesTaught: [1, 3], // Introducción a la Programación, Estructuras de Datos
     availability: {
-      monday: ["07:00", "08:00", "09:00", "10:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
-      tuesday: ["07:00", "08:00", "09:00", "10:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
-      wednesday: ["07:00", "08:00", "09:00", "10:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
-      thursday: ["07:00", "08:00", "09:00", "10:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
-      friday: ["07:00", "08:00", "09:00", "10:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
-      saturday: ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
-      sunday: ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]
+      monday: ["18:00", "19:00", "20:00"],
+      tuesday: ["18:00", "19:00", "20:00"],
+      wednesday: ["18:00", "19:00", "20:00"],
+      thursday: ["18:00", "19:00", "20:00"],
+      friday: ["18:00", "19:00"],
+      saturday: ["14:00", "15:00", "16:00"],
+      sunday: []
     },
     languages: ["Español", "Inglés"],
     teachingExperience: "3 años",
@@ -143,13 +143,13 @@ export const tutors = [
     specializations: ["Programación", "Algoritmos", "Estructuras de Datos"],
     coursesTaught: [8, 9], // Fundamentos de Programación, Cálculo I
     availability: {
-      monday: ["08:00", "09:00", "10:00", "11:00"],
-      tuesday: ["14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["08:00", "09:00", "10:00", "11:00"],
-      thursday: ["14:00", "15:00", "16:00", "17:00"],
-      friday: ["08:00", "09:00", "10:00", "11:00"],
-      saturday: ["10:00", "11:00", "12:00", "13:00"],
-      sunday: ["15:00", "16:00", "17:00", "18:00"]
+      monday: ["16:00", "17:00", "18:00"],
+      tuesday: ["16:00", "17:00", "18:00"],
+      wednesday: ["16:00", "17:00", "18:00"],
+      thursday: ["16:00", "17:00", "18:00"],
+      friday: ["16:00", "17:00"],
+      saturday: ["10:00", "11:00", "12:00"],
+      sunday: []
     },
     languages: ["Español"],
     teachingExperience: "2.5 años",
@@ -348,13 +348,13 @@ export const tutors = [
     specializations: ["Programación", "Matemáticas", "Lógica"],
     coursesTaught: [8], // Fundamentos de Programación
     availability: {
-      monday: ["14:00", "15:00", "16:00", "17:00"],
-      tuesday: ["14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["14:00", "15:00", "16:00", "17:00"],
-      thursday: ["14:00", "15:00", "16:00", "17:00"],
-      friday: ["14:00", "15:00", "16:00", "17:00"],
-      saturday: ["10:00", "11:00", "12:00", "13:00"],
-      sunday: ["16:00", "17:00", "18:00", "19:00"]
+      monday: ["14:00", "15:00", "16:00"],
+      tuesday: ["14:00", "15:00", "16:00"],
+      wednesday: ["14:00", "15:00", "16:00"],
+      thursday: ["14:00", "15:00", "16:00"],
+      friday: ["14:00", "15:00"],
+      saturday: [],
+      sunday: []
     },
     languages: ["Español"],
     teachingExperience: "2.5 años",
@@ -408,13 +408,13 @@ export const tutors = [
     specializations: ["Algoritmos", "Programación", "Estructuras de Datos"],
     coursesTaught: [10, 11], // Algoritmos y Programación, Cálculo I
     availability: {
-      monday: ["08:00", "09:00", "10:00", "11:00"],
-      tuesday: ["14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["08:00", "09:00", "10:00", "11:00"],
-      thursday: ["14:00", "15:00", "16:00", "17:00"],
-      friday: ["08:00", "09:00", "10:00", "11:00"],
-      saturday: ["10:00", "11:00", "12:00", "13:00"],
-      sunday: ["16:00", "17:00", "18:00", "19:00"]
+      monday: ["15:00", "16:00", "17:00"],
+      tuesday: ["15:00", "16:00", "17:00"],
+      wednesday: ["15:00", "16:00", "17:00"],
+      thursday: ["15:00", "16:00", "17:00"],
+      friday: ["15:00", "16:00"],
+      saturday: ["10:00", "11:00", "12:00"],
+      sunday: []
     },
     languages: ["Español"],
     teachingExperience: "2.5 años",
@@ -437,13 +437,13 @@ export const tutors = [
     specializations: ["Programación", "Algoritmos", "Lógica de Programación"],
     coursesTaught: [10], // Algoritmos y Programación
     availability: {
-      monday: ["14:00", "15:00", "16:00", "17:00"],
-      tuesday: ["14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["14:00", "15:00", "16:00", "17:00"],
-      thursday: ["14:00", "15:00", "16:00", "17:00"],
-      friday: ["14:00", "15:00", "16:00", "17:00"],
-      saturday: ["09:00", "10:00", "11:00", "12:00"],
-      sunday: ["15:00", "16:00", "17:00", "18:00"]
+      monday: ["16:00", "17:00", "18:00"],
+      tuesday: ["16:00", "17:00", "18:00"],
+      wednesday: ["16:00", "17:00", "18:00"],
+      thursday: ["16:00", "17:00", "18:00"],
+      friday: ["16:00", "17:00"],
+      saturday: [],
+      sunday: []
     },
     languages: ["Español"],
     teachingExperience: "2 años",
@@ -599,7 +599,7 @@ export const tutors = [
     isActive: true
   },
 
-  // ===== UCV (universityId: 7) =====
+  // ===== UPCH (universityId: 6) =====
   {
     id: 21,
     name: "Carla Vega Morales",
@@ -866,7 +866,7 @@ export const tutors = [
     isActive: true
   },
 
-  // ===== UPC (universityId: 10) =====
+  // ===== UP (universityId: 9) =====
   {
     id: 30,
     name: "Alejandro Ríos Fernández",
@@ -971,13 +971,13 @@ export const tutors = [
     specializations: ["Desarrollo Web", "Metodologías Ágiles", "Patrones de Diseño"],
     coursesTaught: [17], // Desarrollo de Software I
     availability: {
-      monday: ["08:00", "09:00", "10:00", "11:00"],
-      tuesday: ["14:00", "15:00", "16:00", "17:00"],
-      wednesday: ["08:00", "09:00", "10:00", "11:00"],
-      thursday: ["14:00", "15:00", "16:00", "17:00"],
-      friday: ["08:00", "09:00", "10:00", "11:00"],
+      monday: ["14:00", "15:00", "16:00", "17:00"],
+      tuesday: ["16:00", "17:00", "18:00", "19:00"],
+      wednesday: ["14:00", "15:00", "16:00", "17:00"],
+      thursday: ["16:00", "17:00", "18:00", "19:00"],
+      friday: ["14:00", "15:00", "16:00"],
       saturday: ["09:00", "10:00", "11:00", "12:00"],
-      sunday: ["15:00", "16:00", "17:00", "18:00"]
+      sunday: []
     },
     languages: ["Español", "Inglés"],
     teachingExperience: "2 años",

@@ -5,6 +5,21 @@ import { universities } from '../data/universities.js';
 // Helper para rutas con base URL
 const getAssetUrl = (path: string) => import.meta.env.BASE_URL + path;
 
+// Helper para construir URLs de cursos con filtro
+const getCourseFilterUrl = (universityId: number) => {
+  const baseUrl = import.meta.env.BASE_URL || '';
+
+  // Construcción explícita y defensiva
+  let url = baseUrl;
+  if (url && !url.endsWith('/')) {
+    url += '/';
+  }
+  // Usar hash en lugar de query params como fallback
+  url += `courses#university=${universityId}`;
+
+  return url;
+};
+
 // Obtener estadísticas optimizadas para cada universidad
 const universitiesWithStats = universities.map(university => ({
   ...university,
@@ -49,7 +64,7 @@ const universitiesWithStats = universities.map(university => ({
               <div class='university-details'>
                 <div class='detail-item'>
                   <i class='fas fa-map-marker-alt detail-icon' />
-                  <span>{university.city}</span>
+                  <span>{university.location.city}</span>
                 </div>
                 <div class='detail-item'>
                   <i class='fas fa-book detail-icon' />
@@ -63,8 +78,8 @@ const universitiesWithStats = universities.map(university => ({
             </div>
 
             <div class='university-actions'>
-              <a href={getAssetUrl(`/courses?university=${university.id}`)} class='btn btn-primary btn-block'>
-                Ver cursos
+              <a href={getCourseFilterUrl(university.id)} class='btn btn-primary btn-block'>
+                Ver detalles
               </a>
               <button class='btn btn-secondary btn-block'>Información</button>
             </div>

@@ -98,12 +98,16 @@ const currentPath = Astro.url.pathname;
   });
 
   function logout() {
-    // Importar y usar el sistema de autenticación
-    import('../utils/auth.js').then(module => {
-      const auth = module.default;
-      auth.logout();
+    // Usar el sistema de autenticación global
+    if (window.auth) {
+      window.auth.logout();
       window.location.href = baseUrl;
-    });
+    } else {
+      console.error('Sistema de autenticación no disponible');
+      // Fallback: limpiar localStorage manualmente
+      localStorage.removeItem('hermesSession');
+      window.location.href = baseUrl;
+    }
   }
 
   window.toggleProfileMenu = toggleProfileMenu;

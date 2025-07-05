@@ -1,0 +1,586 @@
+---
+// Página de videollamada simulada
+---
+
+<!doctype html>
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Sesión de Tutoría - Hermes Academy</title>
+
+    <!-- Font Awesome icons -->
+    <link
+      rel='stylesheet'
+      href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css'
+      integrity='sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=='
+      crossorigin='anonymous'
+    />
+
+    <!-- Google Fonts -->
+    <link rel='preconnect' href='https://fonts.googleapis.com' />
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+    <link
+      href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+      rel='stylesheet'
+    />
+  </head>
+  <body>
+    <!-- Header de la videollamada -->
+    <header class='videocall-header'>
+      <div class='session-info'>
+        <button class='exit-btn' id='exitBtn'>
+          <i class='fas fa-arrow-left'></i>
+          Salir
+        </button>
+        <span class='session-time' id='sessionTime'>00:15:32</span>
+      </div>
+      <div class='participants-count'>
+        <i class='fas fa-users'></i>
+        <span>2 participantes</span>
+      </div>
+    </header>
+
+    <!-- Área principal de video -->
+    <main class='videocall-main'>
+      <!-- Video del tutor (principal) -->
+      <div class='main-video'>
+        <div class='video-placeholder tutor-video'>
+          <div class='avatar-large'>
+            <i class='fas fa-user'></i>
+          </div>
+          <div class='participant-name'>Prof. María González</div>
+        </div>
+      </div>
+
+      <!-- Video del estudiante (miniatura) -->
+      <div class='self-video'>
+        <div class='video-placeholder student-video'>
+          <div class='avatar-small'>
+            <i class='fas fa-user'></i>
+          </div>
+          <div class='participant-name'>Tú</div>
+        </div>
+      </div>
+
+      <!-- Panel lateral de chat -->
+      <aside class='chat-panel' id='chatPanel'>
+        <div class='chat-header'>
+          <h3><i class='fas fa-comments'></i> Chat</h3>
+          <button class='close-chat' id='closeChatBtn'>
+            <i class='fas fa-times'></i>
+          </button>
+        </div>
+
+        <div class='chat-messages'>
+          <div class='message tutor-message'>
+            <div class='message-author'>Prof. María</div>
+            <div class='message-content'>¡Hola! Bienvenido a la sesión de tutoría</div>
+            <div class='message-time'>14:30</div>
+          </div>
+
+          <div class='message student-message'>
+            <div class='message-author'>Tú</div>
+            <div class='message-content'>Hola profesora, gracias por la sesión</div>
+            <div class='message-time'>14:31</div>
+          </div>
+
+          <div class='message tutor-message'>
+            <div class='message-author'>Prof. María</div>
+            <div class='message-content'>¿En qué tema específico necesitas ayuda hoy?</div>
+            <div class='message-time'>14:32</div>
+          </div>
+        </div>
+
+        <div class='chat-input'>
+          <input type='text' placeholder='Escribe un mensaje...' disabled />
+          <button disabled><i class='fas fa-paper-plane'></i></button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Controles de la videollamada -->
+    <footer class='videocall-controls'>
+      <div class='controls-left'>
+        <button class='control-btn mute-btn active'>
+          <i class='fas fa-microphone'></i>
+        </button>
+        <button class='control-btn camera-btn active'>
+          <i class='fas fa-video'></i>
+        </button>
+      </div>
+
+      <div class='controls-center'>
+        <button class='control-btn chat-btn' id='chatToggleBtn'>
+          <i class='fas fa-comments'></i>
+        </button>
+        <button class='control-btn screen-btn'>
+          <i class='fas fa-desktop'></i>
+        </button>
+        <button class='control-btn settings-btn'>
+          <i class='fas fa-cog'></i>
+        </button>
+      </div>
+
+      <div class='controls-right'>
+        <button class='control-btn end-call-btn' id='endCallBtn'>
+          <i class='fas fa-phone-slash'></i>
+          Finalizar
+        </button>
+      </div>
+    </footer>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #1a1a1a;
+        color: white;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header */
+      .videocall-header {
+        background: #2d2d2d;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #404040;
+      }
+
+      .session-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .exit-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #404040;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .exit-btn:hover {
+        background: #525252;
+        transform: translateY(-1px);
+      }
+
+      .session-time {
+        font-size: 0.9rem;
+        color: white;
+        font-weight: 500;
+      }
+
+      .participants-count {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #ccc;
+      }
+
+      /* Área principal */
+      .videocall-main {
+        flex: 1;
+        display: flex;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .main-video {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0f172a;
+        position: relative;
+      }
+
+      .video-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .tutor-video {
+        width: 100%;
+        height: 100%;
+      }
+
+      .avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .avatar-small {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .participant-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      /* Video del estudiante (miniatura) */
+      .self-video {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 180px;
+        height: 135px;
+        background: #1e293b;
+        border-radius: 8px;
+        border: 3px solid #404040;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .student-video {
+        width: 100%;
+        height: 100%;
+      }
+
+      .self-video .participant-name {
+        font-size: 0.9rem;
+      }
+
+      /* Panel de chat */
+      .chat-panel {
+        width: 350px;
+        background: #2d2d2d;
+        border-left: 1px solid #404040;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .chat-panel.open {
+        transform: translateX(0);
+      }
+
+      .chat-header {
+        padding: 1rem;
+        border-bottom: 1px solid #404040;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .chat-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+      }
+
+      .close-chat {
+        background: none;
+        border: none;
+        color: #ccc;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      .close-chat:hover {
+        background: #404040;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .message {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .tutor-message {
+        align-items: flex-start;
+      }
+
+      .student-message {
+        align-items: flex-end;
+      }
+
+      .message-author {
+        font-size: 0.8rem;
+        color: #ccc;
+        font-weight: 500;
+      }
+
+      .message-content {
+        background: #404040;
+        padding: 0.75rem;
+        border-radius: 12px;
+        max-width: 80%;
+        font-size: 0.9rem;
+      }
+
+      .tutor-message .message-content {
+        background: #6366f1;
+      }
+
+      .student-message .message-content {
+        background: #10b981;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        color: #888;
+      }
+
+      .chat-input {
+        padding: 1rem;
+        border-top: 1px solid #404040;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #404040;
+        border-radius: 6px;
+        background: #1a1a1a;
+        color: white;
+        font-size: 0.9rem;
+      }
+
+      .chat-input input:focus {
+        outline: none;
+        border-color: #6366f1;
+      }
+
+      .chat-input button {
+        padding: 0.75rem;
+        background: #6366f1;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .chat-input button:hover:not(:disabled) {
+        background: #5855eb;
+      }
+
+      .chat-input button:disabled {
+        background: #404040;
+        cursor: not-allowed;
+      }
+
+      /* Controles */
+      .videocall-controls {
+        background: #2d2d2d;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #404040;
+      }
+
+      .controls-left,
+      .controls-center,
+      .controls-right {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .control-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        background: #404040;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+      }
+
+      .control-btn:hover {
+        background: #525252;
+        transform: scale(1.05);
+      }
+
+      .control-btn.active {
+        background: #6366f1;
+      }
+
+      .control-btn.active:hover {
+        background: #5855eb;
+      }
+
+      .end-call-btn {
+        background: #ef4444 !important;
+        width: auto;
+        padding: 0 1.5rem;
+        border-radius: 24px;
+        gap: 0.5rem;
+        font-weight: 500;
+      }
+
+      .end-call-btn:hover {
+        background: #dc2626 !important;
+      }
+
+      /* Responsivo */
+      @media (max-width: 768px) {
+        .videocall-header {
+          padding: 1rem;
+        }
+
+        .self-video {
+          width: 140px;
+          height: 105px;
+        }
+
+        .chat-panel {
+          width: 100%;
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 100%;
+          z-index: 10;
+        }
+
+        .controls-left,
+        .controls-center,
+        .controls-right {
+          gap: 0.5rem;
+        }
+
+        .control-btn {
+          width: 44px;
+          height: 44px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Simulador de tiempo de sesión
+        let seconds = 932; // 15:32
+        const sessionTimeEl = document.getElementById('sessionTime');
+
+        function updateSessionTime() {
+          seconds++;
+          const hours = Math.floor(seconds / 3600);
+          const mins = Math.floor((seconds % 3600) / 60);
+          const secs = seconds % 60;
+
+          const timeString =
+            hours > 0
+              ? `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+              : `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+          if (sessionTimeEl) {
+            sessionTimeEl.textContent = timeString;
+          }
+        }
+
+        setInterval(updateSessionTime, 1000);
+
+        // Toggle del chat
+        const chatToggleBtn = document.getElementById('chatToggleBtn');
+        const chatPanel = document.getElementById('chatPanel');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+
+        if (chatToggleBtn && chatPanel) {
+          chatToggleBtn.addEventListener('click', function () {
+            chatPanel.classList.toggle('open');
+            chatToggleBtn.classList.toggle('active');
+          });
+        }
+
+        if (closeChatBtn && chatPanel && chatToggleBtn) {
+          closeChatBtn.addEventListener('click', function () {
+            chatPanel.classList.remove('open');
+            chatToggleBtn.classList.remove('active');
+          });
+        }
+
+        // Botón de finalizar llamada
+        const endCallBtn = document.getElementById('endCallBtn');
+        if (endCallBtn) {
+          endCallBtn.addEventListener('click', function () {
+            // Redirigir de vuelta al dashboard
+            window.location.href = '/hermes-academy/dashboard';
+          });
+        }
+
+        // Botón de salir
+        const exitBtn = document.getElementById('exitBtn');
+        if (exitBtn) {
+          exitBtn.addEventListener('click', function () {
+            // Redirigir de vuelta al dashboard
+            window.location.href = '/hermes-academy/dashboard';
+          });
+        }
+
+        // Efectos visuales para los botones de control
+        const controlBtns = document.querySelectorAll('.control-btn:not(.end-call-btn)');
+        controlBtns.forEach(btn => {
+          btn.addEventListener('click', function () {
+            if (!btn.classList.contains('active')) {
+              btn.classList.add('active');
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

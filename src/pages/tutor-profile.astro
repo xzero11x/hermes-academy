@@ -1,0 +1,736 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title='Perfil del Tutor - Hermes Academy'>
+  <main class='tutor-profile-main'>
+    <div class='container'>
+      <!-- Header del perfil -->
+      <div class='tutor-header'>
+        <div class='tutor-avatar'>
+          <i class='fas fa-user-graduate'></i>
+        </div>
+        <div class='tutor-info'>
+          <h1 class='tutor-name' id='tutorName'>Cargando...</h1>
+          <p class='tutor-university' id='tutorUniversity'>-</p>
+          <div class='tutor-rating'>
+            <div class='stars' id='tutorStars'>
+              <i class='fas fa-star'></i>
+              <i class='fas fa-star'></i>
+              <i class='fas fa-star'></i>
+              <i class='fas fa-star'></i>
+              <i class='fas fa-star'></i>
+            </div>
+            <span class='rating-text' id='ratingText'>4.8 (45 sesiones)</span>
+          </div>
+        </div>
+        <div class='tutor-badges'>
+          <span class='badge verified'>
+            <i class='fas fa-shield-check'></i>
+            Verificado
+          </span>
+        </div>
+      </div>
+
+      <!-- Información del curso -->
+      <div class='course-info-card'>
+        <h2><i class='fas fa-book'></i> Información del Curso</h2>
+        <div class='course-details'>
+          <div class='course-item'>
+            <strong class='course-name' id='courseName'>Estructuras de Datos</strong>
+            <span class='course-code' id='courseCode'>CS2001</span>
+          </div>
+          <div class='course-description' id='courseDescription'>
+            Curso fundamental de programación que cubre listas, pilas, colas, árboles y algoritmos de ordenamiento.
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid principal -->
+      <div class='profile-grid'>
+        <!-- Información del tutor -->
+        <div class='tutor-details'>
+          <div class='detail-card'>
+            <h3><i class='fas fa-user'></i> Sobre el Tutor</h3>
+            <div class='tutor-description' id='tutorDescription'>
+              Tutor especializado en Estructuras de Datos con 2 años de experiencia enseñando. Me enfoco en explicar
+              conceptos complejos de manera simple y práctica.
+            </div>
+
+            <div class='tutor-stats'>
+              <div class='stat'>
+                <i class='fas fa-clock'></i>
+                <span class='stat-value' id='totalSessions'>45</span>
+                <span class='stat-label'>Sesiones</span>
+              </div>
+              <div class='stat'>
+                <i class='fas fa-star'></i>
+                <span class='stat-value' id='tutorRating'>4.8</span>
+                <span class='stat-label'>Rating</span>
+              </div>
+              <div class='stat'>
+                <i class='fas fa-graduation-cap'></i>
+                <span class='stat-value' id='tutorGrade'>18/20</span>
+                <span class='stat-label'>Nota del Curso</span>
+              </div>
+            </div>
+          </div>
+
+          <div class='detail-card'>
+            <h3><i class='fas fa-calendar-alt'></i> Horarios Disponibles</h3>
+            <div class='availability-grid' id='availabilityGrid'>
+              <div class='day-schedule'>
+                <strong>Lun:</strong> 14:00-16:00, 18:00-20:00
+              </div>
+              <div class='day-schedule'>
+                <strong>Mar:</strong> 16:00-18:00
+              </div>
+              <div class='day-schedule'>
+                <strong>Mié:</strong> 14:00-16:00, 18:00-20:00
+              </div>
+              <div class='day-schedule'>
+                <strong>Jue:</strong> 16:00-18:00
+              </div>
+              <div class='day-schedule'>
+                <strong>Vie:</strong> 14:00-17:00
+              </div>
+              <div class='day-schedule'>
+                <strong>Sáb:</strong> 09:00-12:00
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario de solicitud -->
+        <div class='request-form-container'>
+          <div class='request-card'>
+            <h3><i class='fas fa-paper-plane'></i> Solicitar Tutoría</h3>
+
+            <form class='request-form' id='requestForm'>
+              <div class='form-group'>
+                <label for='sessionDate'>
+                  <i class='fas fa-calendar'></i>
+                  Fecha de la sesión
+                </label>
+                <input type='date' id='sessionDate' required min='' />
+              </div>
+
+              <div class='form-group'>
+                <label for='sessionTime'>
+                  <i class='fas fa-clock'></i>
+                  Hora de la sesión
+                </label>
+                <select id='sessionTime' required>
+                  <option value=''>Selecciona una hora</option>
+                  <option value='09:00'>09:00 AM</option>
+                  <option value='10:00'>10:00 AM</option>
+                  <option value='11:00'>11:00 AM</option>
+                  <option value='14:00'>02:00 PM</option>
+                  <option value='15:00'>03:00 PM</option>
+                  <option value='16:00'>04:00 PM</option>
+                  <option value='17:00'>05:00 PM</option>
+                  <option value='18:00'>06:00 PM</option>
+                  <option value='19:00'>07:00 PM</option>
+                  <option value='20:00'>08:00 PM</option>
+                </select>
+              </div>
+
+              <div class='form-group'>
+                <label for='duration'>
+                  <i class='fas fa-hourglass-half'></i>
+                  Duración
+                </label>
+                <select id='duration' required>
+                  <option value='60'>1 hora</option>
+                  <option value='90'>1.5 horas</option>
+                  <option value='120'>2 horas</option>
+                </select>
+              </div>
+
+              <div class='form-group'>
+                <label for='offeredPrice'>
+                  <i class='fas fa-dollar-sign'></i>
+                  Tu oferta (S/. por hora)
+                </label>
+                <div class='price-input-container'>
+                  <input type='number' id='offeredPrice' min='10' max='100' step='1' required placeholder='25' />
+                  <span class='price-hint'>Precio sugerido: S/. 32/hora</span>
+                </div>
+              </div>
+
+              <div class='form-group'>
+                <label for='requestMessage'>
+                  <i class='fas fa-comment'></i>
+                  Mensaje (opcional)
+                </label>
+                <textarea
+                  id='requestMessage'
+                  rows='3'
+                  placeholder='Cuéntanos qué temas específicos necesitas repasar...'
+                >
+                </textarea>
+              </div>
+
+              <button type='submit' class='request-btn'>
+                <i class='fas fa-paper-plane'></i>
+                Enviar Solicitud
+              </button>
+            </form>
+
+            <!-- Estado de no logueado -->
+            <div class='login-prompt' id='loginPrompt' style='display: none;'>
+              <i class='fas fa-lock'></i>
+              <h4>Inicia sesión para solicitar tutoría</h4>
+              <p>Necesitas una cuenta para enviar solicitudes a tutores.</p>
+              <a href='/auth' class='login-btn'>
+                <i class='fas fa-sign-in-alt'></i>
+                Iniciar Sesión
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de regreso -->
+      <div class='back-button'>
+        <a href='/courses' class='btn-back'>
+          <i class='fas fa-arrow-left'></i>
+          Volver a Cursos
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import '../../utils/tutoring-requests.js';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const tutorId = parseInt(urlParams.get('tutorId')) || 2; // Default a Jorge
+  const courseId = parseInt(urlParams.get('courseId')) || 3; // Default a Estructuras de Datos
+
+  // Datos del tutor demo Jorge Ramírez
+  const tutorData = {
+    id: 2,
+    name: 'Jorge Ramírez Silva',
+    university: 'Universidad de Ingeniería y Tecnología (UTEC)',
+    rating: 4.8,
+    totalSessions: 45,
+    description:
+      'Tutor especializado en Estructuras de Datos con 2 años de experiencia enseñando. Me enfoco en explicar conceptos complejos de manera simple y práctica.',
+    grade: '18/20',
+    hourlyRate: 32,
+    availability: {
+      monday: ['14:00-16:00', '18:00-20:00'],
+      tuesday: ['16:00-18:00'],
+      wednesday: ['14:00-16:00', '18:00-20:00'],
+      thursday: ['16:00-18:00'],
+      friday: ['14:00-17:00'],
+      saturday: ['09:00-12:00'],
+      sunday: [],
+    },
+  };
+
+  const courseData = {
+    id: 3,
+    name: 'Estructuras de Datos',
+    code: 'CS2001',
+    description:
+      'Curso fundamental de programación que cubre listas, pilas, colas, árboles y algoritmos de ordenamiento.',
+  };
+
+  function initializePage() {
+    // Cargar datos del tutor
+    document.getElementById('tutorName').textContent = tutorData.name;
+    document.getElementById('tutorUniversity').textContent = tutorData.university;
+    document.getElementById('ratingText').textContent = `${tutorData.rating} (${tutorData.totalSessions} sesiones)`;
+    document.getElementById('tutorDescription').textContent = tutorData.description;
+    document.getElementById('totalSessions').textContent = tutorData.totalSessions;
+    document.getElementById('tutorRating').textContent = tutorData.rating;
+    document.getElementById('tutorGrade').textContent = tutorData.grade;
+
+    // Cargar datos del curso
+    document.getElementById('courseName').textContent = courseData.name;
+    document.getElementById('courseCode').textContent = courseData.code;
+    document.getElementById('courseDescription').textContent = courseData.description;
+
+    // Configurar fecha mínima (hoy)
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    document.getElementById('sessionDate').setAttribute('min', minDate);
+
+    // Verificar si el usuario está logueado
+    checkUserLogin();
+  }
+
+  function checkUserLogin() {
+    const isLoggedIn = window.auth?.isLoggedIn();
+    const requestForm = document.getElementById('requestForm');
+    const loginPrompt = document.getElementById('loginPrompt');
+
+    if (!isLoggedIn) {
+      requestForm.style.display = 'none';
+      loginPrompt.style.display = 'block';
+    } else {
+      requestForm.style.display = 'block';
+      loginPrompt.style.display = 'none';
+    }
+  }
+
+  function handleRequestSubmit(event) {
+    event.preventDefault();
+
+    // Verificar autenticación
+    if (!window.auth?.isLoggedIn()) {
+      alert('Debes iniciar sesión para enviar una solicitud');
+      window.location.href = '/auth';
+      return;
+    }
+
+    const currentUser = window.auth.getCurrentUser();
+    if (!currentUser) {
+      alert('Error: No se pudo obtener la información del usuario');
+      return;
+    }
+
+    // Obtener datos del formulario
+    const sessionDate = document.getElementById('sessionDate').value;
+    const sessionTime = document.getElementById('sessionTime').value;
+    const duration = parseInt(document.getElementById('duration').value);
+    const offeredPrice = parseFloat(document.getElementById('offeredPrice').value);
+    const message = document.getElementById('requestMessage').value;
+
+    // Validaciones
+    if (!sessionDate || !sessionTime || !duration || !offeredPrice) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    if (offeredPrice < 10 || offeredPrice > 100) {
+      alert('El precio debe estar entre S/. 10 y S/. 100 por hora');
+      return;
+    }
+
+    // Preparar datos de la solicitud
+    const requestData = {
+      offeredPrice: offeredPrice,
+      sessionDate: sessionDate,
+      sessionTime: sessionTime,
+      duration: duration,
+      message: message,
+      studentName: currentUser.profile?.fullName || currentUser.email,
+      courseName: courseData.name,
+      courseCode: courseData.code,
+    };
+
+    // Enviar solicitud
+    try {
+      const result = window.tutoringRequestManager.sendTutoringRequest(currentUser.id, tutorId, courseId, requestData);
+
+      if (result.success) {
+        alert('¡Solicitud enviada exitosamente! El tutor recibirá una notificación y podrá responder en breve.');
+
+        // Limpiar formulario
+        document.getElementById('requestForm').reset();
+
+        // Redirigir a notificaciones después de un momento
+        setTimeout(() => {
+          window.location.href = '/notifications';
+        }, 2000);
+      } else {
+        alert('Error al enviar la solicitud: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error inesperado al enviar la solicitud');
+    }
+  }
+
+  // Inicializar página
+  document.addEventListener('DOMContentLoaded', function () {
+    initializePage();
+
+    // Agregar event listener al formulario
+    const form = document.getElementById('requestForm');
+    if (form) {
+      form.addEventListener('submit', handleRequestSubmit);
+    }
+  });
+</script>
+
+<style>
+  .tutor-profile-main {
+    min-height: calc(100vh - 64px);
+    padding: var(--spacing-md) 0;
+    background: linear-gradient(to bottom, #fafafa, #ffffff);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+  }
+
+  /* Header del tutor */
+  .tutor-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .tutor-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .tutor-info {
+    flex: 1;
+  }
+
+  .tutor-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .tutor-university {
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+
+  .tutor-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .stars {
+    color: #fbbf24;
+    font-size: 0.9rem;
+  }
+
+  .rating-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .tutor-badges {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .badge {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .badge.verified {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  /* Información del curso */
+  .course-info-card {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .course-info-card h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--text-primary);
+  }
+
+  .course-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .course-name {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .course-code {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .course-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Grid principal */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .detail-card {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .detail-card h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--text-primary);
+  }
+
+  .tutor-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .tutor-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .stat {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--bg-general);
+    border-radius: var(--radius-md);
+  }
+
+  .stat i {
+    color: var(--color-primary);
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .availability-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .day-schedule {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .day-schedule strong {
+    color: var(--text-primary);
+    width: 40px;
+    display: inline-block;
+  }
+
+  /* Formulario de solicitud */
+  .request-card {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: var(--spacing-lg);
+  }
+
+  .request-card h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-lg) 0;
+    color: var(--text-primary);
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .form-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .price-input-container {
+    position: relative;
+  }
+
+  .price-hint {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: var(--spacing-xs);
+    display: block;
+  }
+
+  .request-btn {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+  }
+
+  .request-btn:hover {
+    background: var(--color-primary-dark);
+  }
+
+  /* Login prompt */
+  .login-prompt {
+    text-align: center;
+    padding: var(--spacing-lg);
+  }
+
+  .login-prompt i {
+    font-size: 2rem;
+    color: var(--text-light);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .login-prompt h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-primary);
+  }
+
+  .login-prompt p {
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-lg) 0;
+  }
+
+  .login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: background 0.2s ease;
+  }
+
+  .login-btn:hover {
+    background: var(--color-primary-dark);
+  }
+
+  /* Botón de regreso */
+  .back-button {
+    text-align: center;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--bg-general);
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+  }
+
+  .btn-back:hover {
+    background: var(--border-medium);
+    color: var(--text-primary);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .tutor-header {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--spacing-md);
+    }
+
+    .profile-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tutor-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .request-card {
+      position: static;
+    }
+  }
+</style>

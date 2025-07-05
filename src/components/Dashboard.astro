@@ -25,6 +25,14 @@
           </span>
         </div>
       </div>
+
+      <!-- Botón aplicar como tutor (solo visible para estudiantes no tutores) -->
+      <div class='header-actions'>
+        <button class='apply-tutor-btn' id='applyTutorBtn' style='display: none;'>
+          <i class='fas fa-chalkboard-teacher'></i>
+          Aplicar como tutor
+        </button>
+      </div>
     </div>
 
     <!-- Grid principal dividido -->
@@ -41,10 +49,38 @@
             <h2><i class='fas fa-clock'></i> Próximas tutorías</h2>
             <span class='count-badge' id='tutorialsCount'>0</span>
           </div>
-          <div class='tutorials-list' id='tutorialsList'>
-            <div class='empty-state'>
-              <i class='fas fa-calendar-plus'></i>
-              <p>No tienes tutorías programadas</p>
+          <div
+            class='tutorials-list'
+            id='tutorialsList'
+            style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
+          >
+            <div
+              class='empty-state'
+              style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+            >
+              <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
+              <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solicitudes Pendientes -->
+        <div class='dashboard-card requests-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-hourglass-half'></i> Solicitudes Pendientes</h2>
+            <span class='count-badge' id='requestsCount'>0</span>
+          </div>
+          <div
+            class='requests-list'
+            id='requestsList'
+            style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
+          >
+            <div
+              class='empty-state'
+              style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+            >
+              <i class='fas fa-envelope' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
+              <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes solicitudes pendientes</p>
             </div>
           </div>
         </div>
@@ -55,9 +91,9 @@
             <h2><i class='fas fa-rocket'></i> Accesos rápidos</h2>
           </div>
           <div class='actions-grid'>
-            <a href={import.meta.env.BASE_URL + '/courses'} class='action-btn'>
+            <a href='#' onclick='goToMyCourses()' class='action-btn'>
               <i class='fas fa-search'></i>
-              <span>Buscar cursos</span>
+              <span>Mis cursos</span>
             </a>
             <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
               <i class='fas fa-university'></i>
@@ -86,6 +122,20 @@
                 <span class='course-name' id='tutorCourseName'>-</span>
                 <span class='course-code' id='tutorCourseCode'>-</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solicitudes Entrantes del Tutor -->
+        <div class='dashboard-card tutor-requests-card'>
+          <div class='card-header'>
+            <h2><i class='fas fa-inbox'></i> Solicitudes Entrantes</h2>
+            <span class='count-badge tutor-count-badge' id='tutorRequestsCount'>0</span>
+          </div>
+          <div class='tutor-requests-list' id='tutorRequestsList'>
+            <div class='empty-state'>
+              <i class='fas fa-inbox-in'></i>
+              <p>No hay solicitudes pendientes</p>
             </div>
           </div>
         </div>
@@ -149,42 +199,14 @@
 </section>
 
 <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
-  // Sistema de autenticación integrado
-  class AuthManager {
-    constructor() {
-      this.usersKey = 'hermesUsers';
-      this.sessionKey = 'hermesSession';
-    }
+  // Sistema de autenticación - usa el global del Layout
 
-    getCurrentSession() {
-      const session = localStorage.getItem(this.sessionKey);
-      return session ? JSON.parse(session) : null;
-    }
-
-    getUsers() {
-      const users = localStorage.getItem(this.usersKey);
-      return users ? JSON.parse(users) : [];
-    }
-
-    getCurrentUser() {
-      const session = this.getCurrentSession();
-      if (!session) return null;
-
-      const users = this.getUsers();
-      return users.find(user => user.id === session.userId) || null;
-    }
-
-    logout() {
-      localStorage.removeItem(this.sessionKey);
-      return { success: true };
-    }
-  }
-
-  // Crear instancia global
-  window.auth = new AuthManager();
+  // Crear instancia global (usa el auth global)
+  // window.auth ya está disponible desde el Layout
 
   // Asegurar que existen usuarios demo
   function ensureDemoUsers() {
+    if (!window.auth) return false;
     const users = window.auth.getUsers();
     if (users.length === 0) {
       // Redirigir a la página principal para inicializar datos
@@ -196,7 +218,10 @@
 
   // Cargar datos del usuario al cargar la página
   document.addEventListener('DOMContentLoaded', function () {
-    loadUserData();
+    // Esperar a que el auth global esté disponible
+    setTimeout(() => {
+      loadUserData();
+    }, 100);
   });
   function loadUserData() {
     // Asegurar que existen usuarios demo
@@ -207,7 +232,7 @@
     const user = window.auth.getCurrentUser();
 
     if (!user) {
-      window.location.href = baseUrl + '/auth';
+      window.location.href = `${baseUrl}/auth`;
       return;
     }
 
@@ -226,9 +251,16 @@
     // Cargar tutorías programadas del estudiante
     loadScheduledTutorings(user);
 
+    // Cargar solicitudes pendientes del estudiante
+    loadPendingRequests(user);
+
     // Mostrar módulo tutor si corresponde
     if (user.roles && user.roles.isTutor) {
       showTutorModule(user);
+      loadTutorRequests(user);
+    } else {
+      // Si no es tutor, mostrar botón de aplicar como tutor
+      showApplyTutorButton();
     }
   }
 
@@ -258,6 +290,8 @@
       console.log(`Rendering tutoring ${index}:`, tutoring);
       const tutorialItem = document.createElement('div');
       tutorialItem.className = 'tutorial-item';
+      tutorialItem.style.cssText =
+        'background: white; border: 1px solid #e2e8f0; border-radius: 5px; padding: 0.5rem; margin-bottom: 0.25rem;';
 
       // Formatear fecha
       const date = new Date(tutoring.date);
@@ -268,24 +302,24 @@
       });
 
       tutorialItem.innerHTML = `
-        <div class="tutorial-header">
-          <h4 class="tutorial-course">${tutoring.courseName}</h4>
-          <span class="status-badge ${tutoring.status}">${tutoring.status === 'confirmed' ? 'Confirmada' : tutoring.status}</span>
+        <div class="tutorial-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+          <h4 class="tutorial-course" style="font-size: 0.875rem; font-weight: 600; color: #1e293b; margin: 0;">${tutoring.courseName}</h4>
+          <span class="status-badge ${tutoring.status}" style="padding: 0.125rem 0.375rem; border-radius: 3px; font-size: 0.625rem; font-weight: 500; ${tutoring.status === 'confirmed' ? 'background: #dcfce7; color: #166534;' : 'background: #fef3c7; color: #d97706;'}">${tutoring.status === 'confirmed' ? 'Confirmada' : tutoring.status}</span>
         </div>
-        <p class="tutorial-tutor">Tutor: ${tutoring.tutorName}</p>
-        <div class="tutorial-schedule">
-          <div class="schedule-item">
-            <i class="fas fa-calendar"></i>
+        <p class="tutorial-tutor" style="font-size: 0.75rem; color: #64748b; margin: 0 0 0.25rem 0;">Tutor: ${tutoring.tutorName}</p>
+        <div class="tutorial-schedule" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.25rem;">
+          <div class="schedule-item" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
+            <i class="fas fa-calendar" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
             <span>${dateStr}</span>
           </div>
-          <div class="schedule-item">
-            <i class="fas fa-clock"></i>
-            <span>${tutoring.time} (${tutoring.duration} min)</span>
+          <div class="schedule-item" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
+            <i class="fas fa-clock" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>${tutoring.time} (${tutoring.duration}m)</span>
           </div>
         </div>
-        <div class="tutorial-actions">
-          <button class="btn-action btn-primary" onclick="joinTutoringSession('${tutoring.id}')">
-            <i class="fas fa-play"></i>
+        <div class="tutorial-actions" style="display: flex; justify-content: flex-end;">
+          <button class="btn-action btn-primary" onclick="joinTutoringSession('${tutoring.id}')" style="padding: 0.25rem 0.5rem; border: none; border-radius: 3px; font-size: 0.75rem; font-weight: 500; cursor: pointer; background: #6366f1; color: white;">
+            <i class="fas fa-play" style="color: white; font-size: 0.625rem; margin-right: 0.25rem;"></i>
             Ingresar
           </button>
         </div>
@@ -296,6 +330,457 @@
     });
     console.log('Finished rendering all tutorings');
   }
+
+  function loadPendingRequests(user) {
+    console.log('loadPendingRequests called with user:', user);
+
+    // Obtener solicitudes del localStorage
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    console.log('All requests:', requests);
+
+    // Filtrar solicitudes del usuario actual que estén pendientes
+    const userRequests = requests.filter(
+      req => req.studentId === user.id && (req.status === 'pending' || req.status === 'counter_offer')
+    );
+
+    console.log('User pending requests:', userRequests);
+
+    const requestsList = document.getElementById('requestsList');
+    const requestsCount = document.getElementById('requestsCount');
+
+    if (!requestsList || !requestsCount) return;
+
+    if (userRequests.length === 0) {
+      requestsCount.textContent = '0';
+      return; // Mantener el estado vacío por defecto
+    }
+
+    // Actualizar contador
+    requestsCount.textContent = userRequests.length;
+
+    // Limpiar lista y agregar solicitudes
+    requestsList.innerHTML = '';
+
+    userRequests.forEach((request, index) => {
+      console.log(`Rendering request ${index}:`, request);
+      const requestItem = document.createElement('div');
+      requestItem.style.cssText =
+        'padding: 0.5rem; background: white; border-radius: 5px; border: 1px solid #e2e8f0; margin-bottom: 0.25rem;';
+
+      // Obtener información del curso y tutor
+      const courseName = getCourseName(request.courseId);
+      const tutorName = getTutorName(request.tutorId);
+
+      // Determinar estado y color
+      let statusClass = 'pending';
+      let statusText = 'Pendiente';
+      let statusStyles = 'background: #fef3c7; color: #d97706;';
+      if (request.status === 'counter_offer') {
+        statusClass = 'counter_offer';
+        statusText = 'Contraoferta';
+        statusStyles = 'background: #dbeafe; color: #2563eb;';
+      }
+
+      // Crear lista de sesiones programadas
+      const sessionsHtml = request.scheduledSessions
+        ? request.scheduledSessions
+            .map(
+              session =>
+                `<div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b; margin-bottom: 0.125rem;">
+            <i class="fas fa-calendar" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>${session.day} ${session.time} - ${session.endTime}</span>
+          </div>`
+            )
+            .join('')
+        : `<div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
+            <i class="fas fa-calendar" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>${request.sessionDay} ${request.sessionTime}</span>
+          </div>`;
+
+      const sessionsCount = request.scheduledSessions ? request.scheduledSessions.length : 1;
+
+      requestItem.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+          <div>
+            <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b; margin: 0;">${courseName}</div>
+            <div style="font-size: 0.75rem; color: #64748b; margin: 0;">Tutor: ${tutorName}</div>
+          </div>
+          <span style="padding: 0.125rem 0.375rem; border-radius: 3px; font-size: 0.625rem; font-weight: 500; ${statusStyles}">${statusText}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">
+            <i class="fas fa-clock" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>${sessionsCount} sesión(es) programada(s)</span>
+          </div>
+          ${sessionsHtml}
+          <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
+            <i class="fas fa-dollar-sign" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>S/ ${request.studentOfferedPrice}/hora</span>
+          </div>
+          ${
+            request.status === 'counter_offer' && request.tutorCounterPrice
+              ? `
+          <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
+            <i class="fas fa-handshake" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
+            <span>Contraoferta: S/ ${request.tutorCounterPrice}/hora</span>
+          </div>
+          `
+              : ''
+          }
+        </div>
+      `;
+
+      requestsList.appendChild(requestItem);
+      console.log(`Added request item ${index} to the list`);
+    });
+
+    console.log('Finished rendering all pending requests');
+  }
+
+  // Funciones auxiliares para obtener nombres de curso y tutor
+  function getCourseName(courseId) {
+    // Verificar si courseId es válido
+    if (!courseId && courseId !== 0) {
+      console.warn('courseId is null, undefined or invalid:', courseId);
+      return 'Curso no especificado';
+    }
+
+    // Datos de cursos (versión simplificada para el frontend)
+    const courses = [
+      { id: 1, name: 'Introducción a la Programación' },
+      { id: 2, name: 'Cálculo Diferencial' },
+      { id: 3, name: 'Estructuras de Datos' },
+      { id: 4, name: 'Programación Orientada a Objetos' },
+      { id: 5, name: 'Base de Datos' },
+      { id: 6, name: 'Algoritmos y Complejidad' },
+      { id: 7, name: 'Ingeniería de Software' },
+      { id: 8, name: 'Redes de Computadoras' },
+      { id: 9, name: 'Inteligencia Artificial' },
+      { id: 10, name: 'Desarrollo Web' },
+    ];
+
+    const course = courses.find(c => c.id.toString() === courseId.toString());
+    return course ? course.name : `Curso ID: ${courseId}`;
+  }
+
+  function getTutorName(tutorId) {
+    // Verificar si tutorId es válido
+    if (!tutorId && tutorId !== 0) {
+      console.warn('tutorId is null, undefined or invalid:', tutorId);
+      return 'Tutor no especificado';
+    }
+
+    // Datos de tutores (versión simplificada para el frontend)
+    const tutors = [
+      { id: 1, name: 'María Elena González Vargas' },
+      { id: 2, name: 'Jorge Ramírez Silva' },
+      { id: 3, name: 'Carlos Alberto Mendoza Torres' },
+      { id: 4, name: 'Ana Patricia Flores Castillo' },
+      { id: 5, name: 'Luis Fernando Castro Delgado' },
+    ];
+
+    const tutor = tutors.find(t => t.id.toString() === tutorId.toString());
+    return tutor ? tutor.name : `Tutor ID: ${tutorId}`;
+  }
+
+  // Función global para depurar solicitudes
+  window.debugRequests = function () {
+    console.log('=== DEBUG SOLICITUDES ===');
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    console.log('Total requests:', requests.length);
+    console.log('Requests:', requests);
+
+    const user = window.auth?.getCurrentUser();
+    console.log('Current user:', user);
+
+    if (user) {
+      const userRequests = requests.filter(
+        req => req.studentId === user.id && (req.status === 'pending' || req.status === 'counter_offer')
+      );
+      console.log('User pending requests:', userRequests);
+    }
+    console.log('========================');
+  };
+
+  // Función global para crear solicitud de prueba
+  window.createTestRequest = function () {
+    const user = window.auth?.getCurrentUser();
+    if (!user) {
+      console.log('No hay usuario logueado');
+      return;
+    }
+
+    const testRequest = {
+      id: 'REQ_TEST_' + Date.now(),
+      studentId: user.id,
+      tutorId: 2, // Jorge Ramírez Silva
+      courseId: 3, // Estructuras de Datos
+      studentOfferedPrice: 35,
+      sessionDay: 'Lunes',
+      sessionTime: '14:00',
+      sessionEndTime: '15:00',
+      duration: 60,
+      status: 'pending',
+      message: 'Solicitud de prueba para verificar el sistema',
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+    };
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    requests.push(testRequest);
+    localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+    console.log('Solicitud de prueba creada:', testRequest);
+
+    // Recargar datos
+    loadUserData();
+  };
+
+  // Función para limpiar solicitudes problemáticas
+  window.clearInvalidRequests = function () {
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const validRequests = requests.filter(
+      req => req.tutorId != null && req.courseId != null && req.studentId != null && req.status
+    );
+
+    console.log('Solicitudes antes:', requests.length);
+    console.log('Solicitudes válidas:', validRequests.length);
+
+    localStorage.setItem('hermesTutoringRequests', JSON.stringify(validRequests));
+
+    // Recargar datos
+    loadUserData();
+
+    console.log('Solicitudes inválidas eliminadas');
+  };
+
+  // Función para cargar solicitudes entrantes del tutor
+  function loadTutorRequests(user) {
+    console.log('loadTutorRequests called with user:', user);
+
+    // Obtener solicitudes del localStorage
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    console.log('All requests for tutor check:', requests);
+
+    // Filtrar solicitudes dirigidas a este tutor que estén pendientes
+    const tutorRequests = requests.filter(req => req.tutorId === user.id && req.status === 'pending');
+
+    console.log('Tutor incoming requests:', tutorRequests);
+
+    const tutorRequestsList = document.getElementById('tutorRequestsList');
+    const tutorRequestsCount = document.getElementById('tutorRequestsCount');
+
+    if (!tutorRequestsList || !tutorRequestsCount) return;
+
+    if (tutorRequests.length === 0) {
+      tutorRequestsCount.textContent = '0';
+      return; // Mantener el estado vacío por defecto
+    }
+
+    // Actualizar contador
+    tutorRequestsCount.textContent = tutorRequests.length;
+
+    // Limpiar lista y agregar solicitudes
+    tutorRequestsList.innerHTML = '';
+
+    tutorRequests.forEach((request, index) => {
+      console.log(`Rendering tutor request ${index}:`, request);
+      const requestItem = document.createElement('div');
+      requestItem.className = 'tutor-request-item';
+
+      // Obtener información del curso y estudiante
+      const courseName = getCourseName(request.courseId);
+      const studentName = getStudentName(request.studentId);
+
+      requestItem.innerHTML = `
+        <div class="tutor-request-header">
+          <div>
+            <div class="tutor-request-course">${courseName}</div>
+            <div class="tutor-request-student">Estudiante: ${studentName}</div>
+          </div>
+          <span class="tutor-request-price">S/ ${request.studentOfferedPrice}/h</span>
+        </div>
+        <div class="tutor-request-details">
+          <div class="tutor-request-detail-item">
+            <i class="fas fa-calendar"></i>
+            <span>${request.sessionDay} ${request.sessionTime}</span>
+          </div>
+          ${
+            request.message
+              ? `
+          <div class="tutor-request-detail-item">
+            <i class="fas fa-comment"></i>
+            <span>${request.message}</span>
+          </div>
+          `
+              : ''
+          }
+        </div>
+        <div class="tutor-request-actions">
+          <button class="tutor-action-btn accept" onclick="acceptRequest('${request.id}')">
+            <i class="fas fa-check"></i>
+            Aceptar
+          </button>
+          <button class="tutor-action-btn counter" onclick="counterOffer('${request.id}')">
+            <i class="fas fa-handshake"></i>
+            Contraoferta
+          </button>
+          <button class="tutor-action-btn reject" onclick="rejectRequest('${request.id}')">
+            <i class="fas fa-times"></i>
+            Rechazar
+          </button>
+        </div>
+      `;
+
+      tutorRequestsList.appendChild(requestItem);
+      console.log(`Added tutor request item ${index} to the list`);
+    });
+
+    console.log('Finished rendering all tutor requests');
+  }
+
+  // Función auxiliar para obtener nombre del estudiante
+  function getStudentName(studentId) {
+    // Verificar si studentId es válido
+    if (!studentId && studentId !== 0) {
+      console.warn('studentId is null, undefined or invalid:', studentId);
+      return 'Estudiante no especificado';
+    }
+
+    // Por ahora usamos el sistema de autenticación para obtener el nombre
+    const users = window.auth?.getUsers() || [];
+    const student = users.find(u => u.id === studentId);
+
+    if (student && student.profile && student.profile.fullName) {
+      return student.profile.fullName;
+    } else if (student && student.email) {
+      return student.email.split('@')[0]; // Usar parte del email como nombre
+    }
+
+    return `Estudiante ID: ${studentId}`;
+  }
+
+  // Funciones para gestionar solicitudes del tutor
+  window.acceptRequest = function (requestId) {
+    console.log('Accepting request:', requestId);
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const requestIndex = requests.findIndex(req => req.id === requestId);
+
+    if (requestIndex !== -1) {
+      requests[requestIndex].status = 'accepted';
+      requests[requestIndex].lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+      // Crear notificación para el estudiante
+      createNotificationForStudent(requests[requestIndex], 'accepted');
+
+      alert('Solicitud aceptada exitosamente');
+      loadUserData(); // Recargar datos
+    }
+  };
+
+  window.rejectRequest = function (requestId) {
+    console.log('Rejecting request:', requestId);
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const requestIndex = requests.findIndex(req => req.id === requestId);
+
+    if (requestIndex !== -1) {
+      requests[requestIndex].status = 'rejected';
+      requests[requestIndex].lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+      // Crear notificación para el estudiante
+      createNotificationForStudent(requests[requestIndex], 'rejected');
+
+      alert('Solicitud rechazada');
+      loadUserData(); // Recargar datos
+    }
+  };
+
+  window.counterOffer = function (requestId) {
+    const newPrice = prompt('Ingresa tu contraoferta por hora (S/):');
+
+    if (newPrice && !isNaN(newPrice) && parseFloat(newPrice) > 0) {
+      console.log('Counter offer for request:', requestId, 'Price:', newPrice);
+
+      const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+      const requestIndex = requests.findIndex(req => req.id === requestId);
+
+      if (requestIndex !== -1) {
+        requests[requestIndex].status = 'counter_offer';
+        requests[requestIndex].tutorCounterPrice = parseFloat(newPrice);
+        requests[requestIndex].lastUpdated = new Date().toISOString();
+
+        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+        // Crear notificación para el estudiante
+        createNotificationForStudent(requests[requestIndex], 'counter_offer');
+
+        alert(`Contraoferta enviada: S/ ${newPrice}/hora`);
+        loadUserData(); // Recargar datos
+      }
+    } else if (newPrice !== null) {
+      alert('Por favor ingresa un precio válido');
+    }
+  };
+
+  function createNotificationForStudent(request, action) {
+    const notifications = JSON.parse(localStorage.getItem('hermesNotifications') || '[]');
+
+    let title, message;
+    switch (action) {
+      case 'accepted':
+        title = 'Solicitud aceptada';
+        message = 'Tu solicitud de tutoría ha sido aceptada';
+        break;
+      case 'rejected':
+        title = 'Solicitud rechazada';
+        message = 'Tu solicitud de tutoría ha sido rechazada';
+        break;
+      case 'counter_offer':
+        title = 'Contraoferta recibida';
+        message = `El tutor ha hecho una contraoferta: S/ ${request.tutorCounterPrice}/hora`;
+        break;
+      default:
+        title = 'Actualización de solicitud';
+        message = 'Tu solicitud de tutoría ha sido actualizada';
+    }
+
+    const newNotification = {
+      id: 'NOTIF_' + Date.now(),
+      userId: request.studentId,
+      type: action,
+      title: title,
+      message: message,
+      data: {
+        requestId: request.id,
+        tutorId: request.tutorId,
+        courseId: request.courseId,
+      },
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    notifications.push(newNotification);
+    localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+  }
+
+  function showApplyTutorButton() {
+    const applyTutorBtn = document.getElementById('applyTutorBtn');
+    if (applyTutorBtn) {
+      applyTutorBtn.style.display = 'flex';
+
+      // Agregar evento click para redirigir a la página de aplicación
+      applyTutorBtn.addEventListener('click', function () {
+        window.location.href = `${baseUrl}/become-tutor`;
+      });
+    }
+  }
+
   function showTutorModule(user) {
     // Mostrar elementos del header para tutores (solo badges)
     const tutorBadge = document.getElementById('tutorBadge');
@@ -362,19 +847,33 @@
     );
   }
 
-  function logout() {
-    const result = window.auth.logout();
-    if (result.success) {
-      alert('Sesión cerrada exitosamente');
-      window.location.href = baseUrl + '/auth';
-    }
+  function joinTutoringSession(sessionId) {
+    // Redirigir a la página de videollamada simulada
+    window.location.href = `${baseUrl}/videocall`;
   }
 
-  function joinTutoringSession(sessionId) {
-    // Aquí se abriría la sesión virtual o se mostraría información de la sesión
-    alert(
-      `Redirigiendo a la sesión virtual... (Session ID: ${sessionId})\n\n🎥 En una aplicación real, esto abriría:\n• Sala de videollamada\n• Chat integrado\n• Pizarra compartida\n• Recursos del curso`
-    );
+  function goToMyCourses() {
+    const user = window.auth?.getCurrentUser();
+
+    if (!user) {
+      window.location.href = `${baseUrl}/auth`;
+      return;
+    }
+
+    // Obtener la universidad del usuario
+    let universityId = null;
+    if (user.profile && user.profile.universityId) {
+      universityId = user.profile.universityId;
+    }
+
+    // Si tiene universidad, filtrar por ella; si no, mostrar todos
+    if (universityId) {
+      const targetUrl = `${baseUrl}/courses#university=${universityId}`;
+      window.location.href = targetUrl;
+    } else {
+      const targetUrl = `${baseUrl}/courses`;
+      window.location.href = targetUrl;
+    }
   }
 
   // Hacer funciones globales
@@ -383,6 +882,7 @@
   window.manageCourses = manageCourses;
   window.openTutorPanel = openTutorPanel;
   window.joinTutoringSession = joinTutoringSession;
+  window.goToMyCourses = goToMyCourses;
 </script>
 
 <style>
@@ -494,6 +994,33 @@
     transform: translateY(0);
   }
 
+  /* Botón aplicar como tutor */
+  .apply-tutor-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  }
+
+  .apply-tutor-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  }
+
+  .apply-tutor-btn:active {
+    transform: translateY(0);
+  }
+
   .user-name {
     font-size: var(--font-size-lg);
     font-weight: 700;
@@ -548,27 +1075,38 @@
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
   }
 
+  /* Cards principales mejoradas */
   .dashboard-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
+    background: white !important;
+    border-radius: 5px !important;
+    padding: var(--spacing-md) !important;
+    border: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: none !important;
+    transition: none !important;
+    transform: none !important;
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  .dashboard-card::before {
+    display: none !important;
+    content: none !important;
   }
 
   .dashboard-card:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border-color: #e2e8f0;
+    box-shadow: none !important;
+    transform: none !important;
+    border-color: #e2e8f0 !important;
+    background: white !important;
   }
 
   .dashboard-card h2 {
-    font-size: var(--font-size-base);
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
     color: var(--text-primary);
-    margin: 0 0 var(--spacing-sm) 0;
+    margin: 0 0 var(--spacing-md) 0;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -577,11 +1115,15 @@
 
   .dashboard-card h2 i {
     color: #6366f1;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
+    background: rgba(99, 102, 241, 0.1);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
   }
 
   /* Cards específicas */
-  .tutorials-card {
+  .tutorials-card,
+  .requests-card {
     min-height: 300px;
   }
 
@@ -614,142 +1156,27 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
     flex-shrink: 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
   }
 
   .count-badge {
-    background: #6366f1;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
     font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    min-width: 24px;
+    text-align: center;
   }
 
-  .tutorials-list {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    max-height: 250px !important;
-    overflow-y: auto !important;
-  }
+  /* Lista de tutorías mejorada */
 
-  .tutorials-list .tutorial-item {
-    padding: 16px !important;
-    background: white !important;
-    border-radius: 12px !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    transition: all 0.2s ease !important;
-    flex-shrink: 0 !important;
-  }
-
-  .tutorials-list .tutorial-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    transform: translateY(-2px) !important;
-  }
-
-  .tutorial-item .tutorial-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    margin-bottom: 12px !important;
-  }
-
-  .tutorial-item .tutorial-course {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    color: #0f172a !important;
-    margin: 0 !important;
-    line-height: 1.3 !important;
-  }
-
-  .tutorial-item .status-badge {
-    font-size: 11px !important;
-    padding: 4px 8px !important;
-    border-radius: 20px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-  }
-
-  .tutorial-item .status-badge.confirmed {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-  }
-
-  .tutorial-item .status-badge.pending {
-    background: #fef3c7 !important;
-    color: #92400e !important;
-  }
-
-  .tutorial-item .tutorial-tutor {
-    font-size: 14px !important;
-    color: #64748b !important;
-    margin: 0 0 16px 0 !important;
-    font-weight: 500 !important;
-  }
-
-  .tutorial-item .tutorial-schedule {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    margin-bottom: 16px !important;
-  }
-
-  .tutorial-item .schedule-item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    font-size: 14px !important;
-    color: #64748b !important;
-  }
-
-  .tutorial-item .schedule-item i {
-    width: 16px !important;
-    color: #2563eb !important;
-    font-size: 14px !important;
-  }
-
-  .tutorial-actions {
-    display: flex !important;
-    gap: 8px !important;
-  }
-
-  .tutorial-item .btn-action {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 8px 16px !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    text-decoration: none !important;
-    font-family: inherit !important;
-  }
-
-  .tutorial-item .btn-action:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .tutorial-item .btn-primary {
-    background: #2563eb !important;
-    color: white !important;
-  }
-
-  .tutorial-item .btn-primary:hover {
-    background: #1d4ed8 !important;
-  }
-
-  .tutorial-item .btn-action i {
-    color: white !important;
-    font-size: 12px !important;
-  }
+  /* Lista de solicitudes pendientes mejorada */
 
   /* Recomendaciones */
   .recommendations-list {
@@ -854,63 +1281,6 @@
   .stat-label {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: var(--spacing-lg);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  .empty-state i {
-    font-size: var(--font-size-xl);
-    color: #cbd5e1;
-  }
-
-  /* Perfil */
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  .profile-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-xs) 0;
-    border-bottom: 1px solid #f1f5f9;
-  }
-
-  .profile-item:last-child {
-    border-bottom: none;
-  }
-
-  .profile-item .label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
-
-  .profile-item .label i {
-    color: #6366f1;
-    width: 14px;
-    text-align: center;
-  }
-
-  .profile-item .value {
-    font-size: var(--font-size-xs);
-    color: var(--text-primary);
-    font-weight: 600;
   }
 
   /* Módulo Tutor */
@@ -1156,7 +1526,10 @@
     }
 
     .dashboard-card {
-      padding: var(--spacing-sm);
+      padding: var(--spacing-sm) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      transform: none !important;
     }
 
     .column-header {

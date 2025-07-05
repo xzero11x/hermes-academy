@@ -1,0 +1,37 @@
+---
+// Debug page to test URL construction
+---
+
+<html>
+  <head>
+    <title>Debug URLs</title>
+  </head>
+  <body>
+    <h1>URL Debug Page</h1>
+
+    <h2>Environment Variables</h2>
+    <p>BASE_URL: {import.meta.env.BASE_URL}</p>
+    <p>Current URL: {Astro.request.url}</p>
+
+    <h2>Test URLs</h2>
+    <p>Universities URL: <a href={`${import.meta.env.BASE_URL}/courses?university=1`}>Test University 1 Filter</a></p>
+    <p>All Courses URL: <a href={`${import.meta.env.BASE_URL}/courses`}>All Courses</a></p>
+
+    <h2>JavaScript Test</h2>
+    <button onclick='testUrls()'>Test URL Construction</button>
+    <div id='result'></div>
+
+    <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+      function testUrls() {
+        const result = document.getElementById('result');
+        result.innerHTML = `
+        <p>baseUrl variable: ${baseUrl}</p>
+        <p>Template literal: \${baseUrl}/courses?university=1 = ${baseUrl}/courses?university=1</p>
+        <p>String concatenation: baseUrl + '/courses?university=1' = ${baseUrl + '/courses?university=1'}</p>
+      `;
+      }
+
+      window.testUrls = testUrls;
+    </script>
+  </body>
+</html>

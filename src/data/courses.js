@@ -9,95 +9,54 @@ export const courses = [
   // ===== UTEC (universityId: 1) =====
   {
     id: 1,
-    name: "Introducción a la Programación",
-    code: "CS1001",
-    universityId: 1,
-    careerId: 1,
-    cycle: 1,
-    credits: 4,
-    area: "Programación",
-    description: "Fundamentos de programación usando Python. Introducción a algoritmos, estructuras de control y paradigmas de programación.",
-    prerequisites: [],
-    isActive: true
-  },
-  {
-    id: 2,
-    name: "Cálculo Diferencial",
+    name: "Cálculo de una Variable",
     code: "MA1001",
     universityId: 1,
     careerId: 1,
     cycle: 1,
     credits: 4,
     area: "Matemáticas",
-    description: "Límites, derivadas y aplicaciones en ingeniería. Enfoque práctico orientado a problemas de ingeniería.",
+    description: "Límites, derivadas e integrales de funciones de una variable. Aplicaciones en ingeniería.",
     prerequisites: [],
+    isActive: true
+  },
+  {
+    id: 2,
+    name: "Introducción a la Mecánica",
+    code: "FI1001",
+    universityId: 1,
+    careerId: 1,
+    cycle: 2,
+    credits: 4,
+    area: "Física",
+    description: "Principios fundamentales de la mecánica clásica. Cinemática, dinámica y estática.",
+    prerequisites: [1],
     isActive: true
   },
   {
     id: 3,
-    name: "Estructuras de Datos",
-    code: "CS2001",
+    name: "Química General",
+    code: "QU1001",
+    universityId: 1,
+    careerId: 1,
+    cycle: 1,
+    credits: 4,
+    area: "Química",
+    description: "Principios básicos de química: estructura atómica, enlaces químicos y reacciones.",
+    prerequisites: [],
+    isActive: true
+  },
+  {
+    id: 18,
+    name: "Ecuaciones Diferenciales",
+    code: "MA2001",
     universityId: 1,
     careerId: 1,
     cycle: 3,
     credits: 4,
-    area: "Programación",
-    description: "Algoritmos y estructuras de datos fundamentales. Implementación práctica en Python.",
+    area: "Matemáticas",
+    description: "Ecuaciones diferenciales ordinarias y parciales. Métodos de resolución y aplicaciones.",
     prerequisites: [1],
-    isActive: true
-  },
-
-  // ===== UNMSM (universityId: 2) =====
-  {
-    id: 4,
-    name: "Anatomía Humana I",
-    code: "MED101",
-    universityId: 2,
-    careerId: 5,
-    cycle: 1,
-    credits: 5,
-    area: "Medicina",
-    description: "Estudio de la estructura del cuerpo humano. Sistema músculo-esquelético y nervioso.",
-    prerequisites: [],
-    isActive: true
-  },
-  {
-    id: 5,
-    name: "Fisiología Humana I",
-    code: "MED201",
-    universityId: 2,
-    careerId: 5,
-    cycle: 2,
-    credits: 4,
-    area: "Medicina",
-    description: "Funcionamiento de los sistemas corporales. Homeostasis y regulación fisiológica.",
-    prerequisites: [4],
-    isActive: true
-  },
-  {
-    id: 6,
-    name: "Contabilidad General I",
-    code: "CON101",
-    universityId: 2,
-    careerId: 9,
-    cycle: 1,
-    credits: 4,
-    area: "Contabilidad",
-    description: "Principios fundamentales de contabilidad. Estados financieros básicos.",
-    prerequisites: [],
-    isActive: true
-  },
-  {
-    id: 7,
-    name: "Matemática Financiera",
-    code: "FIN101",
-    universityId: 2,
-    careerId: 9,
-    cycle: 2,
-    credits: 3,
-    area: "Finanzas",
-    description: "Interés simple y compuesto. Anualidades y amortización.",
-    prerequisites: [],
     isActive: true
   },
 
@@ -132,28 +91,41 @@ export const courses = [
   // ===== UNI (universityId: 4) =====
   {
     id: 10,
-    name: "Algoritmos y Programación",
-    code: "CS101",
-    universityId: 4,
-    careerId: 3,
-    cycle: 2,
-    credits: 4,
-    area: "Programación",
-    description: "Diseño y análisis de algoritmos. Programación estructurada.",
-    prerequisites: [],
-    isActive: true
-  },
-  {
-    id: 11,
-    name: "Cálculo I",
+    name: "Cálculo 1",
     code: "MA101",
     universityId: 4,
     careerId: 3,
     cycle: 1,
     credits: 4,
     area: "Matemáticas",
-    description: "Funciones, límites y derivadas.",
+    description: "Funciones, límites, derivadas e integrales de funciones de una variable.",
     prerequisites: [],
+    isActive: true
+  },
+  {
+    id: 11,
+    name: "Física 1",
+    code: "FI101",
+    universityId: 4,
+    careerId: 3,
+    cycle: 2,
+    credits: 4,
+    area: "Física",
+    description: "Mecánica clásica: cinemática, dinámica, trabajo y energía.",
+    prerequisites: [10],
+    isActive: true
+  },
+  {
+    id: 19,
+    name: "Ecuaciones Diferenciales de una Variable",
+    code: "MA201",
+    universityId: 4,
+    careerId: 3,
+    cycle: 3,
+    credits: 4,
+    area: "Matemáticas",
+    description: "Ecuaciones diferenciales ordinarias de primera y segunda orden. Métodos analíticos y numéricos.",
+    prerequisites: [10],
     isActive: true
   },
 
@@ -172,66 +144,6 @@ export const courses = [
     isActive: true
   },
 
-  // ===== UPCH (universityId: 6) =====
-  {
-    id: 13,
-    name: "Bioquímica Médica",
-    code: "MED201",
-    universityId: 6,
-    careerId: 6,
-    cycle: 3,
-    credits: 5,
-    area: "Ciencias Básicas",
-    description: "Estudio de los procesos bioquímicos en el organismo humano y su aplicación clínica.",
-    prerequisites: [4],
-    isActive: true
-  },
-
-  // ===== UCV (universityId: 7) =====
-  {
-    id: 14,
-    name: "Psicología General",
-    code: "PSI101",
-    universityId: 7,
-    careerId: 7,
-    cycle: 1,
-    credits: 3,
-    area: "Psicología Básica",
-    description: "Introducción a los conceptos fundamentales de la psicología como ciencia del comportamiento humano.",
-    prerequisites: [],
-    isActive: true
-  },
-
-  // ===== UDEP (universityId: 8) =====
-  {
-    id: 15,
-    name: "Introducción al Derecho",
-    code: "DER101",
-    universityId: 8,
-    careerId: 8,
-    cycle: 1,
-    credits: 4,
-    area: "Derecho Básico",
-    description: "Conceptos fundamentales del derecho, fuentes del derecho y introducción al sistema jurídico peruano.",
-    prerequisites: [],
-    isActive: true
-  },
-
-  // ===== UP (universityId: 9) =====
-  {
-    id: 16,
-    name: "Microeconomía I",
-    code: "ECO201",
-    universityId: 9,
-    careerId: 9,
-    cycle: 2,
-    credits: 4,
-    area: "Economía",
-    description: "Análisis del comportamiento de agentes económicos individuales: consumidores y empresas.",
-    prerequisites: [7],
-    isActive: true
-  },
-
   // ===== UPC (universityId: 10) =====
   {
     id: 17,
@@ -244,6 +156,60 @@ export const courses = [
     area: "Desarrollo",
     description: "Fundamentos del desarrollo de software, metodologías ágiles y patrones de diseño.",
     prerequisites: [8],
+    isActive: true
+  },
+
+  // ===== UNTRM (universityId: 11) =====
+  {
+    id: 20,
+    name: "Matemática Básica",
+    code: "MA001",
+    universityId: 11,
+    careerId: 3,
+    cycle: 1,
+    credits: 4,
+    area: "Matemáticas",
+    description: "Fundamentos matemáticos: álgebra, geometría analítica y trigonometría.",
+    prerequisites: [],
+    isActive: true
+  },
+  {
+    id: 21,
+    name: "Cálculo Diferencial",
+    code: "MA101",
+    universityId: 11,
+    careerId: 3,
+    cycle: 2,
+    credits: 4,
+    area: "Matemáticas",
+    description: "Límites, continuidad y derivadas de funciones de una variable.",
+    prerequisites: [20],
+    isActive: true
+  },
+  {
+    id: 22,
+    name: "Cálculo Integral",
+    code: "MA102",
+    universityId: 11,
+    careerId: 3,
+    cycle: 3,
+    credits: 4,
+    area: "Matemáticas",
+    description: "Integrales definidas e indefinidas. Aplicaciones de la integral.",
+    prerequisites: [21],
+    isActive: true
+  },
+  {
+    id: 23,
+    name: "Física 1",
+    code: "FI101",
+    universityId: 11,
+    careerId: 3,
+    cycle: 3,
+    credits: 4,
+    area: "Física",
+    description: "Mecánica de partículas y sistemas. Principios de conservación.",
+    prerequisites: [21],
     isActive: true
   }
 ];
@@ -264,7 +230,7 @@ export const getCoursesByCareer = (careerId) => {
 
 export const searchCourses = (query) => {
   const searchTerm = query.toLowerCase();
-  return courses.filter(course => 
+  return courses.filter(course =>
     course.isActive && (
       course.name.toLowerCase().includes(searchTerm) ||
       course.code.toLowerCase().includes(searchTerm) ||
