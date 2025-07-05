@@ -342,6 +342,199 @@ const { title = 'Hermes Academy' } = Astro.props;
       console.log('Funciones del dashboard: debugRequests(), createTestRequest(), clearInvalidRequests()');
     </script>
 
+    <!-- Sistema de gestión de solicitudes de tutoría -->
+    <script is:inline>
+      // TutoringRequestManager - Sistema de gestión de solicitudes de tutoría
+
+      // Función para obtener el nombre del curso por ID
+      function getCourseName(courseId) {
+        const courses = [
+          { id: 1, name: 'Cálculo de una Variable' },
+          { id: 2, name: 'Álgebra Lineal' },
+          { id: 3, name: 'Química General' },
+          { id: 4, name: 'Física I' },
+          { id: 5, name: 'Estadística' },
+          { id: 6, name: 'Programación I' },
+          { id: 7, name: 'Microeconomía' },
+          { id: 8, name: 'Contabilidad Financiera' },
+          { id: 9, name: 'Derecho Civil' },
+          { id: 10, name: 'Anatomía Humana' },
+        ];
+
+        // Convertir ambos a string para comparación
+        const course = courses.find(c => String(c.id) === String(courseId));
+        return course ? course.name : `Curso ${courseId}`;
+      }
+
+      class TutoringRequestManager {
+        constructor() {
+          this.requests = this.loadRequests();
+          console.log('TutoringRequestManager inicializado');
+        }
+
+        loadRequests() {
+          try {
+            const stored = localStorage.getItem('hermesTutoringRequests');
+            return stored ? JSON.parse(stored) : [];
+          } catch (error) {
+            console.error('Error cargando solicitudes:', error);
+            return [];
+          }
+        }
+
+        saveRequests() {
+          try {
+            localStorage.setItem('hermesTutoringRequests', JSON.stringify(this.requests));
+            console.log('Solicitudes guardadas:', this.requests.length);
+          } catch (error) {
+            console.error('Error guardando solicitudes:', error);
+          }
+        }
+
+        sendTutoringRequest(studentId, tutorId, courseId, requestData) {
+          try {
+            console.log('Enviando solicitud de tutoría:', { studentId, tutorId, courseId, requestData });
+
+            const newRequest = {
+              id: Date.now() + Math.random(),
+              studentId: parseInt(studentId),
+              tutorId: parseInt(tutorId),
+              courseId: parseInt(courseId),
+              courseName: getCourseName(courseId),
+              status: 'pending',
+              createdAt: new Date().toISOString(),
+              studentOfferedPrice: requestData.offeredPrice || 30,
+              message: requestData.message || '',
+              studentName: requestData.studentName || 'Estudiante',
+              courseCode: requestData.courseCode || '',
+              // Guardar múltiples sesiones en una sola solicitud
+              scheduledSessions: requestData.scheduledSessions || [],
+              // Fallback para compatibilidad con dashboard actual (primer horario)
+              sessionDay: requestData.scheduledSessions?.[0]?.day || requestData.sessionDate || 'No especificado',
+              sessionTime: requestData.scheduledSessions?.[0]?.time || requestData.sessionTime || 'No especificado',
+              duration: requestData.scheduledSessions?.[0]?.duration || requestData.duration || 60,
+            };
+
+            this.requests.push(newRequest);
+            this.saveRequests();
+
+            console.log('Solicitud creada exitosamente:', newRequest);
+
+            // Disparar evento personalizado para notificar a otros componentes
+            window.dispatchEvent(
+              new CustomEvent('tutoringRequestSent', {
+                detail: { request: newRequest },
+              })
+            );
+
+            return { success: true, requestId: newRequest.id };
+          } catch (error) {
+            console.error('Error enviando solicitud:', error);
+            return { success: false, error: error.message };
+          }
+        }
+
+        getRequestsForStudent(studentId) {
+          return this.requests.filter(request => request.studentId === parseInt(studentId));
+        }
+
+        getRequestsForTutor(tutorId) {
+          return this.requests.filter(request => request.tutorId === parseInt(tutorId));
+        }
+
+        updateRequestStatus(requestId, newStatus) {
+          const request = this.requests.find(r => r.id === requestId);
+          if (request) {
+            request.status = newStatus;
+            request.updatedAt = new Date().toISOString();
+            this.saveRequests();
+
+            // Disparar evento de actualización
+            window.dispatchEvent(
+              new CustomEvent('tutoringRequestUpdated', {
+                detail: { request, oldStatus: request.status, newStatus },
+              })
+            );
+
+            return true;
+          }
+          return false;
+        }
+
+        getAllRequests() {
+          return this.requests;
+        }
+
+        deleteRequest(requestId) {
+          const index = this.requests.findIndex(r => r.id === requestId);
+          if (index !== -1) {
+            const deletedRequest = this.requests.splice(index, 1)[0];
+            this.saveRequests();
+
+            // Disparar evento de eliminación
+            window.dispatchEvent(
+              new CustomEvent('tutoringRequestDeleted', {
+                detail: { request: deletedRequest },
+              })
+            );
+
+            return true;
+          }
+          return false;
+        }
+
+        // Función de depuración
+        debug() {
+          console.log('=== DEBUG TUTORING REQUESTS ===');
+          console.log('Total de solicitudes:', this.requests.length);
+          console.log('Solicitudes:', this.requests);
+          console.log('===============================');
+        }
+
+        // Limpiar solicitudes inválidas
+        cleanInvalidRequests() {
+          const validRequests = this.requests.filter(
+            request => request.studentId && request.tutorId && request.courseId && request.status
+          );
+
+          if (validRequests.length !== this.requests.length) {
+            console.log(`Limpiando ${this.requests.length - validRequests.length} solicitudes inválidas`);
+            this.requests = validRequests;
+            this.saveRequests();
+          }
+        }
+      }
+
+      // Crear instancia global
+      if (!window.tutoringRequestManager) {
+        window.tutoringRequestManager = new TutoringRequestManager();
+      }
+
+      // Funciones globales de depuración
+      window.debugRequests = function () {
+        window.tutoringRequestManager.debug();
+      };
+
+      window.clearInvalidRequests = function () {
+        window.tutoringRequestManager.cleanInvalidRequests();
+      };
+
+      window.createTestRequest = function () {
+        const testRequest = window.tutoringRequestManager.sendTutoringRequest(1, 2, 1, {
+          offeredPrice: 35,
+          sessionDate: 'Lunes',
+          sessionTime: '15:00',
+          duration: 60,
+          message: 'Solicitud de prueba',
+          studentName: 'Estudiante de Prueba',
+          courseCode: 'CALC001',
+        });
+        console.log('Solicitud de prueba creada:', testRequest);
+      };
+
+      console.log('Sistema de solicitudes de tutoría cargado');
+    </script>
+
     <slot />
   </body>
 </html>

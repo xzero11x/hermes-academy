@@ -340,7 +340,8 @@ class TutoringRequestManager {
       { id: 18, name: "Ecuaciones Diferenciales" }
     ];
 
-    const course = courses.find(c => c.id === courseId);
+    // Convertir ambos a string para comparación segura
+    const course = courses.find(c => c.id.toString() === courseId.toString());
     return course ? course.name : 'Curso no encontrado';
   }
 }

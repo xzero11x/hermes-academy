@@ -658,19 +658,35 @@
       const courseName = request.courseName || getCourseName(request.courseId);
       const studentName = getStudentName(request.studentId);
 
+      // Crear lista de sesiones programadas (igual que en el panel del estudiante)
+      const sessionsHtml = request.scheduledSessions
+        ? request.scheduledSessions
+            .map(
+              session =>
+                `<div class="tutor-request-detail-item">
+            <i class="fas fa-calendar"></i>
+            <span>${session.day} ${session.time} - ${session.endTime || (session.time.split(':')[0] && String(parseInt(session.time.split(':')[0]) + 1).padStart(2, '0') + ':00') || 'N/A'}</span>
+          </div>`
+            )
+            .join('')
+        : `<div class="tutor-request-detail-item">
+            <i class="fas fa-calendar"></i>
+            <span>${request.sessionDay} ${request.sessionTime}</span>
+          </div>`;
+
+      const sessionsCount = request.scheduledSessions ? request.scheduledSessions.length : 1;
+
       requestItem.innerHTML = `
         <div class="tutor-request-header">
           <div>
             <div class="tutor-request-course">${courseName}</div>
             <div class="tutor-request-student">Estudiante: ${studentName}</div>
+            <div class="tutor-request-sessions-count">${sessionsCount} sesión(es) solicitada(s)</div>
           </div>
           <span class="tutor-request-price">S/ ${request.studentOfferedPrice}/h</span>
         </div>
         <div class="tutor-request-details">
-          <div class="tutor-request-detail-item">
-            <i class="fas fa-calendar"></i>
-            <span>${request.sessionDay} ${request.sessionTime}</span>
-          </div>
+          ${sessionsHtml}
           ${
             request.message
               ? `
@@ -681,6 +697,10 @@
           `
               : ''
           }
+          <div class="tutor-request-detail-item">
+            <i class="fas fa-calculator"></i>
+            <span>Total estimado: S/ ${(request.studentOfferedPrice || 0) * sessionsCount}</span>
+          </div>
         </div>
         <div class="tutor-request-actions">
           <button class="tutor-action-btn accept" onclick="acceptRequest('${request.id}')">

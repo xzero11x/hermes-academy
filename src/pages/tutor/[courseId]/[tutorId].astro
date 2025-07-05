@@ -1027,58 +1027,39 @@ const tutorAvailability: Record<string, string[]> = {
 <script define:vars={{ tutorId: tutor.id, courseId: course.id, baseUrl: import.meta.env.BASE_URL }}>
   // Declaración para window.auth
 
-  // Función para enviar solicitud de tutoría
+  // Función para enviar solicitud de tutoría (usa la lógica original que funcionaba)
   function sendTutoringRequest(studentId, tutorId, courseId, requestData) {
     try {
       console.log('sendTutoringRequest called with:', { studentId, tutorId, courseId, requestData });
 
-      const requestsKey = 'hermesTutoringRequests';
-      const notificationsKey = 'hermesNotifications';
+      // Usar el manager global que ya tiene la lógica correcta
+      if (!window.tutoringRequestManager) {
+        console.error('TutoringRequestManager no está disponible');
+        return false;
+      }
 
-      // Obtener datos existentes
-      const requests = JSON.parse(localStorage.getItem(requestsKey) || '[]');
-      const notifications = JSON.parse(localStorage.getItem(notificationsKey) || '[]');
-
-      // Crear UNA sola solicitud que contenga todas las sesiones
-      const singleRequest = {
-        id: 'REQ_' + Date.now(),
-        studentId: studentId,
-        tutorId: tutorId,
-        courseId: courseId,
-        courseName: course.name, // Agregar nombre del curso
-        studentOfferedPrice: requestData.offeredPrice,
-        scheduledSessions: requestData.scheduledSessions, // Todas las sesiones en una sola solicitud
-        status: 'pending',
+      // Adaptar los datos al formato esperado por el manager
+      const requestDataForManager = {
+        offeredPrice: requestData.offeredPrice,
         message: requestData.message || '',
-        createdAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
+        studentName: 'Estudiante',
+        courseCode: '',
+        scheduledSessions: requestData.scheduledSessions || [], // Pasar todas las sesiones
+        // Fallback para compatibilidad con código anterior
+        sessionDate: requestData.scheduledSessions[0]?.day || 'No especificado',
+        sessionTime: requestData.scheduledSessions[0]?.time || 'No especificado',
+        duration: requestData.scheduledSessions[0]?.duration || 60,
       };
 
-      // Agregar la solicitud única
-      requests.push(singleRequest);
-      localStorage.setItem(requestsKey, JSON.stringify(requests));
+      const result = window.tutoringRequestManager.sendTutoringRequest(
+        studentId,
+        tutorId,
+        courseId,
+        requestDataForManager
+      );
 
-      // Crear notificación para el tutor
-      const newNotification = {
-        id: 'NOTIF_' + Date.now(),
-        userId: tutorId,
-        type: 'new_request',
-        title: 'Nueva solicitud de tutoría',
-        message: `Tienes una nueva solicitud de tutoría para ${course.name} con ${requestData.scheduledSessions.length} sesión(es)`,
-        data: {
-          requestId: singleRequest.id,
-          studentId: studentId,
-          courseId: courseId,
-        },
-        read: false,
-        createdAt: new Date().toISOString(),
-      };
-
-      notifications.push(newNotification);
-      localStorage.setItem(notificationsKey, JSON.stringify(notifications));
-
-      console.log('Solicitud enviada exitosamente:', singleRequest);
-      return true;
+      console.log('Solicitud enviada exitosamente:', result);
+      return result.success;
     } catch (error) {
       console.error('Error enviando solicitud:', error);
       return false;
