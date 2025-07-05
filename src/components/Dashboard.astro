@@ -293,6 +293,20 @@
     setTimeout(() => {
       loadUserData();
     }, 100);
+
+    // Escuchar eventos de notificaciones para recargar automáticamente
+    window.addEventListener('hermesNotificationCreated', function (event) {
+      const currentUser = window.auth?.getCurrentUser();
+      if (currentUser && event.detail.userId === currentUser.id) {
+        console.log('🔄 Recibida notificación, recargando dashboard...', event.detail);
+        // Mostrar un mensaje temporal
+        showTemporaryMessage(event.detail.type, event.detail.notification);
+        // Recargar datos después de un breve delay
+        setTimeout(() => {
+          loadUserData();
+        }, 1000);
+      }
+    });
   });
   function loadUserData() {
     // Asegurar que existen usuarios demo
@@ -456,8 +470,22 @@
     userRequests.forEach((request, index) => {
       console.log(`Rendering request ${index}:`, request);
       const requestItem = document.createElement('div');
-      requestItem.style.cssText =
-        'padding: 0.5rem; background: white; border-radius: 5px; border: 1px solid #e2e8f0; margin-bottom: 0.25rem;';
+
+      // Aplicar clases CSS específicas basadas en el estado
+      let itemClasses = 'request-item';
+      if (request.status === 'counter_offer') {
+        itemClasses += ' counter-offer';
+      } else if (request.status === 'pending') {
+        itemClasses += ' pending';
+      } else if (request.status === 'accepted') {
+        itemClasses += ' accepted';
+      } else if (request.status === 'rejected') {
+        itemClasses += ' rejected';
+      }
+
+      requestItem.className = itemClasses;
+      requestItem.setAttribute('data-request-id', request.id); // Agregar atributo para targeting
+      requestItem.style.cssText = 'padding: 0.5rem; margin-bottom: 0.25rem;';
 
       // Obtener información del curso y tutor
       const courseName = request.courseName || getCourseName(request.courseId);
@@ -517,13 +545,13 @@
             <span>Contraoferta: S/ ${request.tutorCounterPrice}/hora</span>
           </div>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
-            <button class="student-action-btn accept" onclick="acceptCounterOffer('${request.id}')" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+            <button class="student-action-btn btn-accept" onclick="acceptCounterOffer('${request.id}')">
               <i class="fas fa-check"></i> Aceptar
             </button>
-            <button class="student-action-btn counter" onclick="openStudentCounterModal('${request.id}', ${request.tutorCounterPrice})" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+            <button class="student-action-btn btn-counter" onclick="openStudentCounterModal('${request.id}', ${request.tutorCounterPrice})">
               <i class="fas fa-handshake"></i> Contraoferta
             </button>
-            <button class="student-action-btn reject" onclick="rejectCounterOffer('${request.id}')" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+            <button class="student-action-btn btn-reject" onclick="rejectCounterOffer('${request.id}')">
               <i class="fas fa-times"></i> Rechazar
             </button>
           </div>
@@ -734,15 +762,15 @@
           </div>
         </div>
         <div class="tutor-request-actions">
-          <button class="tutor-action-btn accept" onclick="acceptRequest('${request.id}')">
+          <button class="tutor-action-btn btn-accept" onclick="acceptRequest('${request.id}')">
             <i class="fas fa-check"></i>
             Aceptar
           </button>
-          <button class="tutor-action-btn counter" onclick="counterOffer('${request.id}')">
+          <button class="tutor-action-btn btn-counter" onclick="counterOffer('${request.id}')">
             <i class="fas fa-handshake"></i>
             Contraoferta
           </button>
-          <button class="tutor-action-btn reject" onclick="rejectRequest('${request.id}')">
+          <button class="tutor-action-btn btn-reject" onclick="rejectRequest('${request.id}')">
             <i class="fas fa-times"></i>
             Rechazar
           </button>
@@ -780,9 +808,10 @@
   // Funciones para gestionar solicitudes del tutor
   window.acceptRequest = function (requestId) {
     console.log('Accepting request:', requestId);
+    console.log('Type of requestId:', typeof requestId);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const requestIndex = requests.findIndex(req => req.id === requestId);
+    const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
     if (requestIndex !== -1) {
       requests[requestIndex].status = 'accepted';
@@ -794,15 +823,20 @@
       createNotificationForStudent(requests[requestIndex], 'accepted');
 
       alert('Solicitud aceptada exitosamente');
+
+      // Mostrar toast de éxito
+      showToast('✅ Solicitud aceptada! El estudiante será notificado', 'success');
+
       loadUserData(); // Recargar datos
     }
   };
 
   window.rejectRequest = function (requestId) {
     console.log('Rejecting request:', requestId);
+    console.log('Type of requestId:', typeof requestId);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const requestIndex = requests.findIndex(req => req.id === requestId);
+    const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
     if (requestIndex !== -1) {
       requests[requestIndex].status = 'rejected';
@@ -814,16 +848,32 @@
       createNotificationForStudent(requests[requestIndex], 'rejected');
 
       alert('Solicitud rechazada');
+
+      // Mostrar toast informativo
+      showToast('❌ Solicitud rechazada', 'warning');
+
       loadUserData(); // Recargar datos
     }
   };
   window.counterOffer = function (requestId) {
     console.log('Opening counter offer for request:', requestId);
+    console.log('Type of requestId:', typeof requestId);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const request = requests.find(req => req.id === requestId);
+    console.log('All requests:', requests);
+    console.log(
+      'Request IDs:',
+      requests.map(req => ({ id: req.id, type: typeof req.id }))
+    );
+
+    const request = requests.find(req => req.id == requestId); // Usar == en lugar de === para permitir coerción de tipos
 
     if (!request) {
+      console.error('No se encontró la solicitud con ID:', requestId);
+      console.error(
+        'IDs disponibles:',
+        requests.map(req => req.id)
+      );
       alert('Error: No se encontró la solicitud');
       return;
     }
@@ -850,7 +900,7 @@
     }
 
     const finalPrice = parseFloat(newPrice);
-    const requestIndex = requests.findIndex(req => req.id === requestId);
+    const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
     if (requestIndex !== -1) {
       requests[requestIndex].status = 'counter_offer';
@@ -863,6 +913,9 @@
       createNotificationForStudent(requests[requestIndex], 'counter_offer');
 
       alert(`✅ ¡Contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl estudiante recibirá una notificación.`);
+
+      // Mostrar toast de éxito
+      showToast(`💬 Contraoferta enviada: S/ ${finalPrice}/hora`, 'info');
 
       // Recargar datos
       setTimeout(() => {
@@ -907,9 +960,19 @@
       read: false,
       createdAt: new Date().toISOString(),
     };
-
     notifications.push(newNotification);
     localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+
+    // Alert temporal para confirmar que se creó la notificación
+    console.log('✅ Notificación creada para estudiante:', newNotification);
+    alert(`📨 Notificación enviada: ${title}\n${message}`);
+
+    // Trigger event para actualizar otros dashboards que puedan estar abiertos
+    window.dispatchEvent(
+      new CustomEvent('hermesNotificationCreated', {
+        detail: { userId: request.studentId, type: action, notification: newNotification },
+      })
+    );
   }
 
   // ===== FUNCIONES PARA RESPUESTAS DEL ESTUDIANTE A CONTRAOFERTA =====
@@ -919,7 +982,7 @@
     console.log('Student accepting counter offer:', requestId);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const requestIndex = requests.findIndex(req => req.id === requestId);
+    const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
     if (requestIndex !== -1) {
       const request = requests[requestIndex];
@@ -933,21 +996,67 @@
         `Esta acción confirmará la tutoría.`;
 
       if (confirm(confirmMessage)) {
-        requests[requestIndex].status = 'accepted';
-        requests[requestIndex].finalPrice = finalPrice;
-        requests[requestIndex].lastUpdated = new Date().toISOString();
+        // Feedback visual inmediato en el elemento
+        const requestElement = document.querySelector(`[data-request-id="${requestId}"]`);
+        if (requestElement) {
+          requestElement.style.background = '#dcfce7';
+          requestElement.style.borderColor = '#16a34a';
+          requestElement.innerHTML = `
+            <div style="text-align: center; padding: 1rem; color: #166534;">
+              <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+              <p style="margin: 0; font-weight: 600;">✅ Contraoferta Aceptada</p>
+              <p style="margin: 0; font-size: 0.8rem;">Precio final: S/ ${finalPrice}/hora</p>
+            </div>
+          `;
+        }
 
+        // Crear la tutoría programada
+        const user = window.auth?.getCurrentUser();
+        if (user) {
+          const newTutoring = {
+            id: 'TUT_' + Date.now(),
+            courseId: request.courseId,
+            courseName: courseName,
+            tutorId: request.tutorId,
+            tutorName: getTutorName(request.tutorId),
+            studentId: request.studentId,
+            price: finalPrice,
+            status: 'confirmed',
+            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Próxima semana
+            time: request.sessionTime || '14:00',
+            duration: request.duration || 60,
+            createdAt: new Date().toISOString(),
+          };
+
+          // Agregar a las tutorías programadas del usuario
+          if (!user.scheduledTutorings) {
+            user.scheduledTutorings = [];
+          }
+          user.scheduledTutorings.push(newTutoring);
+
+          // Actualizar en localStorage
+          const users = window.auth.getUsers();
+          const userIndex = users.findIndex(u => u.id === user.id);
+          if (userIndex !== -1) {
+            users[userIndex] = user;
+            localStorage.setItem('hermesUsers', JSON.stringify(users));
+          }
+        }
+
+        // Eliminar la solicitud
+        requests.splice(requestIndex, 1);
         localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
 
         // Crear notificación para el tutor
-        createNotificationForTutor(requests[requestIndex], 'counter_accepted');
+        createNotificationForTutor(request, 'counter_accepted');
 
-        alert(`✅ ¡Contraoferta aceptada!\n\nPrecio final: S/ ${finalPrice}/hora\nLa tutoría ha sido confirmada.`);
+        // Mostrar toast de éxito
+        showToast('✅ Contraoferta aceptada! Moviendo a próximas tutorías...', 'success');
 
-        // Forzar actualización completa
+        // Actualizar después de un breve delay para mostrar el feedback visual
         setTimeout(() => {
           loadUserData();
-        }, 100);
+        }, 2000);
       }
     }
   };
@@ -957,7 +1066,7 @@
     console.log('Student rejecting counter offer:', requestId);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const request = requests.find(req => req.id === requestId);
+    const request = requests.find(req => req.id == requestId); // Usar == en lugar de ===
 
     if (!request) {
       alert('Error: No se encontró la solicitud');
@@ -974,23 +1083,37 @@
       `Esta acción terminará la negociación.`;
 
     if (confirm(confirmMessage)) {
-      const requestIndex = requests.findIndex(req => req.id === requestId);
+      const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
       if (requestIndex !== -1) {
-        requests[requestIndex].status = 'rejected';
-        requests[requestIndex].lastUpdated = new Date().toISOString();
-
-        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+        // Feedback visual inmediato en el elemento
+        const requestElement = document.querySelector(`[data-request-id="${requestId}"]`);
+        if (requestElement) {
+          requestElement.style.background = '#fee2e2';
+          requestElement.style.borderColor = '#dc2626';
+          requestElement.innerHTML = `
+            <div style="text-align: center; padding: 1rem; color: #991b1b;">
+              <i class="fas fa-times-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+              <p style="margin: 0; font-weight: 600;">❌ Contraoferta Rechazada</p>
+              <p style="margin: 0; font-size: 0.8rem;">La negociación ha terminado</p>
+            </div>
+          `;
+        }
 
         // Crear notificación para el tutor
         createNotificationForTutor(requests[requestIndex], 'counter_rejected');
 
-        alert('❌ Contraoferta rechazada.\n\nLa negociación ha terminado.');
+        // Eliminar la solicitud
+        requests.splice(requestIndex, 1);
+        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
 
-        // Forzar actualización completa
+        // Mostrar toast informativo
+        showToast('❌ Contraoferta rechazada. Solicitud eliminada.', 'warning');
+
+        // Actualizar después de un breve delay para mostrar el feedback visual
         setTimeout(() => {
           loadUserData();
-        }, 100);
+        }, 2000);
       }
     }
   };
@@ -1000,7 +1123,7 @@
     console.log('Opening student counter offer for request:', requestId, 'tutor price:', tutorPrice);
 
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-    const request = requests.find(req => req.id === requestId);
+    const request = requests.find(req => req.id == requestId); // Usar == en lugar de ===
 
     if (!request) {
       alert('Error: No se encontró la solicitud');
@@ -1029,7 +1152,7 @@
     }
 
     const finalPrice = parseFloat(newPrice);
-    const requestIndex = requests.findIndex(req => req.id === requestId);
+    const requestIndex = requests.findIndex(req => req.id == requestId); // Usar == en lugar de ===
 
     if (requestIndex !== -1) {
       requests[requestIndex].status = 'counter_offer';
@@ -1040,6 +1163,18 @@
 
       // Crear notificación para el tutor
       createNotificationForTutor(requests[requestIndex], 'student_counter');
+
+      alert(
+        `✅ Contraoferta enviada!\n\nTu nueva contraoferta: S/ ${finalPrice}/hora\nEl tutor recibirá una notificación.`
+      );
+
+      // Mostrar toast informativo
+      showToast('💬 Contraoferta enviada al tutor', 'success');
+
+      // Forzar actualización completa
+      setTimeout(() => {
+        loadUserData();
+      }, 100);
 
       alert(`✅ ¡Nueva contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl tutor recibirá una notificación.`);
 
@@ -1087,6 +1222,13 @@
 
     notifications.push(newNotification);
     localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+
+    // Trigger event para actualizar otros dashboards que puedan estar abiertos
+    window.dispatchEvent(
+      new CustomEvent('hermesNotificationCreated', {
+        detail: { userId: request.tutorId, type: action, notification: newNotification },
+      })
+    );
   }
 
   function showApplyTutorButton() {
@@ -1243,12 +1385,114 @@
     console.log('✅ Layout cambiado a: Tutor (2 columnas lado a lado)');
   }
 
+  // Función para mostrar mensajes temporales en el dashboard
+  function showTemporaryMessage(type, notification) {
+    // Crear un toast notification temporal
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'accepted' ? '#dcfce7' : type === 'rejected' ? '#fee2e2' : '#dbeafe'};
+      color: ${type === 'accepted' ? '#166534' : type === 'rejected' ? '#991b1b' : '#2563eb'};
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-width: 350px;
+      border: 1px solid ${type === 'accepted' ? '#bbf7d0' : type === 'rejected' ? '#fecaca' : '#93c5fd'};
+    `;
+
+    toast.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 0.25rem;">${notification.title}</div>
+      <div style="font-size: 0.875rem;">${notification.message}</div>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Remover después de 4 segundos
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 4000);
+  }
+
   // Hacer funciones globales
   window.logout = logout;
   window.manageCourses = manageCourses;
   window.openTutorPanel = openTutorPanel;
   window.joinTutoringSession = joinTutoringSession;
   window.goToMyCourses = goToMyCourses;
+
+  // ===== SISTEMA DE TOASTS/NOTIFICACIONES VISUALES =====
+
+  // Función para mostrar toasts elegantes
+  window.showToast = function (message, type = 'info', duration = 4000) {
+    // Remover toasts anteriores
+    const existingToasts = document.querySelectorAll('.dashboard-toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    // Crear el elemento toast
+    const toast = document.createElement('div');
+    toast.className = `dashboard-toast ${type}`;
+    toast.textContent = message;
+
+    // Agregar al body
+    document.body.appendChild(toast);
+
+    // Mostrar el toast con animación
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+
+    // Ocultar y remover después del tiempo especificado
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, duration);
+  };
+
+  // Escuchar eventos de notificaciones para mostrar toasts automáticamente
+  window.addEventListener('storage', function (e) {
+    if (e.key === 'hermesNotifications') {
+      const user = window.auth?.getCurrentUser();
+      if (!user) return;
+
+      try {
+        const notifications = JSON.parse(e.newValue || '[]');
+        const userNotifications = notifications.filter(n => n.userId === user.id && !n.read);
+
+        if (userNotifications.length > 0) {
+          const latestNotification = userNotifications[userNotifications.length - 1];
+
+          // Determinar el tipo de toast basado en el tipo de notificación
+          let toastType = 'info';
+          if (latestNotification.type === 'accepted' || latestNotification.type === 'counter_accepted') {
+            toastType = 'success';
+          } else if (latestNotification.type === 'rejected' || latestNotification.type === 'counter_rejected') {
+            toastType = 'warning';
+          } else if (latestNotification.type === 'counter_offer' || latestNotification.type === 'student_counter') {
+            toastType = 'info';
+          }
+
+          // Mostrar toast con la notificación
+          showToast(`🔔 ${latestNotification.title}: ${latestNotification.message}`, toastType, 6000);
+
+          // Recargar datos del dashboard si es necesario
+          setTimeout(() => {
+            loadUserData();
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Error procesando notificaciones:', error);
+      }
+    }
+  });
 </script>
 
 <style>
@@ -1930,5 +2174,279 @@
   .student-action-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Estilos específicos para solicitudes en el dashboard */
+  .dashboard-section .request-item {
+    background: white !important;
+    border-radius: 5px !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .dashboard-section .request-item.pending {
+    border-left: 4px solid #f59e0b !important;
+    background: #fffbeb !important;
+  }
+
+  .dashboard-section .request-item.counter-offer {
+    border-left: 4px solid #3b82f6 !important;
+    background: #eff6ff !important;
+  }
+
+  .dashboard-section .request-item.accepted {
+    border-left: 4px solid #10b981 !important;
+    background: #f0fdf4 !important;
+  }
+
+  .dashboard-section .request-item.rejected {
+    border-left: 4px solid #ef4444 !important;
+    background: #fef2f2 !important;
+  }
+
+  /* Botones específicos del estudiante */
+  .dashboard-section .student-action-btn {
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-accept {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border-color: #bbf7d0 !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-accept:hover {
+    background: #bbf7d0 !important;
+    color: #14532d !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-counter {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-color: #fde68a !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-counter:hover {
+    background: #fde68a !important;
+    color: #78350f !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-reject {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #fecaca !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-reject:hover {
+    background: #fecaca !important;
+    color: #7f1d1d !important;
+  }
+
+  /* Botones específicos del tutor */
+  .dashboard-section .tutor-action-btn {
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px !important;
+    font-size: 0.875rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-accept {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border-color: #bbf7d0 !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-accept:hover {
+    background: #bbf7d0 !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-counter {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-color: #fde68a !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-counter:hover {
+    background: #fde68a !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-reject {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #fecaca !important;
+  }
+
+  .dashboard-section .tutor-action-btn.btn-reject:hover {
+    background: #fecaca !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* Estilos para toasts */
+  .dashboard-toast {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    z-index: 10000 !important;
+    transform: translateX(400px) !important;
+    transition: transform 0.3s ease !important;
+    max-width: 300px !important;
+    word-wrap: break-word !important;
+  }
+
+  .dashboard-toast.show {
+    transform: translateX(0) !important;
+  }
+
+  .dashboard-toast.success {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border-left: 4px solid #16a34a !important;
+  }
+
+  .dashboard-toast.info {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+    border-left: 4px solid #3b82f6 !important;
+  }
+
+  .dashboard-toast.warning {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-left: 4px solid #f59e0b !important;
+  }
+
+  .dashboard-toast.error {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-left: 4px solid #ef4444 !important;
+  }
+
+  /* Estilos específicos para toasts y notificaciones del dashboard */
+  .dashboard-toast {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: #1f2937 !important;
+    color: white !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+    z-index: 9999 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 300px !important;
+    max-width: 400px !important;
+    opacity: 0 !important;
+    transform: translateX(100%) !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  .dashboard-toast.show {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+  }
+
+  .dashboard-toast.success {
+    background: #059669 !important;
+    color: white !important;
+  }
+
+  .dashboard-toast.info {
+    background: #2563eb !important;
+    color: white !important;
+  }
+
+  .dashboard-toast.warning {
+    background: #d97706 !important;
+    color: white !important;
+  }
+
+  .dashboard-toast.error {
+    background: #dc2626 !important;
+    color: white !important;
+  }
+
+  /* Estilos específicos para las solicitudes y notificaciones en el dashboard */
+  .dashboard-section .request-item {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+  }
+
+  .dashboard-section .request-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .dashboard-section .request-item.counter-offer {
+    border-left: 4px solid #f59e0b !important;
+    background: #fffbeb !important;
+  }
+
+  .dashboard-section .request-item.pending {
+    border-left: 4px solid #6366f1 !important;
+  }
+
+  .dashboard-section .request-item.accepted {
+    border-left: 4px solid #10b981 !important;
+    background: #f0fdf4 !important;
+  }
+
+  .dashboard-section .request-item.rejected {
+    border-left: 4px solid #ef4444 !important;
+    background: #fef2f2 !important;
+  }
+
+  /* Reforzar estilos para botones de acción (evitar grises por herencia global) */
+  .dashboard-section .student-action-btn.btn-accept,
+  .dashboard-section .student-action-btn.btn-counter,
+  .dashboard-section .student-action-btn.btn-reject,
+  .dashboard-section .tutor-action-btn.btn-accept,
+  .dashboard-section .tutor-action-btn.btn-counter,
+  .dashboard-section .tutor-action-btn.btn-reject {
+    filter: none !important;
+    appearance: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    outline: 2px solid transparent !important;
+    outline-offset: 0 !important;
+    opacity: 1 !important;
+    background-blend-mode: normal !important;
+  }
+
+  .dashboard-section .student-action-btn.btn-accept:active,
+  .dashboard-section .student-action-btn.btn-counter:active,
+  .dashboard-section .student-action-btn.btn-reject:active,
+  .dashboard-section .tutor-action-btn.btn-accept:active,
+  .dashboard-section .tutor-action-btn.btn-counter:active,
+  .dashboard-section .tutor-action-btn.btn-reject:active {
+    filter: none !important;
+    opacity: 0.92 !important;
   }
 </style>
