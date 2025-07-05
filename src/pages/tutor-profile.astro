@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title='Perfil del Tutor - Hermes Academy'>
@@ -203,7 +203,7 @@ import Layout from '../../layouts/Layout.astro';
 </Layout>
 
 <script>
-  import '../../utils/tutoring-requests.js';
+  import '../utils/tutoring-requests.js';
 
   const urlParams = new URLSearchParams(window.location.search);
   const tutorId = parseInt(urlParams.get('tutorId')) || 2; // Default a Jorge
