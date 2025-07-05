@@ -1,8 +1,0 @@
-/* DASHBOARD OVERRIDE - MINIMAL STYLES ONLY */
-
-/* Minimal styles for main section containers only */
-.dashboard-card {
-  background: white !important;
-  border-radius: 5px !important;
-  padding: 1rem !important;
-}
