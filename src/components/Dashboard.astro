@@ -59,11 +59,21 @@
               >
                 <div
                   class='empty-state'
-                  style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+                  style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem; text-align: center;'
                 >
                   <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'>
                   </i>
-                  <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+                  <p style='margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.75rem;'>
+                    No tienes tutorías programadas
+                  </p>
+                  <a
+                    href='#'
+                    onclick='goToMyCourses()'
+                    class='compact-search-btn'
+                    style='background: #8b5cf6; color: white; padding: 0.125rem 0.5rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; display: inline-block; line-height: 1.2;'
+                  >
+                    Buscar Cursos
+                  </a>
                 </div>
               </div>
             </div>
@@ -98,7 +108,7 @@
             <div class='actions-grid'>
               <a href='#' onclick='goToMyCourses()' class='action-btn'>
                 <i class='fas fa-search'></i>
-                <span>Mis cursos</span>
+                <span>Cursos</span>
               </a>
               <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
                 <i class='fas fa-university'></i>
@@ -123,10 +133,18 @@
             >
               <div
                 class='empty-state'
-                style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+                style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem; text-align: center;'
               >
                 <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
-                <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+                <p style='margin: 0 0 0.5rem 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+                <a
+                  href='#'
+                  onclick='goToMyCourses()'
+                  class='compact-search-btn'
+                  style='background: #8b5cf6; color: white; padding: 0.125rem 0.5rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; display: inline-block; line-height: 1.2;'
+                >
+                  Buscar Cursos
+                </a>
               </div>
             </div>
           </div>
@@ -160,7 +178,7 @@
             <div class='actions-grid'>
               <a href='#' onclick='goToMyCourses()' class='action-btn'>
                 <i class='fas fa-search'></i>
-                <span>Mis cursos</span>
+                <span>Cursos</span>
               </a>
               <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
                 <i class='fas fa-university'></i>
@@ -236,24 +254,14 @@
         <div class='dashboard-card availability-card'>
           <div class='card-header'>
             <h2><i class='fas fa-calendar'></i> Horarios Disponibles</h2>
+            <button class='settings-btn' onclick='manageCourses()' title='Gestionar horarios'>
+              <i class='fas fa-cog'></i>
+            </button>
           </div>
           <div class='availability-tags'>
             <span class='availability-tag'><i class='fas fa-clock'></i> Lun: 14:00-16:00</span>
             <span class='availability-tag'><i class='fas fa-clock'></i> Mié: 18:00-20:00</span>
             <span class='availability-tag'><i class='fas fa-clock'></i> Sáb: 09:00-12:00</span>
-          </div>
-        </div>
-
-        <!-- Acciones del tutor -->
-        <div class='dashboard-card tutor-actions-card'>
-          <div class='card-header'>
-            <h2><i class='fas fa-tasks'></i> Acciones</h2>
-          </div>
-          <div class='tutor-actions-expanded'>
-            <button class='tutor-btn-secondary' onclick='manageCourses()'>
-              <i class='fas fa-calendar-edit'></i>
-              <span>Gestionar Horarios</span>
-            </button>
           </div>
         </div>
       </div>
@@ -335,38 +343,37 @@
     console.log('loadScheduledTutorings called with user:', user);
     console.log('User scheduledTutorings:', user.scheduledTutorings);
 
-    if (!user.scheduledTutorings || user.scheduledTutorings.length === 0) {
-      console.log('No scheduled tutorings found');
-      return; // Mantener el estado vacío por defecto
-    }
-
     const tutorialsList = document.getElementById('tutorialsList');
     const tutorialsCount = document.getElementById('tutorialsCount');
+    const tutorialsList2 = document.getElementById('tutorialsList2');
+    const tutorialsCount2 = document.getElementById('tutorialsCount2');
 
-    if (!tutorialsList || !tutorialsCount) return;
+    if (!user.scheduledTutorings || user.scheduledTutorings.length === 0) {
+      console.log('No scheduled tutorings found');
+      // Actualizar contadores a 0
+      if (tutorialsCount) tutorialsCount.textContent = '0';
+      if (tutorialsCount2) tutorialsCount2.textContent = '0';
+      return; // Mantener el estado vacío por defecto con botones visibles
+    }
 
-    // Actualizar contador
-    tutorialsCount.textContent = user.scheduledTutorings.length;
+    // Actualizar contadores
+    if (tutorialsCount) tutorialsCount.textContent = user.scheduledTutorings.length;
+    if (tutorialsCount2) tutorialsCount2.textContent = user.scheduledTutorings.length;
     console.log('Updated tutorials count to:', user.scheduledTutorings.length);
 
-    // Limpiar lista y agregar tutorías
-    tutorialsList.innerHTML = '';
-    console.log('Cleared tutorials list');
-
-    user.scheduledTutorings.forEach((tutoring, index) => {
-      console.log(`Rendering tutoring ${index}:`, tutoring);
-      const tutorialItem = document.createElement('div');
-      tutorialItem.className = 'tutorial-item';
-      tutorialItem.style.cssText =
-        'background: white; border: 1px solid #e2e8f0; border-radius: 5px; padding: 0.5rem; margin-bottom: 0.25rem;';
-
-      // Formatear fecha
+    // Función para crear el HTML de una tutoría
+    function createTutorialHTML(tutoring, index) {
       const date = new Date(tutoring.date);
       const dateStr = date.toLocaleDateString('es-PE', {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
       });
+
+      const tutorialItem = document.createElement('div');
+      tutorialItem.className = 'tutorial-item';
+      tutorialItem.style.cssText =
+        'background: white; border: 1px solid #e2e8f0; border-radius: 5px; padding: 0.5rem; margin-bottom: 0.25rem;';
 
       tutorialItem.innerHTML = `
         <div class="tutorial-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
@@ -391,10 +398,28 @@
           </button>
         </div>
       `;
+      return tutorialItem;
+    }
 
-      tutorialsList.appendChild(tutorialItem);
-      console.log(`Added tutoring item ${index} to the list`);
-    });
+    // Limpiar ambas listas y agregar tutorías
+    if (tutorialsList) {
+      tutorialsList.innerHTML = '';
+      user.scheduledTutorings.forEach((tutoring, index) => {
+        const tutorialItem = createTutorialHTML(tutoring, index);
+        tutorialsList.appendChild(tutorialItem);
+      });
+      console.log('Updated tutorialsList with tutorings');
+    }
+
+    if (tutorialsList2) {
+      tutorialsList2.innerHTML = '';
+      user.scheduledTutorings.forEach((tutoring, index) => {
+        const tutorialItem = createTutorialHTML(tutoring, index);
+        tutorialsList2.appendChild(tutorialItem);
+      });
+      console.log('Updated tutorialsList2 with tutorings');
+    }
+
     console.log('Finished rendering all tutorings');
   }
 
@@ -490,6 +515,17 @@
           <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #64748b;">
             <i class="fas fa-handshake" style="width: 12px; color: #9ca3af; font-size: 0.625rem;"></i>
             <span>Contraoferta: S/ ${request.tutorCounterPrice}/hora</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
+            <button class="student-action-btn accept" onclick="acceptCounterOffer('${request.id}')" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+              <i class="fas fa-check"></i> Aceptar
+            </button>
+            <button class="student-action-btn counter" onclick="openStudentCounterModal('${request.id}', ${request.tutorCounterPrice})" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+              <i class="fas fa-handshake"></i> Contraoferta
+            </button>
+            <button class="student-action-btn reject" onclick="rejectCounterOffer('${request.id}')" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
+              <i class="fas fa-times"></i> Rechazar
+            </button>
           </div>
           `
               : ''
@@ -781,31 +817,57 @@
       loadUserData(); // Recargar datos
     }
   };
-
   window.counterOffer = function (requestId) {
-    const newPrice = prompt('Ingresa tu contraoferta por hora (S/):');
+    console.log('Opening counter offer for request:', requestId);
 
-    if (newPrice && !isNaN(newPrice) && parseFloat(newPrice) > 0) {
-      console.log('Counter offer for request:', requestId, 'Price:', newPrice);
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const request = requests.find(req => req.id === requestId);
 
-      const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
-      const requestIndex = requests.findIndex(req => req.id === requestId);
+    if (!request) {
+      alert('Error: No se encontró la solicitud');
+      return;
+    }
 
-      if (requestIndex !== -1) {
-        requests[requestIndex].status = 'counter_offer';
-        requests[requestIndex].tutorCounterPrice = parseFloat(newPrice);
-        requests[requestIndex].lastUpdated = new Date().toISOString();
+    // Mostrar información actual y pedir contraoferta
+    const currentPrice = request.studentOfferedPrice;
+    const courseName = request.courseName || getCourseName(request.courseId);
 
-        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+    const message =
+      `CONTRAOFERTA - ${courseName}\n\n` +
+      `El estudiante ofreció: S/ ${currentPrice}/hora\n\n` +
+      `¿Cuál es tu contraoferta? (Ingresa solo el número)`;
 
-        // Crear notificación para el estudiante
-        createNotificationForStudent(requests[requestIndex], 'counter_offer');
+    const newPrice = prompt(message, currentPrice + 5);
 
-        alert(`Contraoferta enviada: S/ ${newPrice}/hora`);
-        loadUserData(); // Recargar datos
-      }
-    } else if (newPrice !== null) {
-      alert('Por favor ingresa un precio válido');
+    if (newPrice === null) {
+      // Usuario canceló
+      return;
+    }
+
+    if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
+      alert('⚠️ Precio inválido. Debe ser un número mayor a 0.');
+      return;
+    }
+
+    const finalPrice = parseFloat(newPrice);
+    const requestIndex = requests.findIndex(req => req.id === requestId);
+
+    if (requestIndex !== -1) {
+      requests[requestIndex].status = 'counter_offer';
+      requests[requestIndex].tutorCounterPrice = finalPrice;
+      requests[requestIndex].lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+      // Crear notificación para el estudiante
+      createNotificationForStudent(requests[requestIndex], 'counter_offer');
+
+      alert(`✅ ¡Contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl estudiante recibirá una notificación.`);
+
+      // Recargar datos
+      setTimeout(() => {
+        loadUserData();
+      }, 100);
     }
   };
 
@@ -841,6 +903,183 @@
         requestId: request.id,
         tutorId: request.tutorId,
         courseId: request.courseId,
+      },
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    notifications.push(newNotification);
+    localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
+  }
+
+  // ===== FUNCIONES PARA RESPUESTAS DEL ESTUDIANTE A CONTRAOFERTA =====
+
+  // Aceptar contraoferta del tutor
+  window.acceptCounterOffer = function (requestId) {
+    console.log('Student accepting counter offer:', requestId);
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const requestIndex = requests.findIndex(req => req.id === requestId);
+
+    if (requestIndex !== -1) {
+      const request = requests[requestIndex];
+      const finalPrice = request.tutorCounterPrice;
+      const courseName = request.courseName || getCourseName(request.courseId);
+
+      const confirmMessage =
+        `¿Confirmas que aceptas la contraoferta?\n\n` +
+        `Curso: ${courseName}\n` +
+        `Precio final: S/ ${finalPrice}/hora\n\n` +
+        `Esta acción confirmará la tutoría.`;
+
+      if (confirm(confirmMessage)) {
+        requests[requestIndex].status = 'accepted';
+        requests[requestIndex].finalPrice = finalPrice;
+        requests[requestIndex].lastUpdated = new Date().toISOString();
+
+        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+        // Crear notificación para el tutor
+        createNotificationForTutor(requests[requestIndex], 'counter_accepted');
+
+        alert(`✅ ¡Contraoferta aceptada!\n\nPrecio final: S/ ${finalPrice}/hora\nLa tutoría ha sido confirmada.`);
+
+        // Forzar actualización completa
+        setTimeout(() => {
+          loadUserData();
+        }, 100);
+      }
+    }
+  };
+
+  // Rechazar contraoferta del tutor
+  window.rejectCounterOffer = function (requestId) {
+    console.log('Student rejecting counter offer:', requestId);
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const request = requests.find(req => req.id === requestId);
+
+    if (!request) {
+      alert('Error: No se encontró la solicitud');
+      return;
+    }
+
+    const courseName = request.courseName || getCourseName(request.courseId);
+    const tutorPrice = request.tutorCounterPrice;
+
+    const confirmMessage =
+      `¿Confirmas que rechazas la contraoferta?\n\n` +
+      `Curso: ${courseName}\n` +
+      `Contraoferta del tutor: S/ ${tutorPrice}/hora\n\n` +
+      `Esta acción terminará la negociación.`;
+
+    if (confirm(confirmMessage)) {
+      const requestIndex = requests.findIndex(req => req.id === requestId);
+
+      if (requestIndex !== -1) {
+        requests[requestIndex].status = 'rejected';
+        requests[requestIndex].lastUpdated = new Date().toISOString();
+
+        localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+        // Crear notificación para el tutor
+        createNotificationForTutor(requests[requestIndex], 'counter_rejected');
+
+        alert('❌ Contraoferta rechazada.\n\nLa negociación ha terminado.');
+
+        // Forzar actualización completa
+        setTimeout(() => {
+          loadUserData();
+        }, 100);
+      }
+    }
+  };
+
+  // Abrir contraoferta del estudiante
+  window.openStudentCounterModal = function (requestId, tutorPrice) {
+    console.log('Opening student counter offer for request:', requestId, 'tutor price:', tutorPrice);
+
+    const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+    const request = requests.find(req => req.id === requestId);
+
+    if (!request) {
+      alert('Error: No se encontró la solicitud');
+      return;
+    }
+
+    const courseName = request.courseName || getCourseName(request.courseId);
+    const originalPrice = request.studentOfferedPrice;
+
+    const message =
+      `NUEVA CONTRAOFERTA - ${courseName}\n\n` +
+      `Tu oferta original: S/ ${originalPrice}/hora\n` +
+      `Contraoferta del tutor: S/ ${tutorPrice}/hora\n\n` +
+      `¿Cuál es tu nueva contraoferta? (Ingresa solo el número)`;
+
+    const newPrice = prompt(message, tutorPrice - 2);
+
+    if (newPrice === null) {
+      // Usuario canceló
+      return;
+    }
+
+    if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
+      alert('⚠️ Precio inválido. Debe ser un número mayor a 0.');
+      return;
+    }
+
+    const finalPrice = parseFloat(newPrice);
+    const requestIndex = requests.findIndex(req => req.id === requestId);
+
+    if (requestIndex !== -1) {
+      requests[requestIndex].status = 'counter_offer';
+      requests[requestIndex].studentCounterPrice = finalPrice;
+      requests[requestIndex].lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+      // Crear notificación para el tutor
+      createNotificationForTutor(requests[requestIndex], 'student_counter');
+
+      alert(`✅ ¡Nueva contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl tutor recibirá una notificación.`);
+
+      // Recargar datos
+      setTimeout(() => {
+        loadUserData();
+      }, 100);
+    }
+  };
+
+  // Función para crear notificaciones para el tutor
+  function createNotificationForTutor(request, action) {
+    const notifications = JSON.parse(localStorage.getItem('hermesNotifications') || '[]');
+
+    let title, message;
+    switch (action) {
+      case 'counter_accepted':
+        title = '✅ Contraoferta Aceptada';
+        message = `El estudiante aceptó tu contraoferta de S/ ${request.tutorCounterPrice}/hora para ${request.courseName || 'el curso'}`;
+        break;
+      case 'counter_rejected':
+        title = '❌ Contraoferta Rechazada';
+        message = `El estudiante rechazó tu contraoferta para ${request.courseName || 'el curso'}`;
+        break;
+      case 'student_counter':
+        title = '🔄 Nueva Contraoferta';
+        message = `El estudiante hizo una nueva contraoferta de S/ ${request.studentCounterPrice}/hora para ${request.courseName || 'el curso'}`;
+        break;
+    }
+
+    const newNotification = {
+      id: Date.now() + Math.random(),
+      userId: request.tutorId,
+      title: title,
+      message: message,
+      type: action,
+      data: {
+        requestId: request.id,
+        courseId: request.courseId,
+        price: action === 'student_counter' ? request.studentCounterPrice : request.tutorCounterPrice,
       },
       read: false,
       createdAt: new Date().toISOString(),
@@ -1331,6 +1570,26 @@
     border-bottom: 1px solid rgba(99, 102, 241, 0.1);
   }
 
+  .settings-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-btn:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    transform: rotate(15deg);
+  }
+
   .count-badge {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
@@ -1572,35 +1831,6 @@
     color: #991b1b;
   }
 
-  /* Acciones del tutor */
-  .tutor-actions-expanded {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  .tutor-btn-secondary {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: white;
-    color: var(--text-primary);
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .tutor-btn-secondary:hover {
-    background: #f0fdf4;
-    border-color: #10b981;
-    color: #059669;
-    transform: translateY(-1px);
-  }
-
   /* Responsive */
   @media (max-width: 1024px) {
     .dashboard-main-grid {
@@ -1694,5 +1924,11 @@
     .availability-tags {
       gap: var(--spacing-xs);
     }
+  }
+
+  /* Estilos para botones de acción del estudiante */
+  .student-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 </style>
