@@ -1191,6 +1191,13 @@
     gap: var(--spacing-md);
   }
 
+  /* Layout vertical para panel estudiante en modo tutor */
+  .dashboard-main-grid:not(.student-only-layout) .student-column-original {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
   .student-actions-full {
     width: 100%;
   }
