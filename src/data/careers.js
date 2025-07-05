@@ -6,13 +6,6 @@ export const careers = [
   { id: 3, name: "Ingeniería Civil", universityId: 1, facultyId: 1, duration: 10, isActive: true },
   { id: 4, name: "Ingeniería de Minas", universityId: 1, facultyId: 1, duration: 10, isActive: true },
   
-  // UNMSM
-  { id: 5, name: "Medicina Humana", universityId: 2, facultyId: 2, duration: 14, isActive: true },
-  { id: 6, name: "Derecho", universityId: 2, facultyId: 3, duration: 12, isActive: true },
-  { id: 7, name: "Psicología", universityId: 2, facultyId: 4, duration: 10, isActive: true },
-  { id: 8, name: "Administración", universityId: 2, facultyId: 5, duration: 10, isActive: true },
-  { id: 9, name: "Contabilidad", universityId: 2, facultyId: 5, duration: 10, isActive: true },
-  
   // PUCP
   { id: 10, name: "Ingeniería Informática", universityId: 3, facultyId: 6, duration: 10, isActive: true },
   { id: 11, name: "Administración y Marketing", universityId: 3, facultyId: 7, duration: 10, isActive: true },

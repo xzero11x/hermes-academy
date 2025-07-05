@@ -150,7 +150,7 @@ export const courses = [
     name: "Desarrollo de Software I",
     code: "SI184",
     universityId: 10,
-    careerId: 5,
+    careerId: 20,
     cycle: 3,
     credits: 4,
     area: "Desarrollo",
