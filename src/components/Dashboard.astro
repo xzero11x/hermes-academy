@@ -36,69 +36,137 @@
     </div>
 
     <!-- Grid principal dividido -->
-    <div class='dashboard-main-grid'>
+    <div class='dashboard-main-grid' id='dashboardMainGrid'>
       <!-- Columna Estudiante (Izquierda) -->
-      <div class='student-column'>
-        <div class='column-header'>
+      <div class='student-column' id='studentColumn'>
+        <div class='column-header' id='studentColumnHeader'>
           <h3><i class='fas fa-user-graduate'></i> Panel Estudiante</h3>
         </div>
 
-        <!-- Próximas tutorías -->
-        <div class='dashboard-card tutorials-card'>
-          <div class='card-header'>
-            <h2><i class='fas fa-clock'></i> Próximas tutorías</h2>
-            <span class='count-badge' id='tutorialsCount'>0</span>
+        <!-- Container especial para layout solo estudiante -->
+        <div class='student-only-container' id='studentOnlyContainer' style='display: none;'>
+          <div class='student-top-row'>
+            <!-- Próximas tutorías -->
+            <div class='dashboard-card tutorials-card'>
+              <div class='card-header'>
+                <h2><i class='fas fa-clock'></i> Próximas tutorías</h2>
+                <span class='count-badge' id='tutorialsCount'>0</span>
+              </div>
+              <div
+                class='tutorials-list'
+                id='tutorialsList'
+                style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
+              >
+                <div
+                  class='empty-state'
+                  style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+                >
+                  <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'>
+                  </i>
+                  <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Solicitudes Pendientes -->
+            <div class='dashboard-card requests-card'>
+              <div class='card-header'>
+                <h2><i class='fas fa-hourglass-half'></i> Solicitudes Pendientes</h2>
+                <span class='count-badge' id='requestsCount'>0</span>
+              </div>
+              <div
+                class='requests-list'
+                id='requestsList'
+                style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
+              >
+                <div
+                  class='empty-state'
+                  style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+                >
+                  <i class='fas fa-envelope' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
+                  <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes solicitudes pendientes</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div
-            class='tutorials-list'
-            id='tutorialsList'
-            style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
-          >
-            <div
-              class='empty-state'
-              style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
-            >
-              <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
-              <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+
+          <!-- Accesos rápidos (fila completa) -->
+          <div class='dashboard-card actions-card student-actions-full'>
+            <div class='card-header'>
+              <h2><i class='fas fa-rocket'></i> Accesos rápidos</h2>
+            </div>
+            <div class='actions-grid'>
+              <a href='#' onclick='goToMyCourses()' class='action-btn'>
+                <i class='fas fa-search'></i>
+                <span>Mis cursos</span>
+              </a>
+              <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
+                <i class='fas fa-university'></i>
+                <span>Universidades</span>
+              </a>
             </div>
           </div>
         </div>
 
-        <!-- Solicitudes Pendientes -->
-        <div class='dashboard-card requests-card'>
-          <div class='card-header'>
-            <h2><i class='fas fa-hourglass-half'></i> Solicitudes Pendientes</h2>
-            <span class='count-badge' id='requestsCount'>0</span>
-          </div>
-          <div
-            class='requests-list'
-            id='requestsList'
-            style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
-          >
+        <!-- Layout original para modo tutor (se oculta en modo solo estudiante) -->
+        <div class='student-column-original' id='studentColumnOriginal'>
+          <!-- Próximas tutorías -->
+          <div class='dashboard-card tutorials-card'>
+            <div class='card-header'>
+              <h2><i class='fas fa-clock'></i> Próximas tutorías</h2>
+              <span class='count-badge' id='tutorialsCount2'>0</span>
+            </div>
             <div
-              class='empty-state'
-              style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+              class='tutorials-list'
+              id='tutorialsList2'
+              style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
             >
-              <i class='fas fa-envelope' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
-              <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes solicitudes pendientes</p>
+              <div
+                class='empty-state'
+                style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+              >
+                <i class='fas fa-calendar-plus' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
+                <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes tutorías programadas</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Accesos rápidos estudiante -->
-        <div class='dashboard-card actions-card'>
-          <div class='card-header'>
-            <h2><i class='fas fa-rocket'></i> Accesos rápidos</h2>
+          <!-- Solicitudes Pendientes -->
+          <div class='dashboard-card requests-card'>
+            <div class='card-header'>
+              <h2><i class='fas fa-hourglass-half'></i> Solicitudes Pendientes</h2>
+              <span class='count-badge' id='requestsCount2'>0</span>
+            </div>
+            <div
+              class='requests-list'
+              id='requestsList2'
+              style='display: flex; flex-direction: column; gap: 0.5rem; padding: 0;'
+            >
+              <div
+                class='empty-state'
+                style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; text-align: center;'
+              >
+                <i class='fas fa-envelope' style='font-size: 1.5rem; color: #cbd5e1; margin-bottom: 0.25rem;'></i>
+                <p style='margin: 0; color: #64748b; font-size: 0.75rem;'>No tienes solicitudes pendientes</p>
+              </div>
+            </div>
           </div>
-          <div class='actions-grid'>
-            <a href='#' onclick='goToMyCourses()' class='action-btn'>
-              <i class='fas fa-search'></i>
-              <span>Mis cursos</span>
-            </a>
-            <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
-              <i class='fas fa-university'></i>
-              <span>Universidades</span>
-            </a>
+
+          <!-- Accesos rápidos estudiante -->
+          <div class='dashboard-card actions-card'>
+            <div class='card-header'>
+              <h2><i class='fas fa-rocket'></i> Accesos rápidos</h2>
+            </div>
+            <div class='actions-grid'>
+              <a href='#' onclick='goToMyCourses()' class='action-btn'>
+                <i class='fas fa-search'></i>
+                <span>Mis cursos</span>
+              </a>
+              <a href={import.meta.env.BASE_URL + '/universities'} class='action-btn'>
+                <i class='fas fa-university'></i>
+                <span>Universidades</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -258,9 +326,13 @@
     if (user.roles && user.roles.isTutor) {
       showTutorModule(user);
       loadTutorRequests(user);
+      // Usar layout de tutor (2 columnas)
+      setTutorLayout();
     } else {
       // Si no es tutor, mostrar botón de aplicar como tutor
       showApplyTutorButton();
+      // Usar layout solo estudiante (reorganizado)
+      setStudentOnlyLayout();
     }
   }
 
@@ -876,6 +948,57 @@
     }
   }
 
+  // Funciones para cambiar el layout del dashboard
+  function setStudentOnlyLayout() {
+    const mainGrid = document.getElementById('dashboardMainGrid');
+    const studentOnlyContainer = document.getElementById('studentOnlyContainer');
+    const studentColumnOriginal = document.getElementById('studentColumnOriginal');
+    const studentColumnHeader = document.getElementById('studentColumnHeader');
+
+    if (mainGrid) {
+      mainGrid.className = 'dashboard-main-grid student-only-layout';
+    }
+
+    if (studentOnlyContainer) {
+      studentOnlyContainer.style.display = 'flex';
+    }
+
+    if (studentColumnOriginal) {
+      studentColumnOriginal.style.display = 'none';
+    }
+
+    if (studentColumnHeader) {
+      studentColumnHeader.style.display = 'none';
+    }
+
+    console.log('✅ Layout cambiado a: Solo estudiante (2 columnas arriba)');
+  }
+
+  function setTutorLayout() {
+    const mainGrid = document.getElementById('dashboardMainGrid');
+    const studentOnlyContainer = document.getElementById('studentOnlyContainer');
+    const studentColumnOriginal = document.getElementById('studentColumnOriginal');
+    const studentColumnHeader = document.getElementById('studentColumnHeader');
+
+    if (mainGrid) {
+      mainGrid.className = 'dashboard-main-grid';
+    }
+
+    if (studentOnlyContainer) {
+      studentOnlyContainer.style.display = 'none';
+    }
+
+    if (studentColumnOriginal) {
+      studentColumnOriginal.style.display = 'flex';
+    }
+
+    if (studentColumnHeader) {
+      studentColumnHeader.style.display = 'flex';
+    }
+
+    console.log('✅ Layout cambiado a: Tutor (2 columnas lado a lado)');
+  }
+
   // Hacer funciones globales
   window.logout = logout;
   window.viewTutorRequests = viewTutorRequests;
@@ -1040,6 +1163,41 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-md);
     align-items: start;
+  }
+
+  /* Layout especial para solo estudiante */
+  .dashboard-main-grid.student-only-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-main-grid.student-only-layout .student-column {
+    width: 100%;
+  }
+
+  .dashboard-main-grid.student-only-layout .column-header {
+    display: none;
+  }
+
+  /* Container para layout solo estudiante */
+  .student-only-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .student-top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .student-actions-full {
+    width: 100%;
+  }
+
+  /* Ocultar layout original cuando está en modo solo estudiante */
+  .dashboard-main-grid.student-only-layout .student-column-original {
+    display: none !important;
   }
 
   /* Columnas */
@@ -1481,6 +1639,12 @@
     .tutor-column {
       order: 2;
     }
+
+    /* Layout solo estudiante en tablet */
+    .student-top-row {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-sm);
+    }
   }
 
   @media (max-width: 768px) {
@@ -1517,6 +1681,12 @@
     }
 
     .dashboard-main-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-sm);
+    }
+
+    /* Layout solo estudiante en móvil */
+    .student-top-row {
       grid-template-columns: 1fr;
       gap: var(--spacing-sm);
     }
