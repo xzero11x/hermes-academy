@@ -110,11 +110,14 @@ universities.forEach(university => {
               <h3 class='section-title'>Curso que Deseas Enseñar</h3>
 
               <div class='field-group'>
-                <label for='courseToTeach'>Selecciona el curso *</label>
-                <select id='courseToTeach' name='courseToTeach' required>
-                  <option value=''>Primero selecciona tu universidad</option>
-                </select>
-                <small class='field-hint'>Solo puedes enseñar cursos de tu universidad</small>
+                <label for='courseToTeach'>Curso que deseas enseñar</label>
+                <input
+                  type='text'
+                  id='courseToTeach'
+                  name='courseToTeach'
+                  placeholder='Ej: Cálculo I, Programación, Química Orgánica'
+                />
+                <small class='field-hint'>Escribe el nombre del curso que quieres enseñar</small>
               </div>
 
               <div class='field-group'>
@@ -270,7 +273,7 @@ universities.forEach(university => {
 
             <!-- Botón de Envío -->
             <div class='form-actions'>
-              <button type='submit' class='btn-submit' id='submitBtn'>
+              <button type='button' class='btn-submit' id='submitBtn'>
                 <i class='fas fa-paper-plane'></i>
                 Enviar Solicitud
               </button>
@@ -789,6 +792,27 @@ universities.forEach(university => {
     background: #5b5bd6;
   }
 
+  /* Submission Status */
+  .submission-status {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .status-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #10b981;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .status-line i {
+    font-size: 1rem;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .tutor-application-section {
@@ -826,27 +850,8 @@ universities.forEach(university => {
 
   // Configurar cambio de universidad
   function setupUniversityChange() {
-    const universitySelect = document.getElementById('university') as HTMLSelectElement;
-    const courseSelect = document.getElementById('courseToTeach') as HTMLSelectElement;
-
-    // Usar los datos procesados desde el servidor
-    const coursesByUniversityData = JSON.parse(`{JSON.stringify(coursesByUniversity)}`);
-
-    universitySelect?.addEventListener('change', function () {
-      const selectedUniversity = (this as HTMLSelectElement).value;
-      if (courseSelect) {
-        courseSelect.innerHTML = '<option value="">Selecciona un curso</option>';
-
-        if (selectedUniversity && coursesByUniversityData[selectedUniversity]) {
-          coursesByUniversityData[selectedUniversity].forEach((course: any) => {
-            const option = document.createElement('option');
-            option.value = course.name;
-            option.textContent = `${course.name} (${course.code})`;
-            courseSelect.appendChild(option);
-          });
-        }
-      }
-    });
+    // Esta función ya no es necesaria porque cambiamos el select por input
+    console.log('University change setup - not needed anymore');
   }
 
   // Configurar subida de archivos
@@ -938,49 +943,57 @@ universities.forEach(university => {
 
   // Configurar envío del formulario
   function setupFormSubmission() {
-    const form = document.getElementById('tutorApplicationForm') as HTMLFormElement;
+    console.log('Setting up button click...');
+    const submitBtn = document.getElementById('submitBtn');
+    console.log('Submit button found:', submitBtn);
 
-    form?.addEventListener('submit', function (e) {
-      e.preventDefault();
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function () {
+        console.log('Button clicked!');
 
-      // Validar archivos
-      if (!uploadedFiles.courseGrade || !uploadedFiles.lastSemester) {
-        alert('Por favor sube ambos documentos requeridos');
-        return;
-      }
+        // Mostrar el modal inmediatamente
+        console.log('Showing modal...');
+        const modal = document.getElementById('confirmationModal');
+        if (modal) {
+          modal.classList.add('active');
+          modal.style.display = 'flex';
+          console.log('Modal shown successfully');
+        }
 
-      // Validar nota mínima
-      const courseGrade = parseFloat((document.getElementById('courseGrade') as HTMLInputElement)?.value || '0');
-      if (courseGrade < 16) {
-        alert('La nota mínima requerida en el curso es 16.00');
-        return;
-      }
+        // Agregar estado de "Enviado - En Revisión"
+        const formActions = document.querySelector('.form-actions');
 
-      // Simular envío
-      const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        // Crear elemento de estado si no existe
+        let statusElement = document.querySelector('.submission-status');
+        if (!statusElement) {
+          statusElement = document.createElement('div');
+          statusElement.className = 'submission-status';
+          statusElement.innerHTML = `
+            <div class="status-line">
+              <i class="fas fa-check-circle"></i>
+              <span>Solicitud Enviada - En Revisión</span>
+            </div>
+          `;
+          if (formActions) {
+            formActions.appendChild(statusElement);
+          }
+        }
 
-        setTimeout(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Solicitud';
-          showModal('confirmationModal');
-        }, 2000);
-      }
-    });
-  }
-
-  // Mostrar modal
-  function showModal(modalId: string) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('active');
+        // Cambiar el botón
+        (submitBtn as HTMLButtonElement).disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Solicitud Enviada';
+        submitBtn.style.background = '#10b981';
+      });
+    }
   }
 
   // Cerrar modal
   function closeModal(modalId: string) {
     const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
   }
 
   // Cerrar modales al hacer clic fuera
@@ -988,12 +1001,11 @@ universities.forEach(university => {
     const target = e.target as HTMLElement;
     if (target && target.classList.contains('modal')) {
       target.classList.remove('active');
+      target.style.display = 'none';
     }
   });
 
   // Exponer funciones globalmente para uso en onclick handlers
-  Object.assign(window, {
-    removeFile,
-    closeModal,
-  });
+  (window as any).removeFile = removeFile;
+  (window as any).closeModal = closeModal;
 </script>
