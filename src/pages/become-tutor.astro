@@ -794,8 +794,8 @@ universities.forEach(university => {
 
   /* Submission Status */
   .submission-status {
-    margin-top: 1rem;
-    padding-top: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #e2e8f0;
   }
 
@@ -811,6 +811,11 @@ universities.forEach(university => {
 
   .status-line i {
     font-size: 1rem;
+  }
+
+  .status-line span {
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
   }
 
   /* Responsive */
@@ -951,6 +956,36 @@ universities.forEach(university => {
       submitBtn.addEventListener('click', function () {
         console.log('Button clicked!');
 
+        // Guardar la solicitud de tutor en localStorage
+        const user = (window as any).auth?.getCurrentUser();
+        if (user) {
+          const tutorApplication = {
+            id: 'TUTOR_APP_' + Date.now(),
+            userId: user.id,
+            type: 'tutor_application',
+            status: 'pending_approval',
+            title: 'Solicitud para ser tutor',
+            description: 'Pendiente de aprobación',
+            createdAt: new Date().toISOString(),
+            data: {
+              fullName: (document.getElementById('fullName') as HTMLInputElement)?.value || '',
+              email: (document.getElementById('email') as HTMLInputElement)?.value || '',
+              university: 'UTEC', // Universidad automática
+              career: (document.getElementById('career') as HTMLInputElement)?.value || '',
+              courseToTeach: 'Cálculo de una Variable', // Curso automático
+              courseGrade: (document.getElementById('courseGrade') as HTMLInputElement)?.value || '',
+              hourlyRate: (document.getElementById('hourlyRate') as HTMLInputElement)?.value || '',
+            },
+          };
+
+          // Guardar en hermesTutoringRequests para que aparezca en el dashboard
+          const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+          requests.push(tutorApplication);
+          localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
+
+          console.log('Solicitud de tutor guardada:', tutorApplication);
+        }
+
         // Mostrar el modal inmediatamente
         console.log('Showing modal...');
         const modal = document.getElementById('confirmationModal');
@@ -971,7 +1006,7 @@ universities.forEach(university => {
           statusElement.innerHTML = `
             <div class="status-line">
               <i class="fas fa-check-circle"></i>
-              <span>Solicitud Enviada - En Revisión</span>
+              <span>Solicitud Enviada &nbsp;-&nbsp; En Revisión</span>
             </div>
           `;
           if (formActions) {
