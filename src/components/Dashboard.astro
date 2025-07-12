@@ -273,13 +273,67 @@
 <script define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
   // ===== MODAL MANAGER EMBEBIDO COMPLETO =====
 
-  console.log('🔧 Creando ModalManager profesional embebido...');
+  console.log('Creando ModalManager profesional embebido...');
 
   // Crear el ModalManager directamente embebido
   window.modalManager = {
     modals: new Map(),
     zIndexBase: 10000,
     currentZIndex: 10000,
+
+    // Función de limpieza específica para overlays modales
+    cleanupWhiteOverlay() {
+      console.log('🔧 Limpiando overlays blancos...');
+
+      // Limpiar todos los overlays modales por clase y atributos específicos
+      const overlaysToRemove = document.querySelectorAll(`
+        .modal-overlay,
+        [id^="modal-"],
+        [id^="modal_"],
+        [style*="z-index: 99999"],
+        [style*="position: fixed"][style*="background: rgba"]
+      `);
+
+      overlaysToRemove.forEach(overlay => {
+        // PROTEGER EL HEADER - nunca eliminar elementos con estas clases/ids
+        const isHeader =
+          overlay.classList.contains('dashboard-header') ||
+          overlay.closest('.dashboard-header') ||
+          overlay.id === 'dashboard-header' ||
+          overlay.tagName === 'HEADER';
+
+        if (!isHeader) {
+          console.log('🗑️ Eliminando overlay:', overlay.id || overlay.className);
+          overlay.remove();
+        } else {
+          console.log('🛡️ Protegiendo header, no eliminado');
+        }
+      });
+
+      // Limpiar overlays con z-index alto pero sin clase específica
+      document.querySelectorAll('div').forEach(div => {
+        const style = div.style.cssText || '';
+        const hasHighZIndex = style.includes('z-index: 99999') || style.includes('z-index: 10000');
+        const hasFixedPosition = style.includes('position: fixed');
+        const hasFullSize = style.includes('width: 100%') && style.includes('height: 100%');
+
+        if (hasHighZIndex && hasFixedPosition && hasFullSize) {
+          const isHeader =
+            div.classList.contains('dashboard-header') ||
+            div.closest('.dashboard-header') ||
+            div.id === 'dashboard-header';
+
+          if (!isHeader) {
+            console.log('🗑️ Eliminando overlay sin clase específica');
+            div.remove();
+          }
+        }
+      });
+
+      // Limpiar Map de modales
+      this.modals.clear();
+      console.log('✅ Limpieza completada');
+    },
 
     init() {
       // Crear contenedor de modales si no existe
@@ -893,9 +947,21 @@
 
       return baseStyles + (variants[className] || variants['btn-secondary']);
     },
+
+    // Función de emergencia para limpiar todos los overlays sin tocar header
+    emergencyCleanup() {
+      console.log('🚨 LIMPIEZA DE EMERGENCIA - Eliminando overlays blancos');
+      this.cleanupWhiteOverlay();
+
+      // También agregar a botones de acción rápida
+      setTimeout(() => {
+        console.log('🔄 Verificando limpieza después de 1 segundo...');
+        this.cleanupWhiteOverlay();
+      }, 1000);
+    },
   };
 
-  console.log('✅ ModalManager embebido completo listo');
+  console.log('ModalManager embebido completo listo');
 
   // ===== SISTEMA DE AUTENTICACIÓN =====
 
@@ -918,6 +984,14 @@
 
   // Cargar datos del usuario al cargar la página
   document.addEventListener('DOMContentLoaded', function () {
+    // PRIMERA PRIORIDAD: Limpiar overlays blancos al cargar
+    setTimeout(() => {
+      if (window.modalManager && window.modalManager.cleanupWhiteOverlay) {
+        console.log('🧹 Limpieza automática al cargar página');
+        window.modalManager.cleanupWhiteOverlay();
+      }
+    }, 500);
+
     // Esperar a que el auth global esté disponible
     setTimeout(() => {
       loadUserData();
@@ -927,7 +1001,7 @@
     window.addEventListener('hermesNotificationCreated', function (event) {
       const currentUser = window.auth?.getCurrentUser();
       if (currentUser && event.detail.userId === currentUser.id) {
-        console.log('🔄 Recibida notificación, recargando dashboard...', event.detail);
+        console.log('Recibida notificación, recargando dashboard...', event.detail);
         // Mostrar un mensaje temporal
         showTemporaryMessage(event.detail.type, event.detail.notification);
         // Recargar datos después de un breve delay
@@ -963,7 +1037,7 @@
       }
 
       userNameElement.textContent = displayName;
-      console.log('👤 Nombre de usuario actualizado:', displayName);
+      console.log('Nombre de usuario actualizado:', displayName);
     }
 
     // IMPORTANTE: Configurar el layout ANTES de cargar las solicitudes
@@ -984,7 +1058,7 @@
   // Función para cargar solicitudes del estudiante
   function loadStudentRequests(user) {
     console.log('loadStudentRequests called with user:', user);
-    console.log('🔍 DEBUG - User ID:', user.id, 'Type:', typeof user.id);
+    console.log('DEBUG - User ID:', user.id, 'Type:', typeof user.id);
 
     // Obtener solicitudes del localStorage
     const requests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
@@ -992,7 +1066,7 @@
 
     // Debug: mostrar todos los studentId para comparar
     console.log(
-      '🔍 DEBUG - Student IDs in requests:',
+      'DEBUG - Student IDs in requests:',
       requests.map(req => ({
         id: req.studentId,
         type: typeof req.studentId,
@@ -1019,15 +1093,15 @@
       // Layout solo estudiante
       requestsList = document.getElementById('requestsList');
       requestsCount = document.getElementById('requestsCount');
-      console.log('🔍 DEBUG - Usando layout solo estudiante');
+      console.log('DEBUG - Usando layout solo estudiante');
     } else {
       // Layout con tutor
       requestsList = document.getElementById('requestsList2');
       requestsCount = document.getElementById('requestsCount2');
-      console.log('🔍 DEBUG - Usando layout con tutor');
+      console.log('DEBUG - Usando layout con tutor');
     }
 
-    console.log('🔍 DEBUG - DOM Elements:', {
+    console.log('DEBUG - DOM Elements:', {
       requestsList: requestsList,
       requestsCount: requestsCount,
       requestsListExists: !!requestsList,
@@ -1036,28 +1110,28 @@
     });
 
     if (!requestsList || !requestsCount) {
-      console.error('❌ ERROR - No se encontraron elementos DOM necesarios para el layout activo');
+      console.error('ERROR - No se encontraron elementos DOM necesarios para el layout activo');
       return;
     }
 
-    console.log('🔍 DEBUG - UserRequests length:', userRequests.length);
+    console.log('DEBUG - UserRequests length:', userRequests.length);
 
     if (userRequests.length === 0) {
-      console.log('🔍 DEBUG - No hay solicitudes, estableciendo contador a 0');
+      console.log('DEBUG - No hay solicitudes, estableciendo contador a 0');
       requestsCount.textContent = '0';
       return; // Mantener el estado vacío por defecto
     }
 
     // Actualizar contador
     requestsCount.textContent = userRequests.length;
-    console.log('🔍 DEBUG - Contador actualizado a:', userRequests.length);
+    console.log('DEBUG - Contador actualizado a:', userRequests.length);
 
     // Limpiar lista y agregar solicitudes
     requestsList.innerHTML = '';
-    console.log('🔍 DEBUG - Lista limpiada, empezando renderizado...');
+    console.log('DEBUG - Lista limpiada, empezando renderizado...');
 
     userRequests.forEach((request, index) => {
-      console.log(`🔍 DEBUG - Renderizando solicitud ${index}:`, request);
+      console.log(`DEBUG - Renderizando solicitud ${index}:`, request);
       try {
         const requestItem = document.createElement('div');
         requestItem.className = 'pending-request-item';
@@ -1067,7 +1141,7 @@
         const courseName = request.courseName || getCourseName(request.courseId);
         const tutorName = getTutorName(request.tutorId);
 
-        console.log(`🔍 DEBUG - Solicitud ${index} - Curso: ${courseName}, Tutor: ${tutorName}`);
+        console.log(`DEBUG - Solicitud ${index} - Curso: ${courseName}, Tutor: ${tutorName}`);
 
         // Determinar el estado visual
         let statusText, statusStyles;
@@ -1139,13 +1213,13 @@
         </div>
       `;
         requestsList.appendChild(requestItem);
-        console.log(`✅ Solicitud ${index} agregada exitosamente al DOM`);
+        console.log(`Solicitud ${index} agregada exitosamente al DOM`);
       } catch (error) {
-        console.error(`❌ Error renderizando solicitud ${index}:`, error);
+        console.error(`Error renderizando solicitud ${index}:`, error);
       }
     });
 
-    console.log('🔍 DEBUG - Renderizado completado. Total elementos en lista:', requestsList.children.length);
+    console.log('DEBUG - Renderizado completado. Total elementos en lista:', requestsList.children.length);
     console.log('Finished rendering all pending requests');
   }
 
@@ -1249,13 +1323,13 @@
 
   // Función para forzar recarga de datos
   window.forceReloadRequests = function () {
-    console.log('🔄 Forzando recarga de solicitudes...');
+    console.log('Forzando recarga de solicitudes...');
     const user = window.auth?.getCurrentUser();
     if (user) {
       loadStudentRequests(user);
-      console.log('✅ Recarga completada');
+      console.log('Recarga completada');
     } else {
-      console.error('❌ No hay usuario logueado');
+      console.error('No hay usuario logueado');
     }
   };
 
@@ -1465,10 +1539,10 @@
         // Crear notificación para el estudiante
         createNotificationForStudent(requests[requestIndex], 'accepted');
 
-        await window.modalManager?.alert('✅ Solicitud aceptada exitosamente! El estudiante será notificado.', 'Éxito');
+        await window.modalManager?.alert('Solicitud aceptada exitosamente! El estudiante será notificado.', 'Éxito');
 
         // Mostrar toast de éxito
-        showToast('✅ Solicitud aceptada! El estudiante será notificado', 'success');
+        showToast('Solicitud aceptada! El estudiante será notificado', 'success');
 
         loadUserData(); // Recargar datos
       }
@@ -1508,7 +1582,7 @@
       await window.modalManager?.alert('Solicitud rechazada. El estudiante será notificado.', 'Rechazada');
 
       // Mostrar toast informativo
-      showToast('❌ Solicitud rechazada', 'warning');
+      showToast('Solicitud rechazada', 'warning');
 
       loadUserData(); // Recargar datos
     }
@@ -1549,7 +1623,7 @@
     }
 
     if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
-      await window.modalManager?.alert('⚠️ Precio inválido. Debe ser un número mayor a 0.', 'Error de Validación');
+      await window.modalManager?.alert('Precio inválido. Debe ser un número mayor a 0.', 'Error de Validación');
       return;
     }
 
@@ -1567,12 +1641,12 @@
       createNotificationForStudent(requests[requestIndex], 'counter_offer');
 
       await window.modalManager?.alert(
-        `✅ ¡Contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl estudiante recibirá una notificación.`,
+        `¡Contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl estudiante recibirá una notificación.`,
         'Contraoferta Enviada'
       );
 
       // Mostrar toast de éxito
-      showToast(`💬 Contraoferta enviada: S/ ${finalPrice}/hora`, 'info');
+      showToast(`Contraoferta enviada: S/ ${finalPrice}/hora`, 'info');
 
       // Recargar datos
       setTimeout(() => {
@@ -1621,10 +1695,10 @@
     localStorage.setItem('hermesNotifications', JSON.stringify(notifications));
 
     // Log para confirmar que se creó la notificación
-    console.log('✅ Notificación creada para estudiante:', newNotification);
+    console.log('Notificación creada para estudiante:', newNotification);
 
     // Solo mostrar toast, sin modal que interrumpa el flujo
-    showToast(`📨 Notificación enviada: ${title}`, 'info');
+    showToast(`Notificación enviada: ${title}`, 'info');
 
     // Trigger event para actualizar otros dashboards que puedan estar abiertos
     window.dispatchEvent(
@@ -1660,7 +1734,7 @@
           requestElement.innerHTML = `
             <div style="text-align: center; padding: 1rem; color: #166534;">
               <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-              <p style="margin: 0; font-weight: 600;">✅ Contraoferta Aceptada</p>
+              <p style="margin: 0; font-weight: 600;">Contraoferta Aceptada</p>
               <p style="margin: 0; font-size: 0.8rem;">Precio final: S/ ${finalPrice}/hora</p>
             </div>
           `;
@@ -1704,10 +1778,10 @@
         localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
 
         // Crear notificación para el tutor
-        createNotificationForTutor(request, 'counter_accepted');
+        createNotificationForTutor(requests[requestIndex], 'counter_accepted');
 
         // Mostrar toast de éxito
-        showToast('✅ Contraoferta aceptada! Moviendo a próximas tutorías...', 'success');
+        showToast('Contraoferta aceptada! Moviendo a próximas tutorías...', 'success');
 
         // Actualizar después de un breve delay para mostrar el feedback visual
         setTimeout(() => {
@@ -1747,7 +1821,7 @@
           requestElement.innerHTML = `
             <div style="text-align: center; padding: 1rem; color: #991b1b;">
               <i class="fas fa-times-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-              <p style="margin: 0; font-weight: 600;">❌ Contraoferta Rechazada</p>
+              <p style="margin: 0; font-weight: 600;">Contraoferta Rechazada</p>
               <p style="margin: 0; font-size: 0.8rem;">La negociación ha terminado</p>
             </div>
           `;
@@ -1761,7 +1835,7 @@
         localStorage.setItem('hermesTutoringRequests', JSON.stringify(requests));
 
         // Mostrar toast informativo
-        showToast('❌ Contraoferta rechazada. Solicitud eliminada.', 'warning');
+        showToast('Contraoferta rechazada. Solicitud eliminada.', 'warning');
 
         // Actualizar después de un breve delay para mostrar el feedback visual
         setTimeout(() => {
@@ -1795,7 +1869,7 @@
     }
 
     if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
-      await window.modalManager?.alert('⚠️ Precio inválido. Debe ser un número mayor a 0.', 'Error de Validación');
+      await window.modalManager?.alert('Precio inválido. Debe ser un número mayor a 0.', 'Error de Validación');
       return;
     }
 
@@ -1813,12 +1887,12 @@
       createNotificationForTutor(requests[requestIndex], 'student_counter');
 
       await window.modalManager?.alert(
-        `✅ ¡Nueva contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl tutor recibirá una notificación.`,
+        `¡Nueva contraoferta enviada!\n\nTu oferta: S/ ${finalPrice}/hora\nEl tutor recibirá una notificación.`,
         'Contraoferta Enviada'
       );
 
       // Mostrar toast informativo
-      showToast('💬 Contraoferta enviada al tutor', 'success');
+      showToast('Contraoferta enviada al tutor', 'success');
 
       // Forzar actualización completa
       setTimeout(() => {
@@ -1834,11 +1908,11 @@
     let title, message;
     switch (action) {
       case 'counter_accepted':
-        title = '✅ Contraoferta Aceptada';
+        title = 'Contraoferta Aceptada';
         message = `El estudiante aceptó tu contraoferta de S/ ${request.tutorCounterPrice}/hora para ${request.courseName || 'el curso'}`;
         break;
       case 'counter_rejected':
-        title = '❌ Contraoferta Rechazada';
+        title = 'Contraoferta Rechazada';
         message = `El estudiante rechazó tu contraoferta para ${request.courseName || 'el curso'}`;
         break;
       case 'student_counter':
@@ -1947,7 +2021,7 @@
     // Modal o página dedicada al panel del tutor
     window.modalManager?.alert(
       'Funciones disponibles:\n\n• Gestionar solicitudes\n• Ver estadísticas de tutorías\n• Configurar horarios disponibles\n• Actualizar perfil profesional\n• Establecer precios por curso\n\n(Módulo en desarrollo...)',
-      '🎓 Panel de Tutor'
+      'Panel de Tutor'
     );
   }
 
@@ -2003,7 +2077,7 @@
       studentColumnHeader.style.display = 'none';
     }
 
-    console.log('✅ Layout cambiado a: Solo estudiante (2 columnas arriba)');
+    console.log('Layout cambiado a: Solo estudiante (2 columnas arriba)');
   }
 
   function setTutorLayout() {
@@ -2028,7 +2102,7 @@
       studentColumnHeader.style.display = 'flex';
     }
 
-    console.log('✅ Layout cambiado a: Tutor (2 columnas lado a lado)');
+    console.log('Layout cambiado a: Tutor (2 columnas lado a lado)');
   }
 
   // Función para mostrar mensajes temporales en el dashboard
@@ -2861,100 +2935,6 @@
     background: #fef2f2 !important;
   }
 
-  /* Botones específicos del estudiante */
-  .dashboard-section .student-action-btn {
-    padding: 0.25rem 0.5rem !important;
-    border-radius: 4px !important;
-    font-size: 0.75rem !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    border: 1px solid transparent !important;
-    font-weight: 500 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-accept {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border-color: #bbf7d0 !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-accept:hover {
-    background: #bbf7d0 !important;
-    color: #14532d !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-counter {
-    background: #fef3c7 !important;
-    color: #92400e !important;
-    border-color: #fde68a !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-counter:hover {
-    background: #fde68a !important;
-    color: #78350f !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-reject {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    border-color: #fecaca !important;
-  }
-
-  .dashboard-section .student-action-btn.btn-reject:hover {
-    background: #fecaca !important;
-    color: #7f1d1d !important;
-  }
-
-  /* Botones específicos del tutor */
-  .dashboard-section .tutor-action-btn {
-    padding: 0.5rem 1rem !important;
-    border-radius: 6px !important;
-    font-size: 0.875rem !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    border: 1px solid transparent !important;
-    font-weight: 500 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-accept {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border-color: #bbf7d0 !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-accept:hover {
-    background: #bbf7d0 !important;
-    transform: translateY(-1px) !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-counter {
-    background: #fef3c7 !important;
-    color: #92400e !important;
-    border-color: #fde68a !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-counter:hover {
-    background: #fde68a !important;
-    transform: translateY(-1px) !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-reject {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    border-color: #fecaca !important;
-  }
-
-  .dashboard-section .tutor-action-btn.btn-reject:hover {
-    background: #fecaca !important;
-    transform: translateY(-1px) !important;
-  }
-
   /* Estilos para toasts */
   .dashboard-toast {
     position: fixed !important;
@@ -3063,5 +3043,3 @@
     opacity: 0.92 !important;
   }
 </style>
-
-// ===== MODAL MANAGER EMBEBIDO COMPLETO =====

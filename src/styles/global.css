@@ -452,61 +452,58 @@ body {
   font-size: 10px;
 }
 
-.tutor-request-actions {
-  display: flex;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-sm);
-  flex-wrap: wrap;
+/* === ESTILOS GLOBALES DE BOTONES DE ACCIÓN PARA DASHBOARD === */
+.tutor-action-btn,
+.student-action-btn {
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
 }
 
-.tutor-action-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.tutor-action-btn.btn-accept,
+.student-action-btn.btn-accept {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border-color: #bbf7d0 !important;
 }
 
-.tutor-action-btn.accept {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.tutor-action-btn.btn-accept:hover,
+.student-action-btn.btn-accept:hover {
+  background: #bbf7d0 !important;
+  transform: translateY(-1px) !important;
 }
 
-.tutor-action-btn.accept:hover {
-  background: #bbf7d0;
-  transform: translateY(-1px);
+.tutor-action-btn.btn-counter,
+.student-action-btn.btn-counter {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
 }
 
-.tutor-action-btn.counter {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+.tutor-action-btn.btn-counter:hover,
+.student-action-btn.btn-counter:hover {
+  background: #fde68a !important;
+  transform: translateY(-1px) !important;
 }
 
-.tutor-action-btn.counter:hover {
-  background: #fde68a;
-  transform: translateY(-1px);
+.tutor-action-btn.btn-reject,
+.student-action-btn.btn-reject {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
 }
 
-.tutor-action-btn.reject {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-}
-
-.tutor-action-btn.reject:hover {
-  background: #fecaca;
-  transform: translateY(-1px);
-}
-
-.tutor-action-btn i {
-  font-size: 10px;
+.tutor-action-btn.btn-reject:hover,
+.student-action-btn.btn-reject:hover {
+  background: #fecaca !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Responsive para solicitudes del tutor */
