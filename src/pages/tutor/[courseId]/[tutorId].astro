@@ -1027,41 +1027,53 @@ const tutorAvailability: Record<string, string[]> = {
 <script define:vars={{ tutorId: tutor.id, courseId: course.id, baseUrl: import.meta.env.BASE_URL }}>
   // Declaración para window.auth
 
-  // Función para enviar solicitud de tutoría (usa la lógica original que funcionaba)
+  // Función simplificada para enviar solicitud de tutoría
   function sendTutoringRequest(studentId, tutorId, courseId, requestData) {
     try {
-      console.log('sendTutoringRequest called with:', { studentId, tutorId, courseId, requestData });
+      console.log('🔍 DEBUG - Enviando solicitud:', { studentId, tutorId, courseId, requestData });
+      console.log('🔍 DEBUG - Student ID type:', typeof studentId, 'Value:', studentId);
 
-      // Usar el manager global que ya tiene la lógica correcta
-      if (!window.tutoringRequestManager) {
-        console.error('TutoringRequestManager no está disponible');
-        return false;
-      }
-
-      // Adaptar los datos al formato esperado por el manager
-      const requestDataForManager = {
-        offeredPrice: requestData.offeredPrice,
+      // Crear el objeto de solicitud
+      const newRequest = {
+        id: 'REQ_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        studentId: studentId,
+        tutorId: tutorId,
+        courseId: courseId,
+        studentOfferedPrice: requestData.offeredPrice,
         message: requestData.message || '',
-        studentName: 'Estudiante',
-        courseCode: '',
-        scheduledSessions: requestData.scheduledSessions || [], // Pasar todas las sesiones
-        // Fallback para compatibilidad con código anterior
-        sessionDate: requestData.scheduledSessions[0]?.day || 'No especificado',
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        // Guardar sesiones programadas
+        scheduledSessions: requestData.scheduledSessions || [],
+        // Compatibilidad con versión anterior (solo primera sesión)
+        sessionDay: requestData.scheduledSessions[0]?.day || 'No especificado',
         sessionTime: requestData.scheduledSessions[0]?.time || 'No especificado',
         duration: requestData.scheduledSessions[0]?.duration || 60,
       };
 
-      const result = window.tutoringRequestManager.sendTutoringRequest(
-        studentId,
-        tutorId,
-        courseId,
-        requestDataForManager
-      );
+      console.log('🔍 DEBUG - Objeto de solicitud creado:', newRequest);
 
-      console.log('Solicitud enviada exitosamente:', result);
-      return result.success;
+      // Obtener solicitudes existentes
+      const existingRequests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+
+      // Agregar la nueva solicitud
+      existingRequests.push(newRequest);
+
+      // Guardar en localStorage
+      localStorage.setItem('hermesTutoringRequests', JSON.stringify(existingRequests));
+
+      console.log('✅ Solicitud guardada exitosamente:', newRequest);
+      console.log('📊 Total solicitudes en localStorage:', existingRequests.length);
+
+      // Verificar que se guardó correctamente
+      const verifyRequests = JSON.parse(localStorage.getItem('hermesTutoringRequests') || '[]');
+      const savedRequest = verifyRequests.find(req => req.id === newRequest.id);
+      console.log('🔍 DEBUG - Verificación de guardado:', savedRequest);
+
+      return true;
     } catch (error) {
-      console.error('Error enviando solicitud:', error);
+      console.error('❌ Error enviando solicitud:', error);
       return false;
     }
   }
@@ -1223,17 +1235,20 @@ const tutorAvailability: Record<string, string[]> = {
             sendRequestButton.textContent = 'Enviando...';
           }
 
-          // Enviar solicitud usando la función
-          console.log('Sending request with:', { studentId: currentUser.id, tutorId, courseId, requestData });
+          console.log('Enviando solicitud con datos:', { studentId: currentUser.id, tutorId, courseId, requestData });
           const success = sendTutoringRequest(currentUser.id, tutorId, courseId, requestData);
 
           if (success) {
+            // Mostrar modal de éxito
             showSuccessModal();
 
             // Limpiar formulario
             selectedSlots = [];
+            timeBlocks.forEach(block => block.classList.remove('selected'));
             updateSelectedSlotsList();
             if (messageInput) messageInput.value = '';
+
+            console.log('✅ Solicitud enviada con éxito. Ve al dashboard para ver el estado.');
           } else {
             showErrorModal();
           }
